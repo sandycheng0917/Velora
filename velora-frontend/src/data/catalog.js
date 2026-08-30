@@ -22,6 +22,17 @@
 // Excel 中有 6 個 SKU 沒附照片，那些 SKU 不會進入目錄 —— 展示頁不放沒有圖的商品。
 import manifest from './media-manifest.js'
 
+/**
+ * 圖片路徑一律經過這裡。
+ *
+ * 部署到子路徑時（GitHub Pages 是 https://<帳號>.github.io/<repo>/），
+ * 寫死的 /media/... 會被瀏覽器解析成網域根目錄而 404 ——
+ * Vite 只會改寫 index.html 裡的路徑，JS 字串它不碰。
+ * import.meta.env.BASE_URL 由 vite.config 的 base 決定，開發時是 '/'。
+ */
+const BASE = import.meta.env.BASE_URL || '/'
+const url = (p) => (p ? BASE.replace(/\/$/, '') + p : p)
+
 export const company = {
   name: {
     zh: '維羅拉國際有限公司',
@@ -71,28 +82,28 @@ export const categories = [
     code: 'FRAGRANCE',
     ref: 'FRG',
     name: { zh: '居家香氛', en: 'Home Fragrance', ko: '홈 프래그런스' },
-    cover: '/media/vuca/bedroom.jpg',
+    cover: url('/media/vuca/bedroom.jpg'),
   },
   {
     key: 'scarf',
     code: 'SCARF',
     ref: 'SLK',
     name: { zh: '真絲長巾', en: 'Silk Scarves', ko: '실크 스카프' },
-    cover: '/media/saintmari/scarf-camel-blazer.jpg',
+    cover: url('/media/saintmari/scarf-camel-blazer.jpg'),
   },
   {
     key: 'jewelry',
     code: 'JEWELRY',
     ref: 'JWL',
     name: { zh: '純銀飾品', en: 'Sterling Jewelry', ko: '실버 주얼리' },
-    cover: '/media/saintmari/necklace-01.png',
+    cover: url('/media/saintmari/necklace-01.png'),
   },
   {
     key: 'accessory',
     code: 'ACCESSORY',
     ref: 'SCR',
     name: { zh: '絲巾扣', en: 'Scarf Rings', ko: '스카프링' },
-    cover: '/media/saintmari/scarfring-01.png',
+    cover: url('/media/saintmari/scarfring-01.png'),
   },
 ]
 
@@ -381,9 +392,13 @@ SCENTS.forEach((s, i) => {
       ko: 'Classic Diffuser 260ml × 2',
     },
     hs: '3307.49.0000',
-    image: `/media/vuca/${s.slug}.jpg`,
-    thumb: `/media/thumb/${s.slug}.jpg`,
-    gallery: [`/media/vuca/${s.slug}.jpg`, '/media/vuca/set.png', '/media/vuca/bedroom.jpg'],
+    image: url(`/media/vuca/${s.slug}.jpg`),
+    thumb: url(`/media/vuca/${s.slug}.jpg`),
+    gallery: [
+      url(`/media/vuca/${s.slug}.jpg`),
+      url('/media/vuca/set.png'),
+      url('/media/vuca/bedroom.jpg'),
+    ],
     listed: true,
     order: i + 1,
     updated: '2026-08-28',
@@ -395,7 +410,10 @@ SM_LINES.forEach((line) => {
   for (let i = 1; i <= line.count; i++) {
     const gallery = shots[i]
     if (!gallery || !gallery.length) continue // Excel 未附照片的 SKU 不上架
-    const img = gallery[0]
+    // 名稱不能叫 shots —— 外層已有同名變數，在同一區塊再宣告會讓上一行讀到
+    // 尚未初始化的它（TDZ），整個模組會在載入時就丟 ReferenceError。
+    const paths = gallery.map(url)
+    const img = paths[0]
     const n = pad(i)
     list.push({
       id: `${line.kind}-${i}`,
@@ -415,8 +433,8 @@ SM_LINES.forEach((line) => {
       spec: line.spec,
       hs: line.hsOverride?.[i] || line.hs,
       image: img,
-      thumb: `/media/thumb/${img.split('/').pop().replace(/\.\w+$/, '')}.jpg`,
-      gallery,
+      thumb: img,
+      gallery: paths,
       listed: true,
       order: list.length + 1,
       updated: '2026-08-' + String(10 + ((i * 3) % 19)).padStart(2, '0'),
@@ -436,10 +454,10 @@ export const products = list
 const FEATURED = {
   'frg-ylang': {
     // 精選位要放商品本身；依蘭花的植物意象圖留在彈窗裡說明香調
-    image: '/media/vuca/set.png',
+    image: url('/media/vuca/set.png'),
   },
   'scarf-1': {
-    image: '/media/saintmari/scarf-camel-blazer.jpg',
+    image: url('/media/saintmari/scarf-camel-blazer.jpg'),
     name: { zh: '象牙真絲長巾', en: 'Ivory Twilly Scarf', ko: '아이보리 실크 스카프' },
     desc: {
       zh: '象牙白底上一枚極淡的金線印記，繫在襯衫領口時只露出一小段。手工捲邊，垂墜感夠但不軟塌，是駝色與奶白這類低彩度穿搭最省力的一筆。',
@@ -463,6 +481,8 @@ export const featured = Object.keys(FEATURED)
     return p && { ...p, ...FEATURED[id] }
   })
   .filter(Boolean)
+
+export { url as mediaUrl }
 
 export const findCategory = (key) => categories.find((c) => c.key === key)
 

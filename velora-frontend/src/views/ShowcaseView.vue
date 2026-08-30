@@ -12,16 +12,17 @@ import {
   findCategory,
   houses,
   isCutout,
+  mediaUrl,
   products,
 } from '@/data/catalog.js'
 import { pick, t } from '@/i18n.js'
 
 /* ── 主視覺輪播 ────────────────────────────────────────── */
 const SLIDES = [
-  { img: '/media/vuca/editorial-bw.jpg', cap: 'VL · FRG · 001 — VUCA Classic Diffuser' },
-  { img: '/media/saintmari/scarf-camel-blazer.jpg', cap: 'VL · SLK · 001 — Ivory Twilly Scarf' },
-  { img: '/media/vuca/bedroom.jpg', cap: 'VL · FRG · 004 — Flower Shop, 260ml' },
-  { img: '/media/saintmari/scarf-mauve-pearl.jpg', cap: 'VL · SLK · 003 — Mauve Twilly Scarf' },
+  { img: mediaUrl('/media/vuca/editorial-bw.jpg'), cap: 'VL · FRG · 001 — VUCA Classic Diffuser' },
+  { img: mediaUrl('/media/saintmari/scarf-camel-blazer.jpg'), cap: 'VL · SLK · 001 — Ivory Twilly Scarf' },
+  { img: mediaUrl('/media/vuca/bedroom.jpg'), cap: 'VL · FRG · 004 — Flower Shop, 260ml' },
+  { img: mediaUrl('/media/saintmari/scarf-mauve-pearl.jpg'), cap: 'VL · SLK · 003 — Mauve Twilly Scarf' },
 ]
 const slide = ref(0)
 let timer = null
@@ -276,7 +277,7 @@ function askOnLine() {
 
       <div class="phil">
         <span class="wm" aria-hidden="true" style="left: 58%; top: -40px; font-size: 300px">V</span>
-        <span class="plate ph-img"><img src="/media/vuca/bedroom.jpg" alt="VUCA" /></span>
+        <span class="plate ph-img"><img :src="mediaUrl('/media/vuca/bedroom.jpg')" alt="VUCA" /></span>
         <div class="txt">
           <p class="k">{{ t('philKicker1') }}</p>
           <h3 class="disp">We select,<br />so you don’t have to.</h3>
@@ -287,7 +288,9 @@ function askOnLine() {
 
       <div class="phil flip">
         <span class="wm" aria-hidden="true" style="left: 4%; top: 20px; font-size: 300px">V</span>
-        <span class="plate ph-img"><img src="/media/saintmari/scarf-pink-bow.jpg" alt="SAINTMARI" /></span>
+        <span class="plate ph-img">
+          <img :src="mediaUrl('/media/saintmari/scarf-pink-bow.jpg')" alt="SAINTMARI" />
+        </span>
         <div class="txt">
           <p class="k">{{ t('philKicker2') }}</p>
           <h3 class="disp">Quiet things<br />last longer.</h3>
