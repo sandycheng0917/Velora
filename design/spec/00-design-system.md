@@ -205,7 +205,17 @@ inline 元素的 `aspect-ratio` 無效，高度會塌成 0。
 ## 無障礙
 
 - 所有文字對比 ≥ 4.5:1（金色文字一律 `#8D6D40`）
-- 手機（≤720px）內文 17px、mono 編號 12px/500，小字級整批上調一階，字距收窄 —— 細字重在小螢幕上讀中文會吃力
+- 手機（≤720px）內文 17px、mono 編號 12.5px/500，小字級整批上調一階，字距收窄
+
+  ⚠️ **手機放大規則寫在哪，取決於該 class 定義在哪。**
+  Vue scoped 樣式會編成 `.t-ref[data-v-x]`，specificity（0,2,0）高過
+  `style.css` 裡的全域 `.t-ref`（0,1,0）—— 全域的手機規則會被無聲蓋掉。
+  凡是定義在 `.vue` scoped 區塊的 class（`.t-ref` / `.cd .n` / `.eyebrow` /
+  `.attrs span` / `.t-name` / `.t-zh`），手機放大就必須寫在同一個元件裡。
+
+  ⚠️ **字級要照實測寬度定，不要照想像的斷點。**
+  圖庫在手機上是**單欄、磚寬 313px**（`minmax(160px,1fr)` 在 313px 的容器裡
+  只排得下一欄），不是直覺以為的兩欄 167px。先量再定字級。 —— 細字重在小螢幕上讀中文會吃力
 - `:focus-visible` 一律 2px `#A8875C` 外框 + 3px offset
 - Toggle 用 `role="switch"` + `aria-checked`
 - 彈窗 `role="dialog"` + `aria-modal`，Esc 關閉，開啟時鎖背景捲動

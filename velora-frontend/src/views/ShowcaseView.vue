@@ -824,10 +824,38 @@ h1 .i {
 }
 
 @media (max-width: 720px) {
-  /* scoped 選擇器（.attrs span[data-v-x]）specificity 高過 style.css 的
-     全域手機規則，所以那批 mono 放大沒套到這裡 —— 在這裡補。 */
+  /* style.css 那批全域手機規則對這些沒用 —— scoped 會編成
+     .t-ref[data-v-x]，specificity 高過全域的 .t-ref。凡是定義在本檔的
+     class，手機放大就得寫在這裡。 */
+  .attrs span,
+  .t-ref,
+  .cd .n,
+  .eyebrow {
+    font-size: 12.5px;
+    font-weight: 500;
+  }
   .attrs span {
     font-size: 13px;
+  }
+
+  /* 實測：手機上圖庫是**單欄**、磚寬 313px（不是原本以為的兩欄 167px）。
+     有 313px 的版面卻只放 15px 的字，比例上就是小。照實際寬度放大。 */
+  .t-name {
+    font-size: 20px;
+  }
+  .t-zh {
+    font-size: 17px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+  }
+  .cd .zh {
+    font-size: 16px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+  }
+  /* 精選卡在手機同樣是滿版，中文品名跟著放大 */
+  .wide .zh {
+    font-size: 16.5px;
     font-weight: 500;
   }
   /* flex-wrap 會把 1px 分隔線推到行尾吊著。手機上一項一行，分隔線收起。 */
