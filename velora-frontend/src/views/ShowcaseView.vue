@@ -617,7 +617,7 @@ h1 .i {
 .attrs span {
   font-family: var(--f-mono);
   font-weight: 400;
-  font-size: 12px;
+  font-size: 13px;
   letter-spacing: 0.16em;
   color: var(--ink-soft);
   text-transform: uppercase;
@@ -824,6 +824,22 @@ h1 .i {
 }
 
 @media (max-width: 720px) {
+  /* scoped 選擇器（.attrs span[data-v-x]）specificity 高過 style.css 的
+     全域手機規則，所以那批 mono 放大沒套到這裡 —— 在這裡補。 */
+  .attrs span {
+    font-size: 13px;
+    font-weight: 500;
+  }
+  /* flex-wrap 會把 1px 分隔線推到行尾吊著。手機上一項一行，分隔線收起。 */
+  .attrs {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 7px;
+  }
+  .attrs em {
+    display: none;
+  }
+
   /* 直排的品類代碼在窄螢幕會壓到標題與內文上，手機上收起來；
      書脊那條 1px 金線留著，它只佔一個像素且是版面的識別。 */
   .mark {
