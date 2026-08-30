@@ -1,12 +1,11 @@
-# 推到 main 就自動建置、稽核，repo 公開時再發布到 GitHub Pages。
+# 推到 main 就自動建置、稽核並發布到 GitHub Pages。
 #
-# 發布那一步用 `if: !github.event.repository.private` 守著 ——
-# repo 還是私有時只跑建置與稽核，不會因為 Pages 不可用而失敗。
-# 等你檢查完把 repo 改成 Public，下一次推送就會自動發布，不需要改這個檔案。
-#
-# 首次還需要在 Settings → Pages → Source 選 "GitHub Actions"。
+# 前置設定（已完成，僅供日後參考）：
+#   repo 必須是 Public（免費方案的 Pages 不支援私有 repo），
+#   且 Settings → Pages → Source 要選 "GitHub Actions"。
 #
 # 發布的是「公開版」：不含後台，只有展示頁。
+# build job 會先確認後台沒被打包，有命中就中止，不會發布出去。
 name: Build, Audit & Deploy
 
 on:
@@ -69,8 +68,6 @@ jobs:
 
   deploy:
     needs: build
-    # repo 仍是私有時跳過發布（免費方案的 Pages 不支援私有 repo）
-    if: ${{ !github.event.repository.private }}
     runs-on: ubuntu-latest
     environment:
       name: github-pages
