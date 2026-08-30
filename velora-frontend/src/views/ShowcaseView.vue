@@ -770,6 +770,19 @@ h1 .i {
   max-width: 480px;
 }
 
+/* aspect-ratio 是 Safari 15+ / iOS 15+ 才支援。舊機型上這兩個元素會塌成 0 高，
+   用經典的 padding-top 撐高當退路 —— .plate > img 本來就絕對定位，直接生效。 */
+@supports not (aspect-ratio: 1 / 1) {
+  .tile .plate {
+    height: 0;
+    padding-top: 125%; /* 4 : 5 */
+  }
+  .ph-img {
+    height: 0;
+    padding-top: 73.33%; /* 15 : 11 */
+  }
+}
+
 /* ── 響應式 ─────────────────────────────────────────────── */
 @media (max-width: 1024px) {
   .hero {

@@ -16,4 +16,16 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
+  build: {
+    /**
+     * 明確指定目標，不要用預設值。
+     *
+     * Vite 預設會把 media query 壓成新的範圍語法 `@media (width<=720px)`，
+     * 那是 Safari 16.4 / Chrome 104 之後才支援的寫法 —— iOS 16.3 以前的
+     * iPhone 會直接忽略整段規則，手機上會拿到桌機版面。
+     * 這個站的使用者多半用手機，所以把底線拉到 Safari 14（iOS 14, 2020）。
+     */
+    target: ['es2020', 'chrome87', 'safari14', 'firefox78', 'edge88'],
+    cssTarget: ['chrome87', 'safari14', 'firefox78', 'edge88'],
+  },
 })
