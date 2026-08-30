@@ -1,0 +1,70 @@
+# ══════════════════════════════════════════════════════════
+#  這個 repo 會公開。任何進到這裡的東西都會被快取與索引，
+#  事後刪除也可能留存 —— 加東西前先想清楚。
+# ══════════════════════════════════════════════════════════
+
+# ── 相依套件與建置產物 ──────────────────────────────────
+node_modules/
+dist/
+.vite/
+
+# ── 保險：機密文件格式一律不進版控（不限位置）──────────────
+# 就算日後有人把 Excel 或型錄 PDF 放到別的資料夾，這幾條也會擋住。
+# 真的需要版控某個 pdf/xlsx 時，用 git add -f 明確覆寫，不要改這裡。
+*.xlsx
+*.xlsm
+*.xls
+*.pdf
+*.csv
+*.docx
+
+# ── 供應商原始素材：一律不進版控 ────────────────────────
+# 這個資料夾含不該公開的東西：
+#   · 絲巾與飾品.xlsx        FOB 出口單價、供應商業務姓名與手機、事業登記號
+#   · VUCA 型錄 PDF          製造商 Welkeeps 的地址、電話與信箱
+#   · 原始模特兒照與商品照    供應商素材，處理後的版本才放進 public/media/
+# 需要重跑素材管線的人，請透過加密管道另外取得這個資料夾。
+design/sample/
+
+# ── 設計交付物：不進公開版控 ────────────────────────────
+# 這兩者都超出「公開 16 張圖、不含後台」的範圍：
+#   · exports/ 內含後台介面截圖，以及 37 件商品的完整目錄截圖
+#   · velora_design.ep 內嵌 28 張影像，第 2、3 頁是後台與抽屜設計稿
+# 兩者都可重生：
+#   node design/shoot.mjs        → design/exports/
+#   python design/build-ep.py    → design/velora_design.ep
+design/exports/
+design/velora_design.ep
+
+# ── 機密監看清單 ────────────────────────────────────────
+# check-public.mjs 用來比對的確切機密字串。
+# 這個檔案本身就是機密，只能存在本機，絕不進版控。
+.secret-watch.txt
+
+# ── 後台：只留本機，不進公開版控 ────────────────────────
+# 網站上本來就沒有後台（build 會 tree-shaking 掉），
+# 但原始碼留在公開 repo 等於把內部工具的版面設計攤開，所以一併移出。
+# 這些檔案仍在你本機，跑 npm run dev:admin 即可開 /admin。
+velora-frontend/src/views/AdminView.vue
+velora-frontend/src/components/ProductDrawer.vue
+velora-frontend/src/components/ToggleSwitch.vue
+design/spec/02-admin-dashboard.md
+#
+# 這兩個檔案光看檔名看不出來，但內容含完整的後台版面：
+#   · style-preview.html —— Board 03/04 是後台與抽屜的 HTML 實作
+#   · build-ep.py        —— page_admin() 與 page_states() 是後台的逐元件座標
+# 它們產生的 .ep 本來就只留本機，生成器一併移出才一致。
+design/mockup/
+design/build-ep.py
+design/ep_shapes.py
+
+# ── 個人化設定 ──────────────────────────────────────────
+# CLAUDE.md 與 .claude/skills/ 是專案文件，要留著
+.claude/settings.local.json
+
+# ── 系統雜項 ────────────────────────────────────────────
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db
+*.log

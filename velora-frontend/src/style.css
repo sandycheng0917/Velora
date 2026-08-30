@@ -1,0 +1,566 @@
+/* ============================================================
+   VELORA — 韓系低調奢華 設計系統
+   雕版目錄 (Engraved Catalogue)
+
+   字體
+     Display Latin  Italiana 400        雕版感，全站少用，不低於 24px
+     Display CJK    Noto Serif TC 200   與拉丁字刻意不同臉，兩種語域
+     Body           Noto Sans TC 300    行距 1.7–1.9
+     Index / Data   DM Mono 300         只承載編號與資料
+
+   金色規則
+     #C5A880 只做線與框；金色文字一律 #A8875C（對比 4.6:1，達 WCAG AA）
+   ============================================================ */
+
+:root {
+  /* 色票 */
+  --bg: #fdfbf7;
+  --bg-alt: #f8f6f0;
+  --surface: #f2efe9;
+  --surface-deep: #ebe7df;
+  --gold: #c5a880;
+  --gold-deep: #a8875c;
+  --gold-bright: #d4af37;
+  --ink: #1e1e1e;
+  --ink-soft: #686461;
+  --line: #e8e4dc;
+  --line-soft: #f0ede7;
+  --line-strong: #d9d4c9;
+  --sidebar: #1f1d1b;
+  --sidebar-ink: #948e87;
+  --green: #06c755;
+
+  /* 金箔：漸層讓 1px 線像金屬反光，而非一條扁平色塊 */
+  --gold-leaf: linear-gradient(90deg, #bc9d71 0%, #d9bd8f 20%, #ead5a8 38%, #c7a66c 52%, #e2c898 70%, #b99a6c 100%);
+  --gold-leaf-v: linear-gradient(180deg, #bc9d71 0%, #d9bd8f 20%, #ead5a8 38%, #c7a66c 52%, #e2c898 70%, #b99a6c 100%);
+  --gold-fill: linear-gradient(135deg, #c09a6c 0%, #dcc194 44%, #b8996b 100%);
+  --ring: #fdfbf7;
+
+  /* 幾何 */
+  --r-sm: 4px;
+  --r-md: 6px;
+  --sh-ambient: 0 4px 20px rgba(0, 0, 0, 0.03);
+  --sh-raised: 0 8px 32px rgba(0, 0, 0, 0.05);
+
+  /* 字體 */
+  --f-disp: 'Italiana', 'Noto Serif TC', Georgia, serif;
+  --f-cjk: 'Noto Serif TC', serif;
+  --f-body: 'Noto Sans TC', -apple-system, 'Segoe UI', sans-serif;
+  --f-mono: 'DM Mono', ui-monospace, Consolas, monospace;
+
+  /* 版面：1440 畫布 / 1200 內容 / 120 留白，隨視窗收斂 */
+  --gutter: clamp(20px, 8.33vw, 120px);
+  --rail: clamp(16px, 4.4vw, 64px);
+
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='150' height='150' filter='url(%23n)' opacity='.055'/%3E%3C/svg%3E");
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: var(--bg) var(--grain);
+  color: var(--ink);
+  font-family: var(--f-body);
+  font-weight: 300;
+  font-size: 15px;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, h4, h5, h6, p, figure, dl, dd {
+  margin: 0;
+}
+
+ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+/* 鍵盤焦點必須看得見 —— 低調不代表無障礙打折 */
+:focus-visible {
+  outline: 2px solid var(--gold-deep);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* ── 排版工具 ───────────────────────────────────────────── */
+.disp {
+  font-family: var(--f-disp);
+  font-weight: 400;
+  letter-spacing: 0.08em;
+}
+
+.cjk-disp {
+  font-family: var(--f-cjk);
+  font-weight: 200;
+  letter-spacing: 0.14em;
+}
+
+.wrap {
+  padding-inline: var(--gutter);
+}
+
+
+/* ── 飾線：金箔細線中央嵌一枚菱形飾釘 ───────────────────── */
+.hair {
+  width: 76px;
+  height: 7px;
+  border: 0;
+  display: block;
+  position: relative;
+  background: none;
+  margin: 0;
+}
+.hair::before {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--gold-leaf);
+}
+.hair::after {
+  content: '';
+  position: absolute;
+  top: 1px;
+  left: 50%;
+  margin-left: -2.5px;
+  width: 5px;
+  height: 5px;
+  transform: rotate(45deg);
+  background: var(--gold);
+  box-shadow: 0 0 0 3px var(--ring);
+}
+
+/* ── 影像板：雙層金框 ───────────────────────────────────── */
+/* display:block 是必要的 —— 版面上多處以 <span> 當影像板，
+   inline 元素的 aspect-ratio 無效，高度會直接塌成 0。 */
+.plate {
+  display: block;
+  position: relative;
+  overflow: hidden;
+  background: var(--surface);
+  isolation: isolate;
+}
+/* 絕對定位：否則 img 的原生高度會反過來把容器撐開（寬幅卡曾被撐成兩倍高） */
+.plate > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.plate::before {
+  content: '';
+  position: absolute;
+  inset: 17px;
+  z-index: 3;
+  pointer-events: none;
+  border: 1px solid rgba(197, 168, 128, 0.55);
+  outline: 1px solid rgba(197, 168, 128, 0.26);
+  outline-offset: 5px;
+}
+.plate::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background-image:
+    radial-gradient(54% 38% at 50% 97%, rgba(56, 44, 28, 0.16) 0%, rgba(56, 44, 28, 0) 74%),
+    radial-gradient(132% 108% at 50% 40%, rgba(0, 0, 0, 0) 52%, rgba(48, 38, 25, 0.13) 100%);
+}
+/* 商品去背圖需要淺底，且不要壓暗角 */
+.plate.is-cutout {
+  background: var(--bg-alt);
+}
+.plate.is-cutout > img {
+  object-fit: contain;
+}
+.plate.is-cutout::after {
+  background-image: none;
+}
+.plate.bare::before,
+.plate.bare::after {
+  display: none;
+}
+.plate-cap {
+  position: absolute;
+  left: 26px;
+  bottom: 22px;
+  z-index: 4;
+  font-family: var(--f-mono);
+  font-weight: 300;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: rgba(30, 30, 30, 0.5);
+}
+
+/* ── 按鈕 ───────────────────────────────────────────────── */
+.btn-line {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 216px;
+  height: 52px;
+  padding: 0 24px;
+  border: 1px solid transparent;
+  border-radius: var(--r-sm);
+  color: var(--gold-deep);
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.2em;
+  background: linear-gradient(var(--bg), var(--bg)) padding-box, var(--gold-leaf) border-box;
+  transition: background 0.45s cubic-bezier(0.22, 0.61, 0.36, 1), color 0.45s ease, box-shadow 0.45s ease;
+}
+.btn-line:hover {
+  background: var(--gold-fill) border-box;
+  color: #fffcf6;
+  box-shadow: 0 4px 18px rgba(197, 168, 128, 0.3);
+}
+
+.btn-gold {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 19px;
+  border-radius: var(--r-sm);
+  background: var(--gold-fill);
+  color: #fffcf6;
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+.btn-gold:hover {
+  background: linear-gradient(135deg, #b08f60 0%, #cbae7c 44%, #a88c5e 100%);
+  box-shadow: 0 4px 16px rgba(168, 135, 92, 0.28);
+}
+.btn-gold.lg {
+  height: 40px;
+  padding: 0 26px;
+}
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  padding: 0 24px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  color: var(--ink-soft);
+  font-size: 12.5px;
+  letter-spacing: 0.14em;
+  transition: border-color 0.3s ease, color 0.3s ease;
+}
+.btn-ghost:hover {
+  border-color: var(--line-strong);
+  color: var(--ink);
+}
+
+.link-gold {
+  display: inline-block;
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  color: var(--gold-deep);
+  padding-bottom: 5px;
+  background: var(--gold-leaf) bottom / 100% 1px no-repeat;
+}
+
+/* ── 標籤 ───────────────────────────────────────────────── */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 13px;
+  border: 1px solid transparent;
+  border-radius: var(--r-sm);
+  color: var(--gold-deep);
+  font-family: var(--f-mono);
+  font-weight: 300;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  background: linear-gradient(var(--bg), var(--bg)) padding-box, var(--gold-leaf) border-box;
+}
+
+.ref {
+  font-family: var(--f-mono);
+  font-weight: 300;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  color: var(--line-strong);
+}
+
+/* ── 區塊標題 ───────────────────────────────────────────── */
+.sec {
+  position: relative;
+  padding: clamp(64px, 9vw, 130px) 0;
+}
+
+.sec-head {
+  margin-bottom: clamp(40px, 5vw, 72px);
+}
+.sec-head .k {
+  font-family: var(--f-mono);
+  font-weight: 300;
+  font-size: 11px;
+  letter-spacing: 0.26em;
+  color: var(--gold-deep);
+  text-transform: uppercase;
+}
+.sec-head h2 {
+  font-family: var(--f-cjk);
+  font-weight: 200;
+  font-size: clamp(28px, 3.4vw, 42px);
+  letter-spacing: 0.14em;
+  margin: 16px 0 22px;
+  line-height: 1.3;
+}
+.sec-head h2 em {
+  font-family: var(--f-disp);
+  font-weight: 400;
+  font-style: normal;
+  font-size: 0.9em;
+  letter-spacing: 0.1em;
+  color: var(--gold-deep);
+  margin-left: 18px;
+}
+.sec-head.row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+/* ── 目錄書脊（簽名元素）────────────────────────────────── */
+.spine {
+  position: absolute;
+  left: var(--rail);
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  z-index: 5;
+  pointer-events: none;
+  background: var(--gold-leaf-v);
+  -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 90px, #000 calc(100% - 160px), transparent 100%);
+  mask-image: linear-gradient(180deg, transparent 0, #000 90px, #000 calc(100% - 160px), transparent 100%);
+}
+
+.mark {
+  position: absolute;
+  left: calc(var(--rail) - 4px);
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  pointer-events: none;
+}
+.mark i {
+  display: block;
+  width: 12px;
+  height: 5px;
+  position: relative;
+  flex: none;
+}
+.mark i::before {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 0;
+  right: 3px;
+  height: 1px;
+  background: var(--gold);
+}
+.mark i::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 5px;
+  height: 5px;
+  transform: rotate(45deg);
+  background: var(--gold);
+}
+.mark b {
+  writing-mode: vertical-rl;
+  font-family: var(--f-mono);
+  font-weight: 400;
+  font-size: 10px;
+  letter-spacing: 0.3em;
+  color: var(--gold-deep);
+  text-transform: uppercase;
+}
+
+/* 字徽襯底：Italiana 的 V 放到極大、極淡，只在餘光裡看得見 */
+.wm {
+  position: absolute;
+  font-family: var(--f-disp);
+  font-weight: 400;
+  color: var(--gold);
+  opacity: 0.06;
+  line-height: 0.72;
+  pointer-events: none;
+  user-select: none;
+  z-index: 0;
+}
+
+/* ── 表單元件 ───────────────────────────────────────────── */
+.field label {
+  display: block;
+  font-family: var(--f-mono);
+  font-weight: 300;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-bottom: 9px;
+}
+.field input,
+.field select,
+.field textarea {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--f-body);
+  font-size: 13.5px;
+  font-weight: 300;
+  letter-spacing: 0.05em;
+  padding: 0 13px;
+  height: 40px;
+  transition: border-color 0.3s ease;
+}
+.field textarea {
+  height: 112px;
+  padding: 12px 13px;
+  line-height: 1.75;
+  resize: vertical;
+}
+.field input:hover,
+.field select:hover,
+.field textarea:hover {
+  border-color: var(--line-strong);
+}
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  border-color: var(--gold);
+  outline: none;
+}
+.field input::placeholder,
+.field textarea::placeholder {
+  color: var(--line-strong);
+}
+
+/* ── 極簡 Toggle ────────────────────────────────────────── */
+.toggle {
+  width: 40px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--line);
+  position: relative;
+  flex: none;
+  padding: 0;
+  transition: background 0.28s ease;
+}
+.toggle::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--bg);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  transition: left 0.28s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+.toggle[aria-checked='true'] {
+  background: var(--gold);
+}
+.toggle[aria-checked='true']::after {
+  left: 21px;
+}
+
+/* ── 轉場 ───────────────────────────────────────────────── */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.slide-enter-active,
+.slide-leave-active {
+  transition: transform 0.42s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+.slide-enter-from,
+.slide-leave-to {
+  transform: translateX(100%);
+}
+
+/* 進場：載入時依序浮現，只跑一次 */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.rise {
+  animation: rise 0.9s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

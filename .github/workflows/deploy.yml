@@ -1,0 +1,80 @@
+# 推到 main 就自動建置、稽核，repo 公開時再發布到 GitHub Pages。
+#
+# 發布那一步用 `if: !github.event.repository.private` 守著 ——
+# repo 還是私有時只跑建置與稽核，不會因為 Pages 不可用而失敗。
+# 等你檢查完把 repo 改成 Public，下一次推送就會自動發布，不需要改這個檔案。
+#
+# 首次還需要在 Settings → Pages → Source 選 "GitHub Actions"。
+#
+# 發布的是「公開版」：不含後台，只有展示頁。
+name: Build, Audit & Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: velora-frontend/package-lock.json
+
+      - name: 安裝相依套件
+        working-directory: velora-frontend
+        run: npm ci
+
+      # Pages 把站台放在 /<repo>/ 底下，base path 必須跟著設，否則資源全部 404
+      - name: 建置公開版
+        working-directory: velora-frontend
+        run: npm run build
+        env:
+          VITE_BASE: /${{ github.event.repository.name }}/
+
+      # 這一關是實質保護：後台若被誤打包進公開版，直接讓部署失敗
+      - name: 確認後台沒被打包
+        working-directory: velora-frontend
+        run: |
+          if grep -rl "商品管理" dist/ ; then
+            echo "::error::後台字串出現在公開版建置產物中，中止部署"
+            exit 1
+          fi
+          echo "確認通過：dist/ 不含後台"
+
+      - name: 公開內容稽核
+        run: node check-public.mjs
+
+      # SPA fallback：直接開子路徑時讓 Pages 回傳同一份 index
+      - name: 產生 404 fallback
+        working-directory: velora-frontend
+        run: cp dist/index.html dist/404.html
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: velora-frontend/dist
+
+  deploy:
+    needs: build
+    # repo 仍是私有時跳過發布（免費方案的 Pages 不支援私有 repo）
+    if: ${{ !github.event.repository.private }}
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4
