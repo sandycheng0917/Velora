@@ -173,6 +173,7 @@ ul button:hover {
   letter-spacing: 0.2em;
   color: var(--gold-deep);
 }
+/* LINE 綠當文字只有 1.97:1 —— 文字用壓深版，外框維持品牌綠 */
 .green {
   display: inline-flex;
   align-items: center;
@@ -181,7 +182,8 @@ ul button:hover {
   padding: 0 20px;
   border: 1px solid var(--green);
   border-radius: var(--r-sm);
-  color: var(--green);
+  /* LINE 綠當文字只有 1.97:1 —— 文字壓深，外框維持品牌綠 */
+  color: var(--green-deep);
   font-size: 13px;
   letter-spacing: 0.14em;
   transition: background 0.35s ease;
@@ -214,6 +216,27 @@ ul button:hover {
   }
 }
 @media (max-width: 640px) {
+  /* 頁尾整區在手機上字都偏小：欄標題 11px、連結 13px */
+  h5 {
+    font-size: 13px;
+    letter-spacing: 0.18em;
+  }
+  dt {
+    width: 56px;
+    font-size: 13px;
+  }
+  ul a,
+  ul button,
+  dd,
+  .qr-id,
+  .green {
+    font-size: 15px;
+  }
+  .co-en,
+  .btm span {
+    font-size: 13.5px;
+  }
+
   .grid {
     grid-template-columns: 1fr;
   }

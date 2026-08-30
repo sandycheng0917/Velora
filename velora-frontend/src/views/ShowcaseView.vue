@@ -830,6 +830,22 @@ h1 .i {
 }
 
 @media (max-width: 720px) {
+  /* 區塊中文小標、品類篩選、輪播編號在手機上都偏小 */
+  /* 基礎規則是 .txt .k（0,2,0），裸 .k 蓋不過去 */
+  .txt .k,
+  .k {
+    font-size: 14px;
+  }
+  .idx {
+    font-size: 13px;
+  }
+  .chips button {
+    font-size: 15px;
+  }
+  .ask {
+    font-size: 15px;
+  }
+
   /* style.css 那批全域手機規則對這些沒用 —— scoped 會編成
      .t-ref[data-v-x]，specificity 高過全域的 .t-ref。凡是定義在本檔的
      class，手機放大就得寫在這裡。 */

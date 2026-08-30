@@ -272,7 +272,8 @@ function submit() {
 .lang i {
   font-style: normal;
   font-weight: 400;
-  color: var(--line-strong);
+  /* --line-strong 是線條色，當文字只有 1.43:1 —— 分隔線幾乎看不見 */
+  color: var(--ink-faint);
   margin: 0 6px;
 }
 

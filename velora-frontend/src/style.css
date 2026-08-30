@@ -19,8 +19,10 @@
   --surface: #f2efe9;
   --surface-deep: #ebe7df;
   --gold: #c5a880;
-  /* 金色文字：#a8875c 實測只有 3.23:1，不足 AA。壓低明度、保留同色相到 4.62:1。 */
-  --gold-deep: #8d6d40;
+  /* 金色文字。註：4.62:1 是對頁面底 --bg 量的，但金字也出現在卡片底
+     --surface-deep #ebe7df 上 —— 那裡只有 3.88:1，不足 AA。
+     改成對「所有背景」都過 AA 的值：最低 4.61:1。 */
+  --gold-deep: #7e6239;
   --gold-bright: #d4af37;
   --ink: #1e1e1e;
   /* 客戶手機實測兩次回報「太淡」。#55514e 雖已過 AA（7.7:1），
@@ -30,11 +32,14 @@
   --line-soft: #f0ede7;
   --line-strong: #d9d4c9;
   /* --line-strong 是線條色（1.43:1），拿來當文字等於看不見。
-     編號、placeholder 這類極淡文字改用這個，4.52:1 剛好過 AA。 */
-  --ink-faint: #7a736b;
+     編號、placeholder 這類極淡文字改用這個。同樣以最深的背景為準：4.60:1。 */
+  --ink-faint: #6c665f;
   --sidebar: #1f1d1b;
   --sidebar-ink: #948e87;
   --green: #06c755;
+  /* LINE 品牌綠當文字只有 1.97:1。圖示與外框維持品牌色，
+     文字改用這個壓深版（4.61:1）—— 色相不變，仍讀得出是 LINE。 */
+  --green-deep: #037733;
 
   /* 金箔：漸層讓 1px 線像金屬反光，而非一條扁平色塊 */
   --gold-leaf: linear-gradient(90deg, #bc9d71 0%, #d9bd8f 20%, #ead5a8 38%, #c7a66c 52%, #e2c898 70%, #b99a6c 100%);
@@ -575,6 +580,22 @@ img {
    所以在這裡把字級、字重都往上帶一級，字距收窄一點。
    16px 也順便避免 iOS Safari 在聚焦輸入框時自動放大頁面。 */
 @media (max-width: 720px) {
+  /* 按鈕與連結是轉換路徑上的字，手機上不該比內文還小 */
+  .btn-line,
+  .btn-gold,
+  .btn-ghost,
+  .link-gold {
+    font-size: 15px;
+  }
+  .pill {
+    font-size: 13px;
+  }
+  /* .sec-head .k 定義在本檔（0,2,0），元件裡的 .k[data-v] 也是 (0,2,0)，
+     打平就看載入順序 —— 規則寫在哪支檔案，手機覆寫就得寫在同一支。 */
+  .sec-head .k {
+    font-size: 14px;
+  }
+
   body {
     font-size: 17px;
     font-weight: 400;

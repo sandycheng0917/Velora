@@ -38,6 +38,7 @@ watch(
 
         <div class="body">
           <button class="close" :aria-label="t('close')" @click="emit('close')">
+            <span class="close-t">{{ t('close') }}</span>
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4">
               <path d="M6 6l12 12M18 6L6 18" />
             </svg>
@@ -258,6 +259,11 @@ h3 {
   margin-top: 26px;
 }
 
+/* 桌機只留圖示，手機才顯示文字 */
+.close-t {
+  display: none;
+}
+
 /* 底部的「關閉」只在手機出現 */
 .close-b {
   display: none;
@@ -274,6 +280,10 @@ h3 {
 }
 
 @media (max-width: 780px) {
+  .ask {
+    font-size: 15px;
+  }
+
   .modal {
     flex-direction: column;
     /* 不可以用 max-height: none —— 那會讓 modal 長到內容高度、改由 .scrim 捲動，
@@ -291,16 +301,28 @@ h3 {
     /* flex 子項的預設 min-height:auto 會讓它撐開而不內捲 */
     min-height: 0;
   }
-  /* ✕ 疊在商品照上，沒有底色會看不見 */
+  /* 手機上把 ✕ 換成有字的膠囊鈕 —— 光一個圖示疊在商品照上不像可以按的東西，
+     使用者回報「還是不好關」。加上「關閉」兩個字就沒有猜的空間。 */
   .close {
     right: 10px;
     top: 10px;
-    background: rgba(253, 251, 247, 0.92);
+    width: auto;
+    height: 40px;
+    gap: 7px;
+    padding: 0 15px;
+    border-radius: 999px;
+    background: rgba(253, 251, 247, 0.95);
     -webkit-backdrop-filter: blur(6px);
     backdrop-filter: blur(6px);
-    border: 1px solid var(--line);
+    border: 1px solid var(--line-strong);
     color: var(--ink);
-    box-shadow: var(--sh-ambient);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.16);
+  }
+  .close-t {
+    display: inline;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
   }
   /* 捲到底也要能關 —— 不必為了關閉再捲回頂端 */
   .close-b {
