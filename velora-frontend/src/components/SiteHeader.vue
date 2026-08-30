@@ -153,11 +153,14 @@ function submit() {
   letter-spacing: 0.24em;
   line-height: 1;
 }
+/* 0.42em 的字距是識別的一部分，但 12px 配上這麼寬的字距，
+   三個字會散得又小又淡。放大並加重，字距略收讓它重新聚成一個詞。 */
 .logo span {
   display: block;
   margin-top: 5px;
-  font-size: 12px;
-  letter-spacing: 0.42em;
+  font-size: 13.5px;
+  font-weight: 500;
+  letter-spacing: 0.34em;
   color: var(--ink-soft);
 }
 
@@ -243,27 +246,34 @@ function submit() {
   flex: none;
 }
 
+/* 三個語言只有一兩個字寬，本來就是全站最小的可點目標 ——
+   字級、字重、顏色都不能再退讓，未選中的也要看得清楚。 */
 .lang {
   display: flex;
   align-items: center;
   font-family: var(--f-mono);
-  font-size: 12px;
-  letter-spacing: 0.1em;
+  font-size: 13px;
+  letter-spacing: 0.06em;
 }
 .lang button {
-  color: var(--ink-faint);
+  color: var(--ink-soft);
+  font-weight: 500;
+  padding: 6px 2px;
   transition: color 0.3s ease;
 }
 .lang button:hover {
-  color: var(--ink-soft);
+  color: var(--ink);
 }
 .lang button.on {
   color: var(--ink);
+  font-weight: 700;
+  background: var(--gold-leaf) bottom / 100% 1px no-repeat;
 }
 .lang i {
   font-style: normal;
-  color: var(--ink-faint);
-  margin: 0 5px;
+  font-weight: 400;
+  color: var(--line-strong);
+  margin: 0 6px;
 }
 
 .line-btn {
@@ -347,6 +357,23 @@ function submit() {
 @media (max-width: 560px) {
   .tools {
     gap: 10px;
+  }
+  .logo b {
+    font-size: 26px;
+  }
+  .logo span {
+    font-size: 14.5px;
+    letter-spacing: 0.3em;
+  }
+  /* 手機上這是最小的可點目標，字再放大一階，並撐出 40px 的觸控高度 */
+  .lang {
+    font-size: 14.5px;
+  }
+  .lang button {
+    padding: 10px 3px;
+  }
+  .lang i {
+    margin: 0 5px;
   }
   .div {
     display: none;

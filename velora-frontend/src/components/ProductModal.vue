@@ -82,6 +82,8 @@ watch(
           <button class="link-gold ask" @click="emit('line')">
             {{ t('askAboutThis') }}　{{ company.lineId }} →
           </button>
+
+          <button class="close-b" @click="emit('close')">{{ t('close') }}</button>
         </div>
       </article>
     </div>
@@ -135,13 +137,23 @@ watch(
   padding: 44px 42px;
   overflow: auto;
 }
+/* padding 撐出 44px 的觸控目標（icon 只有 15px，手指按不準），
+   用負的 right/top 抵銷，視覺位置不變。 */
 .close {
   position: absolute;
-  right: 22px;
-  top: 22px;
+  right: 8px;
+  top: 8px;
   z-index: 7;
   color: var(--ink-soft);
   display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+}
+.close:hover {
+  color: var(--ink);
 }
 
 .top {
@@ -246,18 +258,54 @@ h3 {
   margin-top: 26px;
 }
 
+/* 底部的「關閉」只在手機出現 */
+.close-b {
+  display: none;
+  width: 100%;
+  margin-top: 30px;
+  padding: 14px 0;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--bg-alt);
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  color: var(--ink-soft);
+}
+
 @media (max-width: 780px) {
   .modal {
     flex-direction: column;
-    max-height: none;
+    /* 不可以用 max-height: none —— 那會讓 modal 長到內容高度、改由 .scrim 捲動，
+       絕對定位的 ✕ 就跟著捲出畫面，使用者讀完內文得一路捲回頂端才關得掉。
+       限制在視窗高度內、只讓 .body 內捲，✕ 才會永遠釘在右上角。 */
+    max-height: 100%;
   }
   .pane {
     width: 100%;
-    min-height: 300px;
-    height: 300px;
+    min-height: 0;
+    height: 240px;
   }
   .body {
-    padding: 32px 24px;
+    padding: 30px 22px 26px;
+    /* flex 子項的預設 min-height:auto 會讓它撐開而不內捲 */
+    min-height: 0;
+  }
+  /* ✕ 疊在商品照上，沒有底色會看不見 */
+  .close {
+    right: 10px;
+    top: 10px;
+    background: rgba(253, 251, 247, 0.92);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+    border: 1px solid var(--line);
+    color: var(--ink);
+    box-shadow: var(--sh-ambient);
+  }
+  /* 捲到底也要能關 —— 不必為了關閉再捲回頂端 */
+  .close-b {
+    display: block;
   }
 }
+
 </style>

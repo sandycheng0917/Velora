@@ -257,7 +257,7 @@ function askOnLine() {
             </span>
             <span class="t-meta">
               <span class="t-ref">{{ p.ref }}</span>
-              <span class="t-name latin-sm">{{ p.name.en }}</span>
+              <span class="t-name disp">{{ p.name.en }}</span>
               <span class="t-zh">{{ pick(p.name) }}</span>
             </span>
           </button>
@@ -692,11 +692,17 @@ h1 .i {
   letter-spacing: 0.18em;
   color: var(--ink-faint);
 }
+/* 英文用襯線、中文用無襯線 —— 兩個語域刻意不配成同一張臉。
+   先前為了可讀性把英文改成無襯線，結果中英文兩行變得無法區別
+   （「Pearl Scarf Ring No.001」對上「珍珠絲巾扣 No.001」）。
+   Marcellus 比原本的 Italiana 實得多，20px 在手機上撐得住，
+   所以改回襯線並拉大，靠「字體 + 字級 + 顏色」三重對比拉開層次。 */
 .t-name {
   display: block;
   margin-top: 7px;
-  font-size: 15.5px;
-  line-height: 1.45;
+  font-size: 17px;
+  line-height: 1.4;
+  letter-spacing: 0.03em;
   color: var(--ink);
 }
 .t-zh {
@@ -844,9 +850,10 @@ h1 .i {
     font-size: 20px;
   }
   .t-zh {
-    font-size: 17px;
+    font-size: 16px;
     font-weight: 500;
     letter-spacing: 0.04em;
+    color: var(--ink-soft);
   }
   .cd .zh {
     font-size: 16px;
