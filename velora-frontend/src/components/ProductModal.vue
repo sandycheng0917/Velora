@@ -157,19 +157,19 @@ h3 {
 }
 .zh {
   margin-top: 8px;
-  font-size: 14px;
+  font-size: 15px;
   letter-spacing: 0.12em;
   color: var(--ink-soft);
 }
 .tag {
   margin-top: 14px;
-  font-size: 13px;
+  font-size: 14px;
   letter-spacing: 0.1em;
   color: var(--gold-deep);
 }
 .desc {
   margin-top: 20px;
-  font-size: 14px;
+  font-size: 15px;
   line-height: 1.9;
   color: var(--ink-soft);
 }
@@ -190,13 +190,13 @@ h3 {
 .notes dt {
   width: 40px;
   flex: none;
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 0.16em;
   color: var(--gold-deep);
   padding-top: 2px;
 }
 .notes dd {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--ink-soft);
   letter-spacing: 0.06em;
 }
@@ -213,13 +213,13 @@ h3 {
 .facts dt {
   width: 72px;
   flex: none;
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 0.16em;
   color: var(--ink-faint);
   padding-top: 2px;
 }
 .facts dd {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--ink-soft);
   letter-spacing: 0.06em;
 }

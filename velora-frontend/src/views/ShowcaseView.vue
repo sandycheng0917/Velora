@@ -371,7 +371,7 @@ function askOnLine() {
 .eyebrow {
   font-family: var(--f-mono);
   font-weight: 400;
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 0.26em;
   color: var(--gold-deep);
   text-transform: uppercase;
@@ -405,7 +405,7 @@ h1 .i {
   flex-wrap: wrap;
 }
 .ask {
-  font-size: 12px;
+  font-size: 13px;
   letter-spacing: 0.14em;
   color: var(--ink-soft);
   border-bottom: 1px solid var(--line-strong);
@@ -424,7 +424,7 @@ h1 .i {
   z-index: 4;
   font-family: var(--f-mono);
   font-weight: 400;
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 0.22em;
   color: rgba(255, 253, 248, 0.82);
 }
@@ -508,7 +508,7 @@ h1 .i {
 .cd .zh {
   display: block;
   margin-top: 4px;
-  font-size: 13px;
+  font-size: 14px;
   letter-spacing: 0.14em;
   color: var(--ink-soft);
 }
@@ -519,7 +519,7 @@ h1 .i {
   margin-top: 14px;
   font-family: var(--f-mono);
   font-weight: 400;
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 0.2em;
   color: var(--gold-deep);
   text-transform: uppercase;
@@ -596,13 +596,13 @@ h1 .i {
 }
 .wide .zh {
   margin-top: 8px;
-  font-size: 14px;
+  font-size: 15px;
   letter-spacing: 0.12em;
   color: var(--ink-soft);
 }
 .wide .desc {
   margin-top: 20px;
-  font-size: 14px;
+  font-size: 15px;
   line-height: 1.85;
   color: var(--ink-soft);
   max-width: 560px;
@@ -617,7 +617,7 @@ h1 .i {
 .attrs span {
   font-family: var(--f-mono);
   font-weight: 400;
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 0.16em;
   color: var(--ink-soft);
   text-transform: uppercase;
@@ -643,7 +643,7 @@ h1 .i {
   padding: 0 14px;
   border: 1px solid var(--line);
   border-radius: var(--r-sm);
-  font-size: 12px;
+  font-size: 13px;
   letter-spacing: 0.1em;
   color: var(--ink-soft);
   transition: border-color 0.3s ease, color 0.3s ease;
@@ -702,7 +702,7 @@ h1 .i {
 .t-zh {
   display: block;
   margin-top: 3px;
-  font-size: 12.5px;
+  font-size: 13.5px;
   letter-spacing: 0.08em;
   color: var(--ink-soft);
 }
@@ -717,7 +717,7 @@ h1 .i {
 }
 .empty .hint {
   margin-top: 8px;
-  font-size: 13px;
+  font-size: 14px;
   color: var(--ink-soft);
 }
 .empty .link-gold {
@@ -751,7 +751,7 @@ h1 .i {
 .txt .k {
   font-family: var(--f-mono);
   font-weight: 400;
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 0.26em;
   color: var(--gold-deep);
   text-transform: uppercase;

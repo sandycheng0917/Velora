@@ -36,7 +36,7 @@
 | `--gold-deep` | `#8D6D40` | `#8D6D40FF` | 金色**文字**（唯一可承載文字的金，4.62:1） |
 | `--gold-bright` | `#D4AF37` | `#D4AF37FF` | 精選標記（罕用） |
 | `--ink` | `#1E1E1E` | `#1E1E1EFF` | 文字主色 — 沉穩碳墨黑 |
-| `--ink-soft` | `#55514E` | `#55514EFF` | 次要說明字（7.7:1） |
+| `--ink-soft` | `#423E3B` | `#423E3BFF` | 次要說明字（10.6:1）。客戶手機實測兩次回報偏淡，已壓深 |
 | `--ink-faint` | `#7A736B` | `#7A736BFF` | 編號、placeholder（4.52:1）。**線條色不可當文字用** |
 | `--line` | `#E8E4DC` | `#E8E4DCFF` | 1px 髮絲邊框 |
 | `--line-soft` | `#F0EDE7` | `#F0EDE7FF` | 表格列分隔 |
@@ -76,18 +76,24 @@
 
 | 角色 | 網頁 | `.ep` 檔內 | 規格 |
 |---|---|---|---|
-| Display Latin | **Italiana** 400 | Noto Serif TC 200 | 字距 `+0.08em`，**不低於 26px** |
+| Display Latin | **Marcellus** 400 | Noto Serif TC 200 | 字距 `+0.08em`，**不低於 26px** |
 | Small Latin | **Noto Sans TC** 500 | — | 26px 以下的英文一律用這個（`.latin-sm`） |
 | Display CJK | **Noto Serif TC** 200 | Noto Serif TC 200 | 字距 `+0.14em` |
 | Body | **Noto Sans TC** 400/500 | Noto Sans TC | 行距 1.75–1.9；手機 16px |
 | Index / Data | **DM Mono** 400／手機 500 | Noto Sans TC | 字距 `+0.16em`，只承載編號與資料 |
 
-### ⚠️ Italiana 的尺寸下限（不可違反）
+### ⚠️ 為什麼不是 Italiana
 
-Italiana 是**單一字重的高對比襯線體** —— 主筆畫粗、次筆畫近乎髮絲。
-放大時優雅，縮小時髮絲筆畫在手機上會直接消失，客戶實測回報「英文太細、看得很吃力」。
+初版用 Italiana。它是**單一字重的高對比襯線體**，次筆畫近乎髮絲 ——
+放大優雅，但在手機上細筆畫直接消失。客戶實測回報「英文太細、看得很吃力」，
+把字級從 38px 拉到 44px 也只是變成「大的細字」，因為問題出在字體本身。
 
-- **≥ 26px** → Italiana（hero、區塊標題、精選品名、Logo、品類代碼）
+改用 **Marcellus**：取自羅馬碑刻字母，筆畫粗細接近均勻，
+同樣是免費 Google Fonts 的單一字重襯線體，且碑刻血統正好呼應「雕版目錄」的設計語彙。
+
+### ⚠️ 尺寸下限（仍然適用）
+
+- **≥ 26px** → Marcellus（hero、區塊標題、精選品名、Logo、品類代碼）
 - **< 26px** → `.latin-sm`（Noto Sans TC 500）。商品磚品名即屬此類。
 - DM Mono 承載的編號在手機上提到 **12px / 500**，等寬拉丁字在小尺寸最吃虧。
 
@@ -97,8 +103,8 @@ Italiana 是**單一字重的高對比襯線體** —— 主筆畫粗、次筆�
 **拉丁與中文刻意不配對成同一臉** —— 兩種文字視為兩個語域，
 這是台韓精品站的實際做法，不是疏漏。
 
-> `.ep` 檔內用 Noto 家族，因為 Italiana 與 DM Mono 未安裝於本機，
-> Pencil 只能使用系統字。要讓 Pencil 也顯示 Italiana，
+> `.ep` 檔內用 Noto 家族，因為 Marcellus 與 DM Mono 未安裝於本機，
+> Pencil 只能使用系統字。要讓 Pencil 也顯示 Marcellus，
 > 需先把字型安裝到系統或使用者字型目錄。
 
 字級：hero 76/1.14 · h1 48/1.2 · h2 42/1.25 · h3 31/1.3 · h4 24/1.4 ·
@@ -127,7 +133,7 @@ lead 17/1.9 · body 15/1.7 · caption 13/1.6 · micro 11/1.5
 | 金箔漸層線 | 六段金屬漸層取代扁平 1px | 頁首、書脊、飾線、選單、頁尾、表頭 |
 | 菱形飾釘 | 45° 旋轉的 5px 方塊，取自雕版標籤的分隔飾 | 飾線中央、書脊刻度、品類件數前 |
 | 雙層金框 | `border` + `outline-offset` 兩道同心金線 | 所有影像板、彈窗、QR、懸浮鈕 |
-| 幽微字徽 | Italiana 的 `V`，380px、透明度 6% | Hero 負空間、兩段理念區 |
+| 幽微字徽 | Marcellus 的 `V`，380px、透明度 6% | Hero 負空間、兩段理念區 |
 | 紙質底紋 | `feTurbulence` 細顆粒，透明度 5.5% | 全頁背景與影像板 |
 
 ---
@@ -199,7 +205,7 @@ inline 元素的 `aspect-ratio` 無效，高度會塌成 0。
 ## 無障礙
 
 - 所有文字對比 ≥ 4.5:1（金色文字一律 `#8D6D40`）
-- 手機（≤720px）字級提到 16px、字重 400，字距收窄 —— 細字重在小螢幕上讀中文會吃力
+- 手機（≤720px）內文 17px、mono 編號 12px/500，小字級整批上調一階，字距收窄 —— 細字重在小螢幕上讀中文會吃力
 - `:focus-visible` 一律 2px `#A8875C` 外框 + 3px offset
 - Toggle 用 `role="switch"` + `aria-checked`
 - 彈窗 `role="dialog"` + `aria-modal`，Esc 關閉，開啟時鎖背景捲動

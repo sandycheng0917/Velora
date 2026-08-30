@@ -116,13 +116,13 @@ h5 {
   margin-top: 4px;
   font-family: var(--f-mono);
   font-weight: 400;
-  font-size: 12px;
+  font-size: 13px;
   letter-spacing: 0.2em;
   color: var(--gold-deep);
 }
 .note {
   margin-top: 10px;
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.7;
   color: var(--ink-soft);
 }
@@ -134,7 +134,7 @@ h5 {
   border-radius: var(--r-sm);
   background: var(--green);
   color: #fff;
-  font-size: 12px;
+  font-size: 13px;
   letter-spacing: 0.16em;
   transition: filter 0.3s ease;
 }

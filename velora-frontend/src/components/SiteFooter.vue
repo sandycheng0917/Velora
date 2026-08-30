@@ -89,14 +89,14 @@ defineEmits(['select'])
 }
 .co {
   margin-top: 26px;
-  font-size: 14px;
+  font-size: 15px;
   letter-spacing: 0.1em;
 }
 .co-en {
   margin-top: 5px;
   font-family: var(--f-mono);
   font-weight: 400;
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 0.14em;
   color: var(--ink-soft);
 }
@@ -161,7 +161,7 @@ ul button:hover {
   outline-offset: 4px;
 }
 .qr-note {
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.7;
   letter-spacing: 0.08em;
 }
@@ -169,7 +169,7 @@ ul button:hover {
   margin-top: 4px;
   font-family: var(--f-mono);
   font-weight: 400;
-  font-size: 12px;
+  font-size: 13px;
   letter-spacing: 0.2em;
   color: var(--gold-deep);
 }
@@ -182,7 +182,7 @@ ul button:hover {
   border: 1px solid var(--green);
   border-radius: var(--r-sm);
   color: var(--green);
-  font-size: 12px;
+  font-size: 13px;
   letter-spacing: 0.14em;
   transition: background 0.35s ease;
 }
@@ -202,7 +202,7 @@ ul button:hover {
 .btm span {
   font-family: var(--f-mono);
   font-weight: 400;
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 0.16em;
   color: var(--ink-soft);
 }

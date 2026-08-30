@@ -156,7 +156,7 @@ function submit() {
 .logo span {
   display: block;
   margin-top: 5px;
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 0.42em;
   color: var(--ink-soft);
 }
@@ -167,8 +167,9 @@ function submit() {
   margin-left: clamp(28px, 5vw, 80px);
 }
 .nav button {
-  font-size: 12px;
-  letter-spacing: 0.16em;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
   color: var(--ink-soft);
   padding-bottom: 5px;
   border-bottom: 1px solid transparent;
@@ -207,7 +208,7 @@ function submit() {
   border: 0;
   background: none;
   font-family: var(--f-body);
-  font-size: 12.5px;
+  font-size: 13.5px;
   font-weight: 400;
   letter-spacing: 0.06em;
   color: var(--ink);
@@ -246,7 +247,7 @@ function submit() {
   display: flex;
   align-items: center;
   font-family: var(--f-mono);
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 0.1em;
 }
 .lang button {
@@ -299,7 +300,7 @@ function submit() {
     gap: 14px;
   }
   .nav button {
-    font-size: 11px;
+    font-size: 13px;
     letter-spacing: 0.08em;
   }
   .search.open input {
@@ -327,11 +328,15 @@ function submit() {
   .nav.open {
     display: flex;
   }
+  /* 手機是下拉全寬選單，不是擠在一列的導覽 —— 沒有理由還用 13px 的淡字。
+     這裡是唯一的分類入口，字級與顏色都拉到內文等級。 */
   .nav button {
     text-align: left;
-    padding: 12px 0;
-    font-size: 13px;
-    letter-spacing: 0.16em;
+    padding: 15px 0;
+    font-size: 16px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    color: var(--ink);
     border-bottom: 1px solid var(--line-soft);
   }
   .nav button.on {

@@ -3,7 +3,7 @@
    雕版目錄 (Engraved Catalogue)
 
    字體
-     Display Latin  Italiana 400        雕版感，全站少用，不低於 24px
+     Display Latin  Marcellus 400       取自羅馬碑刻字母，呼應雕版目錄。不低於 26px
      Display CJK    Noto Serif TC 200   與拉丁字刻意不同臉，兩種語域
      Body           Noto Sans TC 300    行距 1.7–1.9
      Index / Data   DM Mono 300         只承載編號與資料
@@ -23,7 +23,9 @@
   --gold-deep: #8d6d40;
   --gold-bright: #d4af37;
   --ink: #1e1e1e;
-  --ink-soft: #55514e;
+  /* 客戶手機實測兩次回報「太淡」。#55514e 雖已過 AA（7.7:1），
+     但小字級的中文在手機上仍偏灰，再壓深一階到 10.6:1。 */
+  --ink-soft: #423e3b;
   --line: #e8e4dc;
   --line-soft: #f0ede7;
   --line-strong: #d9d4c9;
@@ -47,14 +49,14 @@
   --sh-raised: 0 8px 32px rgba(0, 0, 0, 0.05);
 
   /* 字體 */
-  --f-disp: 'Italiana', 'Noto Serif TC', Georgia, serif;
+  --f-disp: 'Marcellus', 'Noto Serif TC', Georgia, serif;
   --f-cjk: 'Noto Serif TC', serif;
   --f-body: 'Noto Sans TC', -apple-system, 'Segoe UI', sans-serif;
   /* 中文小字用 500 才立得住，拉丁字用 400 就夠 */
   --w-label: 500;
   --f-mono: 'DM Mono', ui-monospace, Consolas, monospace;
-  /* Italiana 是單一字重的高對比襯線體，筆畫極細 —— 放大優雅，縮小難讀。
-     所以它只用於 26px 以上。26px 以下的英文改用這個，筆畫實得多。 */
+  /* display 字仍只用於 26px 以上。更小的英文用這個 ——
+     無襯線 500 在小尺寸的筆畫比任何襯線體都實。 */
   --f-latin-sm: 'Noto Sans TC', -apple-system, 'Segoe UI', sans-serif;
 
   /* 版面：1440 畫布 / 1200 內容 / 120 留白，隨視窗收斂 */
@@ -231,7 +233,7 @@ img {
   z-index: 4;
   font-family: var(--f-mono);
   font-weight: 400;
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 0.18em;
   color: rgba(30, 30, 30, 0.5);
 }
@@ -247,7 +249,7 @@ img {
   border: 1px solid transparent;
   border-radius: var(--r-sm);
   color: var(--gold-deep);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 400;
   letter-spacing: 0.2em;
   background: linear-gradient(var(--bg), var(--bg)) padding-box, var(--gold-leaf) border-box;
@@ -269,7 +271,7 @@ img {
   border-radius: var(--r-sm);
   background: var(--gold-fill);
   color: #fffcf6;
-  font-size: 12px;
+  font-size: 13px;
   letter-spacing: 0.16em;
   transition: background 0.3s ease, box-shadow 0.3s ease;
 }
@@ -291,7 +293,7 @@ img {
   border: 1px solid var(--line);
   border-radius: var(--r-sm);
   color: var(--ink-soft);
-  font-size: 12.5px;
+  font-size: 13.5px;
   letter-spacing: 0.14em;
   transition: border-color 0.3s ease, color 0.3s ease;
 }
@@ -302,7 +304,7 @@ img {
 
 .link-gold {
   display: inline-block;
-  font-size: 12px;
+  font-size: 13px;
   letter-spacing: 0.18em;
   color: var(--gold-deep);
   padding-bottom: 5px;
@@ -320,7 +322,7 @@ img {
   color: var(--gold-deep);
   font-family: var(--f-mono);
   font-weight: 400;
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
   background: linear-gradient(var(--bg), var(--bg)) padding-box, var(--gold-leaf) border-box;
@@ -329,7 +331,7 @@ img {
 .ref {
   font-family: var(--f-mono);
   font-weight: 400;
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 0.2em;
   color: var(--ink-faint);
 }
@@ -346,7 +348,7 @@ img {
 .sec-head .k {
   font-family: var(--f-mono);
   font-weight: 400;
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 0.26em;
   color: var(--gold-deep);
   text-transform: uppercase;
@@ -429,13 +431,13 @@ img {
   writing-mode: vertical-rl;
   font-family: var(--f-mono);
   font-weight: 400;
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 0.3em;
   color: var(--gold-deep);
   text-transform: uppercase;
 }
 
-/* 字徽襯底：Italiana 的 V 放到極大、極淡，只在餘光裡看得見 */
+/* 字徽襯底：display 字的 V 放到極大、極淡，只在餘光裡看得見 */
 .wm {
   position: absolute;
   font-family: var(--f-disp);
@@ -453,7 +455,7 @@ img {
   display: block;
   font-family: var(--f-mono);
   font-weight: 400;
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--ink-soft);
@@ -468,7 +470,7 @@ img {
   background: var(--bg);
   color: var(--ink);
   font-family: var(--f-body);
-  font-size: 13.5px;
+  font-size: 14.5px;
   font-weight: 400;
   letter-spacing: 0.05em;
   padding: 0 13px;
@@ -561,7 +563,7 @@ img {
   animation: rise 0.9s cubic-bezier(0.22, 0.61, 0.36, 1) both;
 }
 
-/* 小字英文專用：Italiana 在這個尺寸讀不動 */
+/* 小字英文專用：襯線體在這個尺寸讀不動 */
 .latin-sm {
   font-family: var(--f-latin-sm);
   font-weight: 500;
@@ -574,7 +576,7 @@ img {
    16px 也順便避免 iOS Safari 在聚焦輸入框時自動放大頁面。 */
 @media (max-width: 720px) {
   body {
-    font-size: 16px;
+    font-size: 17px;
     font-weight: 400;
     line-height: 1.8;
   }

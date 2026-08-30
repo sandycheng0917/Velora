@@ -26,7 +26,7 @@
 - 底：`rgba(253,251,247,.88)` + `backdrop-filter: saturate(140%) blur(14px)`
 - 底線：1px 金箔漸層，`opacity .55`
 - 捲動後追加 `shadow-ambient`
-- 左 `x=120`：`VELORA` Italiana 25px 字距 `.24em`；下方「維 羅 拉」11px 字距 `.42em` `--ink-soft`
+- 左 `x=120`：`VELORA` Marcellus 25px 字距 `.24em`；下方「維 羅 拉」11px 字距 `.42em` `--ink-soft`
 - 中 `x=344` 起：`ALL / FRAGRANCE / SCARF / JEWELRY / ACCESSORY / STORY`
   12px 字距 `.16em`，間距 38px；作用中為 `--ink` + 1px 金箔底線
 - 右：搜尋 icon 17px｜1×12 分隔線｜語言切換「繁 / EN」11px mono｜
@@ -42,11 +42,11 @@
 | y | 內容 |
 |---|---|
 | 260 | eyebrow「2026 AUTUMN — KOREAN SELECTION」11px mono 字距 `.26em` `--gold-deep` |
-| 300–630 | H1 Italiana 76px／行高 1.14／字距 `.08em`，四行：`Refined` `Elegance,` `Everyday` `Luxury.`；後兩行縮排 56px 形成詩節結構 |
+| 300–630 | H1 Marcellus 76px／行高 1.14／字距 `.08em`，四行：`Refined` `Elegance,` `Everyday` `Luxury.`；後兩行縮排 56px 形成詩節結構 |
 | 660 | 副標 17px／行高 1.9 `--ink-soft`，寬 430 |
 | 720 | CTA `216×52` radius 4，金箔描邊，字「探索系列　Explore」12px 字距 `.20em` `--gold-deep`；**hover 灌入金漸層、字轉 `#FFFCF6`** |
 | 738 | 次要連結「或直接用 LINE 問我們 →」12px + 1px `--line-strong` 底線 |
-| — | 字徽 `V` Italiana 380px 透明度 6%，`right:8px; top:96px`，`z-index:0` |
+| — | 字徽 `V` Marcellus 380px 透明度 6%，`right:8px; top:96px`，`z-index:0` |
 
 **右欄影像**
 - 4 張輪播，`opacity` 淡入 1.1s，每 6 秒自動換頁
@@ -62,7 +62,7 @@
 
 區段標題（左對齊，貼合書脊）：
 - `y 930`：「TWO KOREAN HOUSES · FOUR LINES」11px mono `--gold-deep`
-- `y 958`：「四大品類」Noto Serif TC 42px + `Curated` Italiana 38px `--gold-deep`（左距 18px）
+- `y 958`：「四大品類」Noto Serif TC 42px + `Curated` Marcellus 38px `--gold-deep`（左距 18px）
 - `y 1026`：金箔飾線 76×7 含中央菱形飾釘
 
 **卡片座標**（`x` 自 120 起算）
@@ -80,7 +80,7 @@
 - 底 `--bg`、1px `--line`、radius 6
 - 常駐內框：`inset:7px` 1px `rgba(197,168,128,.26)` radius 3；hover 轉 `.55`
 - 影像區佔上方，`meta` 區固定 104px 高，上緣 1px `--line`
-- meta：英文品類 Italiana 23px 字距 `.20em` → 中文 13px 字距 `.14em` `--ink-soft`
+- meta：英文品類 Marcellus 23px 字距 `.20em` → 中文 13px 字距 `.14em` `--ink-soft`
   → 4px 菱形飾釘 + 「N SELECTED」10px mono `--gold-deep`
 - hover：邊框轉 `--gold`、上浮 3px、底部 1px 金箔線由左展開 0.7s
 - ≤1024px：改 2 欄網格，卡片統一 400px 高；≤720px 單欄
@@ -95,7 +95,7 @@
 - 右內容 pad 46/52：
   - 品牌標籤 pill `h 24`，金箔描邊 radius 4，10px mono `--gold-deep`
   - 索引碼 10px mono `--line-strong`（同一組編號不重複出現在影像上）
-  - 品名 Italiana 31px 字距 `.07em` → 中文 14px `--ink-soft`
+  - 品名 Marcellus 31px 字距 `.07em` → 中文 14px `--ink-soft`
   - 描述 14px／行高 1.85 `--ink-soft`，最大寬 530
   - 規格列：10px mono，以 1×10 直線分隔（材質 · 產地 · 規格）
   - **「查看細節　View Details →」** 12px 字距 `.18em` `--gold-deep` + 金箔底線
@@ -114,7 +114,7 @@
 - 商品磚：radius 6，1px `--line`；影像 `aspect-ratio: 4/5`；
   meta pad 18/20/22，上緣 1px `--line`
   - 索引碼 10px mono `--line-strong`
-  - 英文品名 Italiana 17px
+  - 英文品名 Marcellus 17px
   - 中文品名 12.5px `--ink-soft`
 - hover：邊框轉金、上浮 2px
 - 點擊開啟細節彈窗
@@ -126,7 +126,7 @@
 - 面板 `880 × 自適應`，radius 6，`shadow-raised`
 - 內縮金框：`inset:7px` 1px `rgba(197,168,128,.42)` radius 3
 - 左 400px 影像（可切換），右 pad 44/42：
-  品牌 pill · 索引碼 · 品名 Italiana 31px · 中文 · tagline `--gold-deep` · 描述 14/1.9
+  品牌 pill · 索引碼 · 品名 Marcellus 31px · 中文 · tagline `--gold-deep` · 描述 14/1.9
 - **香調金字塔**（僅香氛）：`--bg-alt` 底、radius 4、pad 18/20，
   前調／中調／後調三列，標籤 11px `--gold-deep`
 - 規格定義列：材質 / 規格 / 產地 / 品牌，上緣 1px `--line`，各列下緣 1px `--line-soft`
@@ -139,7 +139,7 @@
 
 - 兩列，第二列 `flex-direction: row-reverse` 並 `padding-top: 64px` 製造韓系節奏
 - 影像 50% 寬、`aspect-ratio: 15/11`、radius 6
-- 文字：`PHILOSOPHY — 小標` 11px mono `--gold-deep` → Italiana 37px 兩行 →
+- 文字：`PHILOSOPHY — 小標` 11px mono `--gold-deep` → Marcellus 37px 兩行 →
   金箔飾線 → 15px／行高 1.95 `--ink-soft`，最大寬 470
 - 字徽 `V` 300px 透明度 6% 襯底
 - 內容：`We select, so you don't have to.` / `Quiet things last longer.`
@@ -149,7 +149,7 @@
 
 - 底 `--surface`，上緣 1px 金箔線，pad `88px / gutter`
 - 四欄 `1fr 190 190 300`，間距 40
-  1. `VELORA` Italiana 25px → 「維羅拉國際有限公司」14px → 英文名 11px mono →
+  1. `VELORA` Marcellus 25px → 「維羅拉國際有限公司」14px → 英文名 11px mono →
      統編 / 地址 / 電話 / 信箱（標籤 11px `--line-strong`，寬 46）
   2. CATEGORIES：四條商品線
   3. INFORMATION：品牌故事 / 選件標準 / 隱私權政策 / 服務條款
