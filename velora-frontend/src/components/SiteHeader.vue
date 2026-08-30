@@ -156,7 +156,7 @@ function submit() {
 .logo span {
   display: block;
   margin-top: 5px;
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.42em;
   color: var(--ink-soft);
 }
@@ -199,7 +199,7 @@ function submit() {
   transition: border-color 0.4s ease;
 }
 .search.open {
-  border-bottom-color: var(--line-strong);
+  border-bottom-color: var(--ink-faint);
 }
 .search input {
   width: 0;
@@ -208,7 +208,7 @@ function submit() {
   background: none;
   font-family: var(--f-body);
   font-size: 12.5px;
-  font-weight: 300;
+  font-weight: 400;
   letter-spacing: 0.06em;
   color: var(--ink);
   transition: width 0.4s cubic-bezier(0.22, 0.61, 0.36, 1), padding 0.4s ease;
@@ -221,7 +221,7 @@ function submit() {
   outline: none;
 }
 .search input::placeholder {
-  color: var(--line-strong);
+  color: var(--ink-faint);
 }
 .search input::-webkit-search-cancel-button {
   display: none;
@@ -250,7 +250,7 @@ function submit() {
   letter-spacing: 0.1em;
 }
 .lang button {
-  color: var(--line-strong);
+  color: var(--ink-faint);
   transition: color 0.3s ease;
 }
 .lang button:hover {
@@ -261,7 +261,7 @@ function submit() {
 }
 .lang i {
   font-style: normal;
-  color: var(--line-strong);
+  color: var(--ink-faint);
   margin: 0 5px;
 }
 

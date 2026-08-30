@@ -215,7 +215,7 @@ h3 {
   flex: none;
   font-size: 11px;
   letter-spacing: 0.16em;
-  color: var(--line-strong);
+  color: var(--ink-faint);
   padding-top: 2px;
 }
 .facts dd {

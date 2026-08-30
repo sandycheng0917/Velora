@@ -370,7 +370,7 @@ function askOnLine() {
 
 .eyebrow {
   font-family: var(--f-mono);
-  font-weight: 300;
+  font-weight: 400;
   font-size: 11px;
   letter-spacing: 0.26em;
   color: var(--gold-deep);
@@ -423,7 +423,7 @@ h1 .i {
   top: 44px;
   z-index: 4;
   font-family: var(--f-mono);
-  font-weight: 300;
+  font-weight: 400;
   font-size: 11px;
   letter-spacing: 0.22em;
   color: rgba(255, 253, 248, 0.82);
@@ -518,8 +518,8 @@ h1 .i {
   gap: 9px;
   margin-top: 14px;
   font-family: var(--f-mono);
-  font-weight: 300;
-  font-size: 10px;
+  font-weight: 400;
+  font-size: 11px;
   letter-spacing: 0.2em;
   color: var(--gold-deep);
   text-transform: uppercase;
@@ -616,8 +616,8 @@ h1 .i {
 }
 .attrs span {
   font-family: var(--f-mono);
-  font-weight: 300;
-  font-size: 10px;
+  font-weight: 400;
+  font-size: 11px;
   letter-spacing: 0.16em;
   color: var(--ink-soft);
   text-transform: uppercase;
@@ -649,7 +649,7 @@ h1 .i {
   transition: border-color 0.3s ease, color 0.3s ease;
 }
 .chips button:hover {
-  border-color: var(--line-strong);
+  border-color: var(--ink-faint);
   color: var(--ink);
 }
 .chips button.on {
@@ -687,10 +687,10 @@ h1 .i {
 .t-ref {
   display: block;
   font-family: var(--f-mono);
-  font-weight: 300;
-  font-size: 10px;
+  font-weight: 400;
+  font-size: 11px;
   letter-spacing: 0.18em;
-  color: var(--line-strong);
+  color: var(--ink-faint);
 }
 .t-name {
   display: block;
@@ -750,7 +750,7 @@ h1 .i {
 }
 .txt .k {
   font-family: var(--f-mono);
-  font-weight: 300;
+  font-weight: 400;
   font-size: 11px;
   letter-spacing: 0.26em;
   color: var(--gold-deep);
@@ -781,8 +781,11 @@ h1 .i {
     padding: clamp(48px, 9vw, 88px) var(--gutter);
   }
   .hero-r {
+    /* flex: none 是必要的 —— 直向排列時 .hero-r 原本的 flex:1 會帶著
+       flex-basis:0 蓋掉 height，而容器沒有固定高度，整欄會塌成 1px。 */
+    flex: none;
     width: 100%;
-    height: 440px;
+    height: min(58vh, 440px);
     border-left: 0;
     border-top: 1px solid var(--gold);
   }
@@ -808,6 +811,11 @@ h1 .i {
 }
 
 @media (max-width: 720px) {
+  /* 直排的品類代碼在窄螢幕會壓到標題與內文上，手機上收起來；
+     書脊那條 1px 金線留著，它只佔一個像素且是版面的識別。 */
+  .mark {
+    display: none;
+  }
   .cat {
     grid-template-columns: 1fr;
   }

@@ -19,13 +19,17 @@
   --surface: #f2efe9;
   --surface-deep: #ebe7df;
   --gold: #c5a880;
-  --gold-deep: #a8875c;
+  /* 金色文字：#a8875c 實測只有 3.23:1，不足 AA。壓低明度、保留同色相到 4.62:1。 */
+  --gold-deep: #8d6d40;
   --gold-bright: #d4af37;
   --ink: #1e1e1e;
-  --ink-soft: #686461;
+  --ink-soft: #55514e;
   --line: #e8e4dc;
   --line-soft: #f0ede7;
   --line-strong: #d9d4c9;
+  /* --line-strong 是線條色（1.43:1），拿來當文字等於看不見。
+     編號、placeholder 這類極淡文字改用這個，4.52:1 剛好過 AA。 */
+  --ink-faint: #7a736b;
   --sidebar: #1f1d1b;
   --sidebar-ink: #948e87;
   --green: #06c755;
@@ -46,6 +50,8 @@
   --f-disp: 'Italiana', 'Noto Serif TC', Georgia, serif;
   --f-cjk: 'Noto Serif TC', serif;
   --f-body: 'Noto Sans TC', -apple-system, 'Segoe UI', sans-serif;
+  /* 中文小字用 500 才立得住，拉丁字用 400 就夠 */
+  --w-label: 500;
   --f-mono: 'DM Mono', ui-monospace, Consolas, monospace;
 
   /* 版面：1440 畫布 / 1200 內容 / 120 留白，隨視窗收斂 */
@@ -70,9 +76,9 @@ body {
   background: var(--bg) var(--grain);
   color: var(--ink);
   font-family: var(--f-body);
-  font-weight: 300;
+  font-weight: 400;
   font-size: 15px;
-  line-height: 1.7;
+  line-height: 1.75;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -221,8 +227,8 @@ img {
   bottom: 22px;
   z-index: 4;
   font-family: var(--f-mono);
-  font-weight: 300;
-  font-size: 10px;
+  font-weight: 400;
+  font-size: 11px;
   letter-spacing: 0.18em;
   color: rgba(30, 30, 30, 0.5);
 }
@@ -287,7 +293,7 @@ img {
   transition: border-color 0.3s ease, color 0.3s ease;
 }
 .btn-ghost:hover {
-  border-color: var(--line-strong);
+  border-color: var(--ink-faint);
   color: var(--ink);
 }
 
@@ -310,8 +316,8 @@ img {
   border-radius: var(--r-sm);
   color: var(--gold-deep);
   font-family: var(--f-mono);
-  font-weight: 300;
-  font-size: 10px;
+  font-weight: 400;
+  font-size: 11px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
   background: linear-gradient(var(--bg), var(--bg)) padding-box, var(--gold-leaf) border-box;
@@ -319,10 +325,10 @@ img {
 
 .ref {
   font-family: var(--f-mono);
-  font-weight: 300;
-  font-size: 10px;
+  font-weight: 400;
+  font-size: 11px;
   letter-spacing: 0.2em;
-  color: var(--line-strong);
+  color: var(--ink-faint);
 }
 
 /* ── 區塊標題 ───────────────────────────────────────────── */
@@ -336,7 +342,7 @@ img {
 }
 .sec-head .k {
   font-family: var(--f-mono);
-  font-weight: 300;
+  font-weight: 400;
   font-size: 11px;
   letter-spacing: 0.26em;
   color: var(--gold-deep);
@@ -420,7 +426,7 @@ img {
   writing-mode: vertical-rl;
   font-family: var(--f-mono);
   font-weight: 400;
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.3em;
   color: var(--gold-deep);
   text-transform: uppercase;
@@ -443,8 +449,8 @@ img {
 .field label {
   display: block;
   font-family: var(--f-mono);
-  font-weight: 300;
-  font-size: 10px;
+  font-weight: 400;
+  font-size: 11px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--ink-soft);
@@ -460,7 +466,7 @@ img {
   color: var(--ink);
   font-family: var(--f-body);
   font-size: 13.5px;
-  font-weight: 300;
+  font-weight: 400;
   letter-spacing: 0.05em;
   padding: 0 13px;
   height: 40px;
@@ -475,7 +481,7 @@ img {
 .field input:hover,
 .field select:hover,
 .field textarea:hover {
-  border-color: var(--line-strong);
+  border-color: var(--ink-faint);
 }
 .field input:focus,
 .field select:focus,
@@ -485,7 +491,7 @@ img {
 }
 .field input::placeholder,
 .field textarea::placeholder {
-  color: var(--line-strong);
+  color: var(--ink-faint);
 }
 
 /* ── 極簡 Toggle ────────────────────────────────────────── */
@@ -550,6 +556,28 @@ img {
 }
 .rise {
   animation: rise 0.9s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+/* ── 手機：字要更實 ───────────────────────────────────────
+   多數人用手機看。小螢幕上細字重與大字距會讓中文變得難讀，
+   所以在這裡把字級、字重都往上帶一級，字距收窄一點。
+   16px 也順便避免 iOS Safari 在聚焦輸入框時自動放大頁面。 */
+@media (max-width: 720px) {
+  body {
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.8;
+  }
+  .micro,
+  .ref,
+  [class*='mono'] {
+    letter-spacing: 0.12em;
+  }
+  /* 極小的 mono 標籤在手機上要更實才讀得到 */
+  .plate-cap,
+  .ref {
+    font-weight: 500;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

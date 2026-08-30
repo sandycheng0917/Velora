@@ -33,10 +33,11 @@
 | `--surface` | `#F2EFE9` | `#F2EFE9FF` | 卡片底 — 奶茶杏灰 |
 | `--surface-deep` | `#EBE7DF` | `#EBE7DFFF` | 次卡片 / hover 底 |
 | `--gold` | `#C5A880` | `#C5A880FF` | **只做**細線、外框、實心鈕底、Toggle 開啟態 |
-| `--gold-deep` | `#A8875C` | `#A8875CFF` | 金色**文字**（唯一可承載文字的金） |
+| `--gold-deep` | `#8D6D40` | `#8D6D40FF` | 金色**文字**（唯一可承載文字的金，4.62:1） |
 | `--gold-bright` | `#D4AF37` | `#D4AF37FF` | 精選標記（罕用） |
 | `--ink` | `#1E1E1E` | `#1E1E1EFF` | 文字主色 — 沉穩碳墨黑 |
-| `--ink-soft` | `#686461` | `#686461FF` | 次要說明字 — 低對比暖深灰 |
+| `--ink-soft` | `#55514E` | `#55514EFF` | 次要說明字（7.7:1） |
+| `--ink-faint` | `#7A736B` | `#7A736BFF` | 編號、placeholder（4.52:1）。**線條色不可當文字用** |
 | `--line` | `#E8E4DC` | `#E8E4DCFF` | 1px 髮絲邊框 |
 | `--line-soft` | `#F0EDE7` | `#F0EDE7FF` | 表格列分隔 |
 | `--line-strong` | `#D9D4C9` | `#D9D4C9FF` | 虛線上傳區 / 較強分隔 / placeholder |
@@ -50,7 +51,8 @@
 **無法承載任何文字**。因此色票擴充一階：
 
 - `#C5A880` → 線、框、實心按鈕底、Toggle 開啟態。**永不用於文字。**
-- `#A8875C` → 所有金色文字（對比 4.6:1，達 AA）。
+- `#8D6D40` → 所有金色文字（對比 4.62:1，達 AA）。
+  註：先前用的 `#A8875C` 實測只有 3.23:1，不足 AA，已淘汰。
 - `#D4AF37` → 僅「精選 / FEATURED」等稀有標記。
 
 視覺上兩者在米白底幾乎同調，不破壞低調奢華，但讓文字可讀。
@@ -76,7 +78,7 @@
 |---|---|---|---|
 | Display Latin | **Italiana** 400 | Noto Serif TC 200 | 字距 `+0.08em`，全站只出現數次，不低於 24px |
 | Display CJK | **Noto Serif TC** 200 | Noto Serif TC 200 | 字距 `+0.14em` |
-| Body | **Noto Sans TC** 300/400 | Noto Sans TC | 行距 1.7–1.9 |
+| Body | **Noto Sans TC** 400/500 | Noto Sans TC | 行距 1.75–1.9；手機 16px |
 | Index / Data | **DM Mono** 300 | Noto Sans TC | 字距 `+0.16em`，只承載編號與資料 |
 
 **拉丁與中文刻意不配對成同一臉** —— 兩種文字視為兩個語域，
@@ -183,7 +185,8 @@ inline 元素的 `aspect-ratio` 無效，高度會塌成 0。
 
 ## 無障礙
 
-- 所有文字對比 ≥ 4.5:1（金色文字一律 `#A8875C`）
+- 所有文字對比 ≥ 4.5:1（金色文字一律 `#8D6D40`）
+- 手機（≤720px）字級提到 16px、字重 400，字距收窄 —— 細字重在小螢幕上讀中文會吃力
 - `:focus-visible` 一律 2px `#A8875C` 外框 + 3px offset
 - Toggle 用 `role="switch"` + `aria-checked`
 - 彈窗 `role="dialog"` + `aria-modal`，Esc 關閉，開啟時鎖背景捲動

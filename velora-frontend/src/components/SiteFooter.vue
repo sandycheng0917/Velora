@@ -95,7 +95,7 @@ defineEmits(['select'])
 .co-en {
   margin-top: 5px;
   font-family: var(--f-mono);
-  font-weight: 300;
+  font-weight: 400;
   font-size: 11px;
   letter-spacing: 0.14em;
   color: var(--ink-soft);
@@ -113,7 +113,7 @@ dt {
   flex: none;
   font-size: 11px;
   letter-spacing: 0.16em;
-  color: var(--line-strong);
+  color: var(--ink-faint);
   padding-top: 2px;
 }
 dd {
@@ -126,7 +126,7 @@ h5 {
   margin-bottom: 22px;
   font-family: var(--f-mono);
   font-weight: 400;
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.24em;
   text-transform: uppercase;
   color: var(--gold-deep);
@@ -201,8 +201,8 @@ ul button:hover {
 }
 .btm span {
   font-family: var(--f-mono);
-  font-weight: 300;
-  font-size: 10px;
+  font-weight: 400;
+  font-size: 11px;
   letter-spacing: 0.16em;
   color: var(--ink-soft);
 }
