@@ -53,6 +53,9 @@
   /* 中文小字用 500 才立得住，拉丁字用 400 就夠 */
   --w-label: 500;
   --f-mono: 'DM Mono', ui-monospace, Consolas, monospace;
+  /* Italiana 是單一字重的高對比襯線體，筆畫極細 —— 放大優雅，縮小難讀。
+     所以它只用於 26px 以上。26px 以下的英文改用這個，筆畫實得多。 */
+  --f-latin-sm: 'Noto Sans TC', -apple-system, 'Segoe UI', sans-serif;
 
   /* 版面：1440 畫布 / 1200 內容 / 120 留白，隨視窗收斂 */
   --gutter: clamp(20px, 8.33vw, 120px);
@@ -558,6 +561,13 @@ img {
   animation: rise 0.9s cubic-bezier(0.22, 0.61, 0.36, 1) both;
 }
 
+/* 小字英文專用：Italiana 在這個尺寸讀不動 */
+.latin-sm {
+  font-family: var(--f-latin-sm);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+
 /* ── 手機：字要更實 ───────────────────────────────────────
    多數人用手機看。小螢幕上細字重與大字距會讓中文變得難讀，
    所以在這裡把字級、字重都往上帶一級，字距收窄一點。
@@ -568,15 +578,16 @@ img {
     font-weight: 400;
     line-height: 1.8;
   }
-  .micro,
+  /* mono 是等寬拉丁字，小尺寸下最吃虧 —— 手機上放大並加重 */
   .ref,
-  [class*='mono'] {
-    letter-spacing: 0.12em;
-  }
-  /* 極小的 mono 標籤在手機上要更實才讀得到 */
   .plate-cap,
-  .ref {
+  .eyebrow,
+  .attrs span,
+  .cd .n,
+  .t-ref {
+    font-size: 12px;
     font-weight: 500;
+    letter-spacing: 0.1em;
   }
 }
 

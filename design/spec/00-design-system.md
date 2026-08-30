@@ -76,10 +76,23 @@
 
 | 角色 | 網頁 | `.ep` 檔內 | 規格 |
 |---|---|---|---|
-| Display Latin | **Italiana** 400 | Noto Serif TC 200 | 字距 `+0.08em`，全站只出現數次，不低於 24px |
+| Display Latin | **Italiana** 400 | Noto Serif TC 200 | 字距 `+0.08em`，**不低於 26px** |
+| Small Latin | **Noto Sans TC** 500 | — | 26px 以下的英文一律用這個（`.latin-sm`） |
 | Display CJK | **Noto Serif TC** 200 | Noto Serif TC 200 | 字距 `+0.14em` |
 | Body | **Noto Sans TC** 400/500 | Noto Sans TC | 行距 1.75–1.9；手機 16px |
-| Index / Data | **DM Mono** 300 | Noto Sans TC | 字距 `+0.16em`，只承載編號與資料 |
+| Index / Data | **DM Mono** 400／手機 500 | Noto Sans TC | 字距 `+0.16em`，只承載編號與資料 |
+
+### ⚠️ Italiana 的尺寸下限（不可違反）
+
+Italiana 是**單一字重的高對比襯線體** —— 主筆畫粗、次筆畫近乎髮絲。
+放大時優雅，縮小時髮絲筆畫在手機上會直接消失，客戶實測回報「英文太細、看得很吃力」。
+
+- **≥ 26px** → Italiana（hero、區塊標題、精選品名、Logo、品類代碼）
+- **< 26px** → `.latin-sm`（Noto Sans TC 500）。商品磚品名即屬此類。
+- DM Mono 承載的編號在手機上提到 **12px / 500**，等寬拉丁字在小尺寸最吃虧。
+
+中文沒有這個問題 —— Noto Sans TC 400 在 16px 下筆畫是實的，客戶也確認中文可讀。
+**這是拉丁字專屬的問題，不要連中文一起調。**
 
 **拉丁與中文刻意不配對成同一臉** —— 兩種文字視為兩個語域，
 這是台韓精品站的實際做法，不是疏漏。

@@ -257,7 +257,7 @@ function askOnLine() {
             </span>
             <span class="t-meta">
               <span class="t-ref">{{ p.ref }}</span>
-              <span class="t-name disp">{{ p.name.en }}</span>
+              <span class="t-name latin-sm">{{ p.name.en }}</span>
               <span class="t-zh">{{ pick(p.name) }}</span>
             </span>
           </button>
@@ -380,8 +380,8 @@ function askOnLine() {
 h1 {
   font-family: var(--f-disp);
   font-weight: 400;
-  font-size: clamp(38px, 5.3vw, 76px);
-  line-height: 1.14;
+  font-size: clamp(44px, 5.3vw, 76px);
+  line-height: 1.16;
   letter-spacing: 0.08em;
 }
 h1 span {
@@ -502,8 +502,8 @@ h1 .i {
 }
 .cd .en {
   display: block;
-  font-size: 23px;
-  letter-spacing: 0.2em;
+  font-size: 25px;
+  letter-spacing: 0.18em;
 }
 .cd .zh {
   display: block;
@@ -590,7 +590,7 @@ h1 .i {
 }
 .wide h3 {
   margin-top: 22px;
-  font-size: clamp(24px, 2.6vw, 31px);
+  font-size: clamp(27px, 2.6vw, 31px);
   line-height: 1.25;
   letter-spacing: 0.07em;
 }
@@ -695,9 +695,9 @@ h1 .i {
 .t-name {
   display: block;
   margin-top: 7px;
-  font-size: 17px;
-  letter-spacing: 0.05em;
-  line-height: 1.3;
+  font-size: 15.5px;
+  line-height: 1.45;
+  color: var(--ink);
 }
 .t-zh {
   display: block;
