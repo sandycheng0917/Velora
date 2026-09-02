@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- 資安：預設封鎖一切，只開必要來源。無內聯腳本、無內聯樣式、無第三方 JS。
+     字型是唯一的外部來源；要完全去除第三方請見 README「字型自架」。 -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'none'; form-action 'none'; frame-ancestors 'none'; base-uri 'none'">
+<meta name="referrer" content="no-referrer">
+
+<title>維羅拉國際有限公司 | Velora International</title>
+<meta name="description" content="維羅拉國際代理韓國選品，分為兩館：生活選品（居家香氛、真絲長巾、純銀飾品）與行動配件（保護殼、磁吸支架、充電）。同一種眼光，兩種材質。">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Marcellus&family=DM+Mono:wght@400;500&family=Noto+Sans+TC:wght@200;300;400;500&family=Noto+Serif+TC:wght@200;300&display=swap">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<a class="skip" href="#main" data-en="Skip to content" data-ko="본문으로 건너뛰기">跳到主要內容</a>
+
+<!-- ═══ 書脊：簽名元素。一條金線貫穿全頁，是這本目錄的裝訂邊 ═══ -->
+<span class="spine" aria-hidden="true"></span>
+
+<!-- 章節牌：隨捲動報出目前在第幾館。手機在頁首下方，桌機貼在書脊上 -->
+<p class="chapter-tag" id="chapterTag" aria-live="polite">
+  <i aria-hidden="true"></i><b>目次</b>
+</p>
+
+<header class="hdr">
+  <a class="wm" href="#top">VELORA<span data-en="Velora" data-ko="벨로라">維羅拉</span></a>
+
+  <nav class="nav" aria-label="章節">
+    <a href="#living"><em>I</em><span data-en="Living" data-ko="리빙">生活選品</span></a>
+    <a href="#mobile"><em>II</em><span data-en="Mobile" data-ko="모바일">行動配件</span></a>
+    <a href="#standard" data-en="Standard" data-ko="기준">選物準則</a>
+    <a href="#about" data-en="About" data-ko="소개">關於</a>
+  </nav>
+
+  <div class="lang" role="group" aria-label="切換語言">
+    <button type="button" data-lang="zh" aria-pressed="true">中</button>
+    <button type="button" data-lang="en" aria-pressed="false">EN</button>
+    <button type="button" data-lang="ko" aria-pressed="false">한</button>
+  </div>
+</header>
+
+<main id="main">
+<div id="top"></div>
+
+<!-- ═══ 主視覺：論點 + 目次。兩館的關係在第一屏就講完 ═══ -->
+<section class="hero">
+  <p class="kick" data-en="2026 · Korean Selection" data-ko="2026 · 한국 셀렉션">2026 · 韓國選品代理</p>
+
+  <h1>
+    <span class="l1" data-en="The same eye," data-ko="같은 안목,">同一種眼光，</span>
+    <span class="l2" data-en="two materials." data-ko="두 가지 소재.">兩種材質。</span>
+  </h1>
+
+  <p class="lede" data-en="Velora's Korean lines fall into two chapters: things for the home and the person, and things for the phone in your hand. The standard behind both is one standard — the material is stated plainly, the finish holds up close, and you reach for it every day." data-ko="벨로라가 취급하는 한국 브랜드는 두 개의 장으로 나뉩니다. 집과 몸에 두는 것, 그리고 손에 쥐는 것. 기준은 하나입니다 — 소재를 분명히 밝히고, 마감이 가까이서 견디며, 매일 손이 갑니다.">維羅拉代理的韓國品牌分成兩館：放在家裡和身上的，以及握在手上的。挑選的標準是同一套 —— 材質說得清楚，收邊經得起近看，而且每天用得到。</p>
+
+  <!-- 目次：這是主視覺的主體，不是次要導覽。兩館並置本身就是論點 -->
+  <nav class="toc" aria-label="目次">
+    <a href="#living">
+      <em>I</em>
+      <span class="t" data-en="Living" data-ko="리빙">生活選品</span>
+      <span class="d" data-en="Fragrance · Silk · Silver · Scarf rings" data-ko="프래그런스 · 실크 · 실버 · 스카프링">香氛 · 長巾 · 銀飾 · 絲巾扣</span>
+      <span class="n">04</span>
+    </a>
+    <a href="#mobile">
+      <em>II</em>
+      <span class="t" data-en="Mobile" data-ko="모바일">行動配件</span>
+      <span class="d" data-en="Cases · Mounts · Power" data-ko="케이스 · 마운트 · 충전">保護殼 · 磁吸支架 · 充電</span>
+      <span class="n">03</span>
+    </a>
+  </nav>
+</section>
+
+<!-- ═══ 第 I 館 ═══ -->
+<section class="ch" id="living">
+  <header class="ch-head">
+    <span class="num" aria-hidden="true">I</span>
+    <p class="kick" data-en="Chapter I · Living" data-ko="제1장 · 리빙">第 I 館 · LIVING</p>
+    <h2 data-en="Living" data-ko="리빙 셀렉션">生活選品</h2>
+    <p class="lede" data-en="VUCA's home fragrance, and SAINTMARI's silk twillies and sterling jewelry. Two Seoul houses, both of which will tell you exactly what a thing is made of." data-ko="VUCA의 홈 프래그런스, 그리고 SAINTMARI의 실크 스카프와 실버 주얼리. 두 서울 브랜드의 공통점은 소재를 분명히 밝힌다는 것입니다.">VUCA 的居家香氛，SAINTMARI 的真絲長巾與純銀飾品。兩家首爾品牌，共通點是把材質講得清楚。</p>
+  </header>
+
+  <ul class="cats">
+    <li><span class="c" data-en="Home Fragrance" data-ko="홈 프래그런스">居家香氛</span><span class="r">FRG</span></li>
+    <li><span class="c" data-en="Silk Scarves" data-ko="실크 스카프">真絲長巾</span><span class="r">SLK</span></li>
+    <li><span class="c" data-en="Sterling Jewelry" data-ko="실버 주얼리">純銀飾品</span><span class="r">JWL</span></li>
+    <li><span class="c" data-en="Scarf Rings" data-ko="스카프링">絲巾扣</span><span class="r">SCR</span></li>
+  </ul>
+
+  <div class="grid">
+    <article class="card">
+      <span class="plate"><img src="assets/media/vuca/ylang.jpg" alt="依蘭香氛" loading="lazy" decoding="async" width="800" height="1000"></span>
+      <p class="ref">VL · FRG · 001</p>
+      <h3 data-en="Ylang Ylang" data-ko="일랑일랑">依蘭</h3>
+      <p class="say" data-en="Opens on peach and grapefruit, builds a powdery weight through iris and ylang, settles into musk and sandalwood. Not sweet — good for a bedroom." data-ko="복숭아와 자몽으로 열려 아이리스와 일랑일랑이 파우더리한 두께를 쌓고 머스크와 샌달우드로 가라앉습니다. 달지 않아 침실에 어울립니다.">開場帶著水蜜桃與葡萄柚的果酸，中段讓依蘭與鳶尾鋪出粉質的厚度，尾韻落在麝香與檀木。不甜膩，適合臥室。</p>
+      <dl class="hall">
+        <dt data-en="Base" data-ko="베이스">基劑</dt><dd data-en="Corn-derived plant ethanol" data-ko="옥수수 유래 식물성 에탄올">玉米萃取植物乙醇</dd>
+        <dt data-en="Standard" data-ko="기준">標準</dt><dd data-en="IFRA compliant" data-ko="IFRA 기준 충족">符合 IFRA</dd>
+      </dl>
+    </article>
+
+    <article class="card">
+      <span class="plate"><img src="assets/media/saintmari/scarf-camel-blazer.jpg" alt="駝色外套搭配真絲長巾" loading="lazy" decoding="async" width="800" height="1000"></span>
+      <p class="ref">VL · SLK · 001</p>
+      <h3 data-en="Silk Twilly Scarf" data-ko="실크 스카프">真絲長巾</h3>
+      <p class="say" data-en="The edges are hand-rolled, so it hangs without curling. Prints are kept low in saturation and never compete with what you are wearing." data-ko="가장자리를 손으로 말아 박아 늘어뜨려도 말리지 않습니다. 프린트는 채도를 낮춰 옷의 주된 색을 방해하지 않습니다.">邊緣以手工捲縫收口，垂墜時不會翻捲。印花刻意壓低飽和度，不搶衣服的主色。</p>
+      <dl class="hall">
+        <dt data-en="Material" data-ko="소재">材質</dt><dd data-en="100% Silk" data-ko="실크 100%">100% 真絲</dd>
+        <dt data-en="Size" data-ko="사이즈">尺寸</dt><dd data-en="approx. 8 × 120 cm" data-ko="약 8 × 120 cm">約 8 × 120 cm</dd>
+      </dl>
+    </article>
+
+    <article class="card">
+      <span class="plate is-cutout"><img src="assets/media/saintmari/necklace-01.png" alt="純銀細鍊項鍊" loading="lazy" decoding="async" width="800" height="800"></span>
+      <p class="ref">VL · JWL · 001</p>
+      <h3 data-en="Necklace" data-ko="목걸이">項鍊</h3>
+      <p class="say" data-en="A fine chain with a scattered drop that catches very little light as you move. Five centimetres of adjustment, so it sits inside a collar or over a turtleneck." data-ko="가는 체인에 드문드문 놓인 드롭이 움직일 때 아주 옅은 빛을 냅니다. 5cm 조절이 가능해 셔츠 안이나 터틀넥 위에 모두 어울립니다.">細鍊配上零星的垂墜，走動時會有很輕的光。鍊長可調五公分，襯衫領內或高領外都能戴。</p>
+      <dl class="hall">
+        <dt data-en="Material" data-ko="소재">材質</dt><dd data-en="Sterling silver 925" data-ko="925 실버">925 純銀</dd>
+        <dt data-en="Chain" data-ko="체인">鍊長</dt><dd data-en="approx. 40 + 5 cm" data-ko="약 40 + 5 cm">約 40 + 5 cm</dd>
+      </dl>
+    </article>
+  </div>
+</section>
+
+<!-- ═══ 第 II 館 ═══ -->
+<section class="ch" id="mobile">
+  <header class="ch-head">
+    <span class="num" aria-hidden="true">II</span>
+    <p class="kick" data-en="Chapter II · Mobile" data-ko="제2장 · 모바일">第 II 館 · MOBILE</p>
+    <h2 data-en="Mobile" data-ko="모바일 액세서리">行動配件</h2>
+    <p class="lede" data-en="A phone is the object you hold longest each day. This chapter is picked the way the scarves are picked: what it is made of, how the edges are finished, and what it looks like after a year." data-ko="휴대폰은 하루 중 가장 오래 손에 쥐는 물건입니다. 이 장은 스카프를 고르는 방식 그대로 고릅니다 — 무엇으로 만들었는지, 마감이 어떤지, 1년 뒤에 어떤 모습인지.">手機是每天握在手上最久的東西。這一館用挑長巾的同一套標準挑它的配件：什麼做的、收邊怎麼處理、用一年之後長什麼樣子。</p>
+    <p class="proof" data-en="Editor's note — items in this chapter are layout placeholders. Copy and photography will be replaced once the line is confirmed." data-ko="편집 노트 — 이 장의 품목은 레이아웃 예시입니다. 라인 확정 후 문안과 사진을 교체합니다.">編按 —— 本館品項為版面示意，內容與照片待品項定案後替換。</p>
+  </header>
+
+  <ul class="cats">
+    <li><span class="c" data-en="Cases" data-ko="케이스">保護殼</span><span class="r">CSE</span></li>
+    <li><span class="c" data-en="Mounts &amp; MagSafe" data-ko="마운트 · 맥세이프">磁吸與支架</span><span class="r">MNT</span></li>
+    <li><span class="c" data-en="Power &amp; Film" data-ko="충전 · 필름">充電與貼膜</span><span class="r">PWR</span></li>
+  </ul>
+
+  <div class="grid">
+    <article class="card">
+      <span class="plate pending" role="img" aria-label="圖片製版中">
+        <b aria-hidden="true"></b>
+        <span class="p1" data-en="Plate pending" data-ko="제작 중">圖片製版中</span>
+        <span class="p2">VL · CSE · 001</span>
+      </span>
+      <p class="ref">VL · CSE · 001</p>
+      <h3 data-en="Full-grain Leather MagSafe Case" data-ko="풀그레인 레더 맥세이프 케이스">全粒面牛皮磁吸殼</h3>
+      <p class="say" data-en="Vegetable-tanned hide with a folded, stitched edge rather than a cut one — the rim will not chalk. It darkens with handling, the way a good watch strap does." data-ko="식물성 타닌으로 무두질한 가죽에 재단면이 아닌 접어 박은 마감이라 테두리가 하얗게 일어나지 않습니다. 좋은 시계 스트랩처럼 손을 탈수록 짙어집니다.">植鞣牛皮，邊緣是折邊車縫而不是切邊，用久了不會起白邊。握過會慢慢變深，像一條用得好的錶帶。</p>
+      <dl class="hall">
+        <dt data-en="Material" data-ko="소재">材質</dt><dd data-en="Vegetable-tanned full-grain hide" data-ko="식물성 타닌 풀그레인 가죽">植鞣全粒面牛皮</dd>
+        <dt data-en="Fit" data-ko="호환">相容</dt><dd>MagSafe</dd>
+      </dl>
+    </article>
+
+    <article class="card">
+      <span class="plate pending" role="img" aria-label="圖片製版中">
+        <b aria-hidden="true"></b>
+        <span class="p1" data-en="Plate pending" data-ko="제작 중">圖片製版中</span>
+        <span class="p2">VL · MNT · 001</span>
+      </span>
+      <p class="ref">VL · MNT · 001</p>
+      <h3 data-en="Anodised Aluminium Stand" data-ko="아노다이징 알루미늄 스탠드">鋁合金磁吸支架</h3>
+      <p class="say" data-en="One piece of milled aluminium, anodised rather than painted, so a scratch does not show a different colour underneath. The hinge holds where you leave it." data-ko="한 덩어리에서 깎아낸 알루미늄을 도장이 아닌 아노다이징으로 마감해 긁혀도 다른 색이 드러나지 않습니다. 힌지는 놓아둔 각도를 그대로 유지합니다.">整塊鋁銑削成形，表面是陽極處理不是烤漆，刮到不會露出底下另一個顏色。轉軸停在哪就是哪。</p>
+      <dl class="hall">
+        <dt data-en="Material" data-ko="소재">材質</dt><dd data-en="Anodised aluminium" data-ko="아노다이징 알루미늄">鋁合金 · 陽極處理</dd>
+        <dt data-en="Angle" data-ko="각도">角度</dt><dd>15° – 60°</dd>
+      </dl>
+    </article>
+
+    <article class="card">
+      <span class="plate pending" role="img" aria-label="圖片製版中">
+        <b aria-hidden="true"></b>
+        <span class="p1" data-en="Plate pending" data-ko="제작 중">圖片製版中</span>
+        <span class="p2">VL · PWR · 001</span>
+      </span>
+      <p class="ref">VL · PWR · 001</p>
+      <h3 data-en="Two-port GaN Charger" data-ko="2포트 GaN 충전기">氮化鎵雙孔充電器</h3>
+      <p class="say" data-en="Small enough to leave in a bag and still run a laptop and a phone together. The housing is flame-retardant, and the prongs fold flat so they do not catch on a lining." data-ko="가방에 넣어 두어도 부담 없는 크기로 노트북과 휴대폰을 함께 충전합니다. 하우징은 난연 소재이며, 접히는 플러그가 안감에 걸리지 않습니다.">小到可以一直放在包裡，仍然能同時餵飽筆電和手機。外殼是阻燃材質，插腳可折平，不會勾到內袋。</p>
+      <dl class="hall">
+        <dt data-en="Material" data-ko="소재">材質</dt><dd data-en="Flame-retardant polycarbonate" data-ko="난연 폴리카보네이트">阻燃 PC</dd>
+        <dt data-en="Output" data-ko="출력">輸出</dt><dd>45 W</dd>
+      </dl>
+    </article>
+  </div>
+</section>
+
+<!-- ═══ 選物準則：兩館共用的那一套。這節是把兩館綁在一起的論述 ═══ -->
+<section class="ch std" id="standard">
+  <header class="ch-head">
+    <p class="kick" data-en="Across both chapters" data-ko="두 장에 공통">兩館共用</p>
+    <h2 data-en="How things get in" data-ko="선정 기준">選物準則</h2>
+    <p class="lede" data-en="A silk scarf and a phone case have nothing in common as objects. They are held to the same three questions." data-ko="실크 스카프와 휴대폰 케이스는 물건으로서 공통점이 없습니다. 다만 같은 세 가지 질문을 통과해야 합니다.">真絲長巾和手機殼，當作物件來看沒有任何共通點。它們要過的是同樣三個問題。</p>
+  </header>
+
+  <ul class="rules">
+    <li>
+      <h3 data-en="What is it made of" data-ko="무엇으로 만들었는가">材質說得出來</h3>
+      <p data-en="Silk means 100% silk. Silver means 925. Leather means a named tannage. If a supplier cannot say, it does not go in." data-ko="실크는 실크 100%, 실버는 925, 가죽은 무두질 방식을 밝힙니다. 공급처가 답하지 못하면 취급하지 않습니다.">真絲就是 100% 真絲，純銀就是 925，牛皮寫得出鞣製方式。供應商說不清楚的，不收。</p>
+    </li>
+    <li>
+      <h3 data-en="How the edges are finished" data-ko="마감이 어떤가">收邊決定壽命</h3>
+      <p data-en="Hand-rolled hems do not curl. A clasp on the same line as the chain does not snag a cuff. On a case, the same question is asked of the rim and the seam." data-ko="손으로 만 밑단은 말리지 않고, 체인과 같은 선에 놓인 잠금은 소매에 걸리지 않습니다. 케이스에도 같은 질문을 테두리와 이음새에 던집니다.">手工捲縫的長巾不翻捲，扣頭做在同一條線上的手鍊不勾袖口。到了保護殼，同樣的問題問在邊緣和接縫。</p>
+    </li>
+    <li>
+      <h3 data-en="Is it for every day" data-ko="매일 쓰는 것인가">每天用得到</h3>
+      <p data-en="Not things brought out for an occasion. The diffuser in the hallway, the ring worn daily, the case in your hand — all of them have to survive ordinary days." data-ko="특별한 날에만 꺼내는 물건이 아닙니다. 현관의 디퓨저, 매일 끼는 반지, 손에 쥔 케이스 모두 평범한 하루를 견뎌야 합니다.">不是場合才拿出來的東西。玄關的擴香、天天戴的戒指、握在手上的保護殼，都得禁得起平常的日子。</p>
+    </li>
+  </ul>
+</section>
+
+<!-- ═══ 關於 ═══ -->
+<section class="ch about" id="about">
+  <header class="ch-head">
+    <p class="kick" data-en="About" data-ko="소개">關於</p>
+    <h2 data-en="Velora International" data-ko="벨로라 인터내셔널">維羅拉國際</h2>
+  </header>
+
+  <div class="houses">
+    <article>
+      <p class="ref">HOUSE · 01</p>
+      <h3>VUCA</h3>
+      <p class="loc" data-en="Seoul, Korea · Home fragrance" data-ko="서울, 한국 · 홈 프래그런스">韓國首爾 · 居家香氛</p>
+      <p data-en="A house that treats scent as part of a room rather than an accessory to it. Formulated to IFRA standards on a base of corn-derived plant ethanol, and tested for seven key harmful substances." data-ko="향을 공간의 일부로 다루는 브랜드. IFRA 기준에 맞춘 향료와 옥수수 유래 식물성 에탄올 베이스, 7가지 유해물질 검사를 통과했습니다.">主張香氣是空間的一部分而非附加品。香精配方符合 IFRA 標準，基劑採用玉米萃取植物乙醇，並通過七項有害物質檢驗。</p>
+    </article>
+
+    <article>
+      <p class="ref">HOUSE · 02</p>
+      <h3>SAINTMARI</h3>
+      <p class="loc" data-en="Seoul, Korea · Silk &amp; silver" data-ko="서울, 한국 · 실크 · 실버">韓國首爾 · 真絲與純銀</p>
+      <p data-en="Silk scarves and sterling jewelry. The design is restrained and speaks through proportion and finish — things you wear daily, not only for occasions." data-ko="실크 스카프와 실버 주얼리. 절제된 디자인으로 비율과 마감이 말을 합니다 — 특별한 날이 아니라 매일 착용하는 물건입니다.">做真絲長巾與純銀首飾。設計克制，靠比例與收邊說話 —— 是每天戴的東西，不是場合才拿出來的。</p>
+    </article>
+
+    <article class="tbd">
+      <p class="ref">HOUSE · 03</p>
+      <h3 data-en="To be announced" data-ko="공개 예정">待公布</h3>
+      <p class="loc" data-en="Mobile accessories" data-ko="모바일 액세서리">行動配件</p>
+      <p data-en="The house behind Chapter II will be named here once the agency agreement is signed." data-ko="제2장을 맡을 브랜드는 계약 체결 후 이곳에 표기됩니다.">第 II 館的品牌將在代理合約簽訂後於此列出。</p>
+    </article>
+  </div>
+</section>
+
+<!-- ═══ 唯一的轉換點：LINE。不放價格、購物車或下單 ═══ -->
+<section class="cta">
+  <p class="kick" data-en="Enquiries" data-ko="문의">洽詢</p>
+  <h2 data-en="Ask us on LINE" data-ko="LINE으로 문의하세요">有想問的，直接用 LINE</h2>
+  <p class="lede" data-en="Wholesale terms, sample requests, or which scent suits a particular room — a message is the fastest way to a real answer." data-ko="도매 조건, 샘플 요청, 특정 공간에 맞는 향 추천까지 — 메시지가 가장 빠릅니다.">批發條件、索取樣品，或是想問哪一款香調適合某個空間 —— 傳訊息最快。</p>
+  <a class="btn" href="https://lin.ee/uzoQ8dl" target="_blank" rel="noopener noreferrer">
+    <span data-en="Add on LINE" data-ko="LINE 추가">加入 LINE 詢問</span><em>@velora</em>
+  </a>
+</section>
+</main>
+
+<footer class="ft">
+  <p class="co" data-en="Velora International CO., LTD" data-ko="벨로라 인터내셔널">維羅拉國際有限公司</p>
+  <p class="sub" data-en="Korean selection agency · Living &amp; Mobile" data-ko="한국 셀렉션 에이전시 · 리빙 &amp; 모바일">韓國選品代理 · 生活選品與行動配件</p>
+  <p class="lk">
+    <a href="mailto:hello@velora.com.tw">hello@velora.com.tw</a>
+    <a href="https://lin.ee/uzoQ8dl" target="_blank" rel="noopener noreferrer">LINE @velora</a>
+  </p>
+  <p class="fine" data-en="Prices and wholesale terms are quoted on LINE, not published here." data-ko="가격과 도매 조건은 이곳에 게시하지 않고 LINE으로 안내합니다.">價格與批發條件不在網站公布，請於 LINE 洽詢。</p>
+</footer>
+
+<script src="assets/app.js" defer></script>
+</body>
+</html>
