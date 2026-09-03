@@ -72,14 +72,15 @@
     });
   });
 
-  /* ── 章節牌：書脊上報出目前在第幾館 ─────────────────────
-     羅馬數字只給兩個館 —— 它們是真的章節序，其餘節次沒有序號。 */
+  /* ── 位置牌：書脊上報出目前看到哪一家 ───────────────────
+     品牌名不翻譯，三語都是同一個字標。 */
   var CHAPTERS = {
-    top: { n: '', zh: '目次', en: 'Contents', ko: '목차' },
-    living: { n: 'I', zh: '生活選品', en: 'Living', ko: '리빙' },
-    mobile: { n: 'II', zh: '行動配件', en: 'Mobile', ko: '모바일' },
-    standard: { n: '', zh: '選物準則', en: 'Standard', ko: '선정 기준' },
-    about: { n: '', zh: '關於', en: 'About', ko: '소개' }
+    top: { zh: 'Velora', en: 'Velora', ko: 'Velora' },
+    vuca: { zh: 'VUCA', en: 'VUCA', ko: 'VUCA' },
+    saintmari: { zh: 'SAINTMARI', en: 'SAINTMARI', ko: 'SAINTMARI' },
+    mobile: { zh: '手機包', en: 'Phone bags', ko: '폰백' },
+    standard: { zh: '選物準則', en: 'Standard', ko: '선정 기준' },
+    about: { zh: '關於', en: 'About', ko: '소개' }
   };
 
   var tagText = document.querySelector('#chapterTag b');
@@ -87,12 +88,11 @@
 
   function paintChapter() {
     var c = CHAPTERS[here];
-    if (!c || !tagText) return;
-    tagText.textContent = c.n ? c.n + ' · ' + c[current] : c[current];
+    if (c && tagText) tagText.textContent = c[current];
   }
 
   var watched = [document.querySelector('.hero')];
-  ['living', 'mobile', 'standard', 'about'].forEach(function (id) {
+  ['vuca', 'saintmari', 'mobile', 'standard', 'about'].forEach(function (id) {
     watched.push(document.getElementById(id));
   });
 
