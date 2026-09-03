@@ -300,7 +300,32 @@ ul, ol { padding: 0; list-style: none; }
 }
 
 /* ── 商品卡 ─────────────────────────────────────────────── */
-.grid { display: grid; gap: 48px; }
+
+/* 同一列的卡片要逐行對齊：影像板、索引碼、品名、說明、材質表
+   各自成一行，行高取該列的最大值。沒有這段的話，說明文字兩行的
+   卡片和三行的卡片會讓下面的材質表各自漂移 —— 目錄的規格列沒對齊
+   就是跑版。subgrid 讓子卡片直接借用外層格線的橫列。
+
+   row-gap 必須是 0：卡片橫跨五個外層橫列，任何 row-gap 都會被
+   插進卡片「內部」的每一行之間，把一張卡撐開成五塊。卡片之間的
+   距離改由卡片自己的下內距負責。 */
+.grid {
+  display: grid;
+  column-gap: 0;
+  row-gap: 0;
+}
+.card {
+  display: grid;
+  grid-template-rows: subgrid;
+  grid-row: span 5;
+  padding-bottom: 48px;
+}
+/* 不支援 subgrid 的瀏覽器退回彈性排版：材質表壓到卡片底部，
+   至少同一列的規格表仍在同一條線上。 */
+@supports not (grid-template-rows: subgrid) {
+  .card { display: flex; flex-direction: column; }
+  .card .say { flex: 1 1 auto; }
+}
 
 /* 影像板：雙層金框。display:block 是必要的 —— 版面上用 <span> 當板子，
    inline 元素的 aspect-ratio 無效，高度會直接塌成 0。 */
@@ -612,7 +637,7 @@ html[lang='ko'] .card h3 {
   .hero-index em { display: inline-block; margin: 8px 10px 0 0; }
   .hero-index i { text-align: left; }
 
-  .grid { grid-template-columns: repeat(2, 1fr); gap: 44px 36px; }
+  .grid { grid-template-columns: repeat(2, 1fr); column-gap: 36px; }
   .rules { grid-template-columns: repeat(3, 1fr); gap: 36px 32px; }
   .houses { grid-template-columns: repeat(3, 1fr); }
 
@@ -684,7 +709,7 @@ html[lang='ko'] .card h3 {
   .ch-head .lede { grid-area: 1 / 2 / span 2 / auto; }
   .ch-head .proof { grid-area: 3 / 2; margin-top: 4px; }
 
-  .grid { grid-template-columns: repeat(3, 1fr); gap: 48px 42px; }
+  .grid { grid-template-columns: repeat(3, 1fr); column-gap: 42px; }
 
   /* 轉換區與頁尾比照區段頭分兩欄 */
   .cta {
