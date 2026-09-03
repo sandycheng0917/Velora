@@ -72,15 +72,15 @@
     });
   });
 
-  /* ── 位置牌：書脊上報出目前看到哪一家 ───────────────────
-     品牌名不翻譯，三語都是同一個字標。 */
+  /* ── 位置牌：書脊上報出目前在哪一個品類 ───────────────── */
   var CHAPTERS = {
     top: { zh: 'Velora', en: 'Velora', ko: 'Velora' },
-    vuca: { zh: 'VUCA', en: 'VUCA', ko: 'VUCA' },
-    saintmari: { zh: 'SAINTMARI', en: 'SAINTMARI', ko: 'SAINTMARI' },
-    mobile: { zh: '手機包', en: 'Phone bags', ko: '폰백' },
-    standard: { zh: '選物準則', en: 'Standard', ko: '선정 기준' },
-    about: { zh: '關於', en: 'About', ko: '소개' }
+    fragrance: { zh: '香氛', en: 'Fragrance', ko: '프래그런스' },
+    scarf: { zh: '絲巾', en: 'Scarves', ko: '스카프' },
+    jewelry: { zh: '飾品', en: 'Jewelry', ko: '주얼리' },
+    phonebag: { zh: '手機包', en: 'Phone bags', ko: '폰백' },
+    brands: { zh: '代理品牌', en: 'Houses', ko: '취급 브랜드' },
+    standard: { zh: '選物準則', en: 'Standard', ko: '선정 기준' }
   };
 
   var tagText = document.querySelector('#chapterTag b');
@@ -92,7 +92,7 @@
   }
 
   var watched = [document.querySelector('.hero')];
-  ['vuca', 'saintmari', 'mobile', 'standard', 'about'].forEach(function (id) {
+  ['fragrance', 'scarf', 'jewelry', 'phonebag', 'brands', 'standard'].forEach(function (id) {
     watched.push(document.getElementById(id));
   });
 

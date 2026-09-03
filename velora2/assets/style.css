@@ -1,46 +1,53 @@
 /* ============================================================
-   VELORA 2 — 雕版目錄・品牌館
-   Engraved Catalogue, one house per block
+   VELORA 2 — 韓系低調奢華・雕版目錄
+   四個品類分區，品牌退到商品卡上的小字。
 
-   骨架是「我們代理哪些品牌」，不是「我們賣哪些品類」。
-   香氛、絲巾銀飾、手機包各自成一塊，彼此只用一條髮絲線隔開 ——
-   它們本來就是三家不相干的韓國品牌，代理商同時代理很正常，
-   網站不需要替它們解釋為什麼在一起。
-
-   左邊那條金線是這本目錄的裝訂邊，貫穿全頁，桌機上隨捲動
-   報出目前看到哪一家。每件商品都帶同一組「材質標記」：
-   品名、索引碼、材質規格 —— 那是選品標準，不是分類論述。
+   ── 這一版針對三個回饋重做 ──
+   1「底色太白」  紙色由 #FDFBF7（亮度 96.6%）換成 #F3EDE2（85.1%）。
+                 差 11 個百分點，是看得出來的暖調紙，不再是白紙。
+   2「韓系感沒了」整頁改成由淺到深的層次：紙 → 米帶 → 版面 → 暗塊，
+                 收尾的 LINE 區與頁尾是一整塊暖褐色。韓系低調奢華
+                 靠的是層層疊上去的暖調，不是一片白底加細線。
+                 紙紋也加重（0.055 → 0.075）。
+   3「字太小」    全站字級整體放大約一成五，手機優先：
+                 內文 15 → 17px、說明 14 → 15.5px、規格 11.5 → 13px、
+                 索引碼 10.5 → 12px。客戶已在手機上實測回報過兩次，
+                 這一版直接給足。
 
    字體（兩個語域，刻意不同臉）
      Display Latin  Marcellus 400        不低於 26px
      Display CJK    Noto Serif TC 200
-     Body           Noto Sans TC 300     行距 1.7–1.9
+     Body           Noto Sans TC 300     行距 1.85–1.95
      Index / Data   DM Mono 400          只承載編號與規格
-     韓文           交給系統字（Malgun Gothic / Apple SD Gothic Neo），
-                    不多載一套 Noto Serif KR —— 省下的位元組比較值錢
+     韓文           交給系統字（Malgun Gothic / Apple SD Gothic Neo）
 
    金色規則（不可違反）
-     #C5A880 只做線、框、實心底。對 #FDFBF7 僅 1.9:1，不可承載文字。
-     金色文字一律 #7E6239 —— 對本站所有底色都過 WCAG AA。
+     #C5A880 只做線、框、實心底，不可承載文字。
+     金色文字在淺底一律 #70542C —— 對紙 6.02:1、對最深的底 4.78:1。
+     暗塊上的金色另用 #D9BD8F —— 對 #2B2419 有 8.49:1。
 
    行動優先：預設樣式就是手機版，min-width 才往上加。
    ============================================================ */
 
 :root {
-  /* 色票 */
-  --bg: #fdfbf7;
-  --bg-alt: #f8f6f0;
-  --surface: #f2efe9;
-  --surface-deep: #ebe7df;
+  /* 色票：暖調紙感，四階由淺到深 */
+  --bg: #f3ede2;          /* 紙 */
+  --bg-alt: #ece5d8;      /* 米帶 */
+  --surface: #e4dbca;     /* 版面／影像板底 */
+  --surface-deep: #ded4c2;/* 最深的承載文字底色 */
+
+  --dark: #2b2419;        /* 收尾暗塊：暖褐，不是黑 */
+  --dark-soft: #3a3125;
 
   --gold: #c5a880;        /* 線與框，永不承載文字 */
-  --gold-deep: #7e6239;   /* 所有金色文字，最低 4.61:1 */
+  --gold-deep: #70542c;   /* 淺底上的金色文字，最低 4.78:1 */
+  --gold-lit: #d9bd8f;    /* 暗塊上的金色文字，8.49:1 */
 
-  --ink: #1e1e1e;
-  --ink-soft: #423e3b;    /* 內文。手機上淺灰的中文站不住，壓到 10.6:1 */
-  --ink-faint: #6c665f;   /* 編號、註記。仍達 4.6:1 */
-  --line: #e8e4dc;
-  --line-strong: #d9d4c9;
+  --ink: #1c1917;
+  --ink-soft: #3d3833;    /* 內文，最低 7.59:1 */
+  --ink-faint: #5e564b;   /* 編號、註記，最低 4.92:1 */
+  --line: #ded5c6;
+  --line-strong: #cdc2ae;
 
   /* 金箔：漸層讓 1px 線像金屬反光，而不是一條扁平色塊 */
   --gold-leaf-v: linear-gradient(180deg, #bc9d71 0%, #d9bd8f 20%, #ead5a8 38%, #c7a66c 52%, #e2c898 70%, #b99a6c 100%);
@@ -54,10 +61,10 @@
   /* 版面：rail 是書脊的位置，gutter 是內容起點，兩者必須留出間距 */
   --rail: 16px;
   --gutter: 34px;
-  --hdr-h: 54px;
+  --hdr-h: 58px;
 
-  /* 紙紋：極淡的雜訊，讓大片米白不顯得是空的色塊 */
-  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='150' height='150' filter='url(%23n)' opacity='.055'/%3E%3C/svg%3E");
+  /* 紙紋：加重到 0.075，暖底才有紙的顆粒感而不是一塊平色 */
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.075'/%3E%3C/svg%3E");
 }
 
 *,
@@ -73,16 +80,14 @@ body {
   color: var(--ink);
   font-family: var(--f-body);
   font-weight: 300;
-  font-size: 15px;
-  line-height: 1.8;
+  font-size: 17px;             /* 手機基準。客戶回報過兩次太小，這裡給足 */
+  line-height: 1.85;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
 
 img { max-width: 100%; }
-
 a { color: inherit; text-decoration: none; }
-
 h1, h2, h3, p, dl, dd, ul, ol { margin: 0; }
 ul, ol { padding: 0; list-style: none; }
 
@@ -96,10 +101,10 @@ ul, ol { padding: 0; list-style: none; }
   left: -9999px;
   top: 8px;
   z-index: 100;
-  padding: 10px 16px;
+  padding: 12px 18px;
   background: var(--bg);
   border: 1px solid var(--gold);
-  font-size: 13px;
+  font-size: 15px;
 }
 .skip:focus { left: 8px; }
 
@@ -122,10 +127,9 @@ ul, ol { padding: 0; list-style: none; }
 }
 @keyframes draw { from { transform: scaleY(0); } to { transform: scaleY(1); } }
 
-/* 位置牌：目前看到哪一家。這是「書脊上的標籤」，只在書脊夠寬時才成立 ——
-   手機上書脊只是一條髮絲線，標籤沒有落腳處，浮起來就會壓到內文，
-   所以手機不顯示，桌機才立到書脊上（見 min-width:1040）。
-   手機不缺這個資訊：品牌字標就在眼前。 */
+/* 位置牌：目前在哪一個品類。這是「書脊上的標籤」，只在書脊夠寬時
+   才成立 —— 手機上書脊只是一條髮絲線，標籤沒有落腳處，浮起來會壓到
+   內文，所以手機不顯示，桌機才立到書脊上（見 min-width:1040）。 */
 .chapter-tag {
   display: none;
   position: fixed;
@@ -133,12 +137,11 @@ ul, ol { padding: 0; list-style: none; }
   align-items: center;
   gap: 8px;
   font-family: var(--f-mono);
-  font-size: 10.5px;
+  font-size: 12px;
   letter-spacing: 0.24em;
   color: var(--gold-deep);
   pointer-events: none;
 }
-/* 菱形飾釘：書脊上的釘子 */
 .chapter-tag i {
   width: 5px;
   height: 5px;
@@ -159,7 +162,7 @@ ul, ol { padding: 0; list-style: none; }
   gap: 12px;
   height: var(--hdr-h);
   padding: 0 var(--gutter) 0 var(--rail);
-  background: rgba(253, 251, 247, 0.94);
+  background: rgba(243, 237, 226, 0.95);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--line);
 }
@@ -167,32 +170,32 @@ ul, ol { padding: 0; list-style: none; }
 .wm {
   display: flex;
   align-items: baseline;
-  gap: 8px;
+  gap: 9px;
   font-family: var(--f-disp);
-  font-size: 19px;
+  font-size: 21px;
   letter-spacing: 0.3em;
   line-height: 1;
 }
 .wm span {
   font-family: var(--f-cjk);
   font-weight: 300;
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 0.18em;
   color: var(--ink-faint);
 }
 
-/* 品牌導覽在手機上隱藏 —— 主視覺的品牌索引已經在做這件事，不重複 */
+/* 品類導覽在手機上隱藏 —— 主視覺的品類索引已經在做這件事，不重複 */
 .nav { display: none; }
 
 .lang { display: flex; align-items: center; gap: 2px; }
 .lang button {
-  padding: 5px 8px;
-  min-width: 34px;
+  padding: 6px 9px;
+  min-width: 38px;
   border: 0;
   background: none;
   font-family: var(--f-body);
   font-weight: 400;
-  font-size: 12px;
+  font-size: 14px;
   letter-spacing: 0.1em;
   color: var(--ink-faint);
   cursor: pointer;
@@ -202,135 +205,102 @@ ul, ol { padding: 0; list-style: none; }
   box-shadow: inset 0 -1px 0 var(--gold);
 }
 
-/* ── 主視覺：標題 + 品牌索引 ─────────────────────────────── */
-.hero {
-  padding: 76px var(--gutter) 64px;
-}
+/* ── 主視覺 ─────────────────────────────────────────────── */
+.hero { padding: 78px var(--gutter) 66px; }
 
 .kick {
   font-family: var(--f-mono);
-  font-size: 11px;
+  font-size: 12.5px;
   letter-spacing: 0.26em;
   color: var(--gold-deep);
   text-transform: uppercase;
 }
 
 .hero h1 {
-  margin: 22px 0 26px;
+  margin: 24px 0 28px;
   font-family: var(--f-cjk);
   font-weight: 200;
-  font-size: clamp(33px, 10.5vw, 62px);
-  line-height: 1.28;
+  font-size: clamp(38px, 11.5vw, 66px);
+  line-height: 1.3;
   letter-spacing: 0.05em;
 }
 .hero h1 span { display: block; }
 .hero h1 .l2 { color: var(--gold-deep); }
 
 .lede {
-  max-width: 46ch;
+  max-width: 44ch;
   color: var(--ink-soft);
-  font-size: 14.5px;
-  line-height: 1.9;
+  font-size: 16px;
+  line-height: 1.95;
 }
 
-/* 品牌索引：全站骨架放在第一屏。三家並列，各自是一條線 ——
-   不編號、不分章，因為它們本來就是三家不相干的品牌。 */
+/* 品類索引：全站骨架放在第一屏。四類並列，帶編號與款數 */
 .hero-index {
-  margin-top: 40px;
+  margin-top: 42px;
   border-top: 1px solid var(--line-strong);
 }
 .hero-index a {
-  display: block;
-  padding: 18px 0;
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  padding: 19px 0;
   border-bottom: 1px solid var(--line-strong);
-  font-family: var(--f-disp);
-  font-size: 22px;
-  letter-spacing: 0.14em;
   transition: padding-left 0.35s cubic-bezier(0.33, 0, 0.15, 1);
 }
-/* 還沒公布的那家沒有字標可排，用 CJK 臉並淡一階，
-   和已經有字標的兩家分開 —— 位置留著，但不假裝它已經有名字 */
-.hero-index a > span {
+.hero-index span {
+  flex: 1;
   font-family: var(--f-cjk);
-  font-weight: 200;
-  font-size: 19px;
-  letter-spacing: 0.1em;
-  color: var(--ink-faint);
-}
-.hero-index em {
-  display: block;
-  margin-top: 5px;
-  font-family: var(--f-body);
-  font-style: normal;
   font-weight: 300;
-  font-size: 12.5px;
-  letter-spacing: 0.06em;
-  color: var(--ink-faint);
+  font-size: 24px;
+  letter-spacing: 0.12em;
 }
+.hero-index em,
+.hero-index i {
+  font-family: var(--f-mono);
+  font-style: normal;
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  color: var(--gold-deep);
+}
+.hero-index i { min-width: 2.4em; text-align: right; }
 .hero-index a:hover,
 .hero-index a:focus-visible { padding-left: 10px; }
 
 /* ── 區段 ───────────────────────────────────────────────── */
-.ch { padding: 62px var(--gutter); }
+.ch { padding: 60px var(--gutter); }
 
-.ch-head { margin-bottom: 34px; }
+/* 四個品類分區之間只用一條髮絲線隔開，不換底色 ——
+   分區用的是同一種紙，換的是內容。 */
+.cat + .cat { border-top: 1px solid var(--line); }
 
+/* 頁面色調由上往下逐步加深：紙 → 米帶 → 版面 → 暗塊。
+   韓系低調奢華靠的是這種層層疊上去的暖調，不是一片白底。 */
+.tint { background: var(--bg-alt); }
+.std { background: var(--surface); }
+
+.ch-head { margin-bottom: 36px; }
 .ch-head h2 {
-  margin: 14px 0 18px;
+  margin: 15px 0 20px;
   font-family: var(--f-cjk);
   font-weight: 200;
-  font-size: clamp(26px, 7.5vw, 40px);
+  font-size: clamp(30px, 8.5vw, 44px);
   letter-spacing: 0.14em;
   line-height: 1.3;
 }
 
-/* 編按：這是校樣上的編輯註記，不是內文。刻意做小做淡。
-   不用等寬體 —— DM Mono 沒有中文字，會退到系統字並套上等寬字距，
-   中文排起來會鬆掉。設計系統裡的等寬體只承載編號與規格。 */
+/* 編按：校樣上的編輯註記，不是內文。刻意做小做淡，但不用等寬體 ——
+   DM Mono 沒有中文字，會退到系統字並套上等寬字距，中文排起來會鬆掉。 */
 .proof {
-  margin-top: 16px;
-  padding-left: 12px;
+  margin-top: 18px;
+  padding-left: 14px;
   border-left: 1px solid var(--gold);
-  font-size: 12.5px;
+  font-size: 14px;
   line-height: 1.85;
   color: var(--ink-faint);
 }
 
-/* 品類列：一館之內有哪幾條線 */
-.cats {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1px;
-  margin-bottom: 40px;
-  background: var(--line);
-  border: 1px solid var(--line);
-}
-/* 品類數是奇數時（SAINTMARI 與手機包各三條線），最後一格佔滿整列，
-   不留一個空格 —— 空格的底色會露出格線色，看起來像壞掉 */
-.cats li:last-child:nth-child(odd) { grid-column: 1 / -1; }
-.cats li {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 15px 14px;
-  background: var(--bg-alt);
-}
-.cats .c {
-  font-family: var(--f-cjk);
-  font-weight: 300;
-  font-size: 14.5px;
-  letter-spacing: 0.1em;
-}
-.cats .r {
-  font-family: var(--f-mono);
-  font-size: 10px;
-  letter-spacing: 0.16em;
-  color: var(--gold-deep);
-}
-
 /* ── 商品卡 ─────────────────────────────────────────────── */
-.grid { display: grid; gap: 46px; }
+.grid { display: grid; gap: 48px; }
 
 /* 影像板：雙層金框。display:block 是必要的 —— 版面上用 <span> 當板子，
    inline 元素的 aspect-ratio 無效，高度會直接塌成 0。 */
@@ -354,11 +324,11 @@ ul, ol { padding: 0; list-style: none; }
 .plate::before {
   content: '';
   position: absolute;
-  inset: 14px;
+  inset: 15px;
   z-index: 3;
   pointer-events: none;
-  border: 1px solid rgba(197, 168, 128, 0.55);
-  outline: 1px solid rgba(197, 168, 128, 0.26);
+  border: 1px solid rgba(197, 168, 128, 0.6);
+  outline: 1px solid rgba(197, 168, 128, 0.3);
   outline-offset: 4px;
 }
 /* 暗角：讓照片沉進紙裡，不是浮在上面 */
@@ -369,224 +339,222 @@ ul, ol { padding: 0; list-style: none; }
   z-index: 2;
   pointer-events: none;
   background-image:
-    radial-gradient(54% 38% at 50% 97%, rgba(56, 44, 28, 0.16) 0%, rgba(56, 44, 28, 0) 74%),
-    radial-gradient(132% 108% at 50% 40%, rgba(0, 0, 0, 0) 52%, rgba(48, 38, 25, 0.13) 100%);
+    radial-gradient(54% 38% at 50% 97%, rgba(56, 44, 28, 0.18) 0%, rgba(56, 44, 28, 0) 74%),
+    radial-gradient(132% 108% at 50% 40%, rgba(0, 0, 0, 0) 52%, rgba(48, 38, 25, 0.15) 100%);
 }
 /* 去背圖要淺底、要 contain，而且不壓暗角 */
 .plate.is-cutout { background: var(--bg-alt); }
-.plate.is-cutout > img { object-fit: contain; }
+.plate.is-cutout > img { object-fit: contain; padding: 34px; }
 .plate.is-cutout::after { background-image: none; }
 
 /* 製版中：照片還沒到的板子。做成校樣上等著上版的空版，
-   不用示意圖或圖庫照 —— 空著比放假的誠實，而且合這本目錄的語彙 */
+   不用示意圖或圖庫照 —— 空著比放假的誠實。 */
 .plate.pending {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: 13px;
   background: var(--bg-alt);
 }
 .plate.pending::after { background-image: none; }
 .plate.pending b {
-  width: 7px;
-  height: 7px;
+  width: 8px;
+  height: 8px;
   border: 1px solid var(--gold);
   transform: rotate(45deg);
 }
 .plate.pending .p1 {
   font-family: var(--f-mono);
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 0.24em;
   color: var(--ink-faint);
 }
 .plate.pending .p2 {
   font-family: var(--f-mono);
-  font-size: 10px;
+  font-size: 11.5px;
   letter-spacing: 0.2em;
   color: var(--gold-deep);
 }
 
+/* 索引碼與品牌並排：左邊是目錄編號，右邊是這件出自哪一家。
+   分類負責瀏覽，品牌負責信任感 —— 兩個資訊擺同一行不佔額外空間。 */
 .ref {
-  margin: 16px 0 6px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 18px 0 8px;
   font-family: var(--f-mono);
-  font-size: 10.5px;
+  font-size: 12px;
   letter-spacing: 0.22em;
   color: var(--gold-deep);
 }
+.ref em {
+  font-style: normal;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  color: var(--ink-faint);
+}
 
-/* 品名是 h4 —— 品牌名是 h3，商品掛在品牌底下，標題階層照實反映 */
-.card h4 {
+.card h3 {
   font-family: var(--f-cjk);
   font-weight: 300;
-  font-size: 20px;
+  font-size: 23px;
   letter-spacing: 0.1em;
   line-height: 1.45;
 }
 
 .say {
-  margin: 12px 0 18px;
-  max-width: 42ch;
-  font-size: 14px;
-  line-height: 1.85;
+  margin: 13px 0 20px;
+  max-width: 40ch;
+  font-size: 15.5px;
+  line-height: 1.9;
   color: var(--ink-soft);
 }
 
-/* 材質標記：三家共用的同一張規格表。
-   手機殼跟真絲長巾用完全相同的方式被描述 —— 這就是整合的論點。 */
+/* 材質標記：四個品類共用的同一張規格表。
+   手機包跟真絲長巾用完全相同的方式被描述 —— 那是選品標準的體現。 */
 .hall {
   display: grid;
   grid-template-columns: auto 1fr;
-  gap: 0 16px;
-  padding-top: 12px;
+  gap: 0 18px;
+  padding-top: 14px;
   border-top: 1px solid var(--line);
   font-family: var(--f-mono);
-  font-size: 11.5px;
+  font-size: 13px;
   line-height: 2.1;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.05em;
 }
 .hall dt { color: var(--gold-deep); }
 .hall dd { color: var(--ink-soft); }
 
-/* ── 選物準則：講維羅拉怎麼決定要不要代理一條線 ─────────── */
-.std { background: var(--bg-alt); }
-
-.rules { display: grid; gap: 30px; }
-.rules li {
-  padding-left: 20px;
-  position: relative;
+/* ── 代理品牌 ───────────────────────────────────────────── */
+.houses { display: grid; gap: 1px; background: var(--line); border: 1px solid var(--line); }
+.houses article { padding: 30px 26px; background: var(--bg); }
+.houses h3 {
+  margin: 10px 0 5px;
+  font-family: var(--f-disp);
+  font-size: 30px;
+  letter-spacing: 0.14em;
 }
+.houses .loc {
+  margin-bottom: 14px;
+  font-family: var(--f-mono);
+  font-size: 12.5px;
+  letter-spacing: 0.12em;
+  color: var(--ink-faint);
+}
+.houses p:last-child { font-size: 15.5px; color: var(--ink-soft); max-width: 38ch; }
+/* 還沒簽的那一家：整格淡下去，但保留位置。目錄留了頁碼給它。
+   字標處用 CJK 臉，不假裝它已經有名字。 */
+.houses .tbd { background: var(--bg-alt); }
+.houses .tbd h3 {
+  font-family: var(--f-cjk);
+  font-weight: 200;
+  font-size: 25px;
+  color: var(--ink-faint);
+}
+
+/* ── 選物準則 ───────────────────────────────────────────── */
+.rules { display: grid; gap: 34px; }
+.rules li { position: relative; padding-left: 22px; }
 /* 菱形飾釘，不編號 —— 這三條是並列的檢查項，不是先後順序 */
 .rules li::before {
   content: '';
   position: absolute;
   left: 0;
-  top: 11px;
-  width: 6px;
-  height: 6px;
+  top: 13px;
+  width: 7px;
+  height: 7px;
   background: var(--gold);
   transform: rotate(45deg);
 }
 .rules h3 {
-  margin-bottom: 8px;
+  margin-bottom: 9px;
   font-family: var(--f-cjk);
   font-weight: 300;
-  font-size: 17px;
+  font-size: 19px;
   letter-spacing: 0.1em;
 }
-.rules p {
-  max-width: 40ch;
-  font-size: 14px;
-  color: var(--ink-soft);
-}
+.rules p { max-width: 38ch; font-size: 15.5px; color: var(--ink-soft); }
 
-/* ── 品牌館：全站主體。一家一塊，各自完整 ─────────────────
-   彼此之間只用一條髮絲線隔開，不做「章」也不編羅馬數字 ——
-   三家品牌本來就不相干，網站不需要替它們解釋為什麼在一起。 */
-.house + .house {
-  margin-top: 60px;
-  padding-top: 56px;
-  border-top: 1px solid var(--line);
+/* ── 唯一的轉換點：暖褐暗塊 ─────────────────────────────────
+   整頁的色調到這裡落底。韓系低調奢華需要一個收尾的暗塊，
+   不然整份版面從頭到尾都是同一個明度，看起來會扁。
+   用暖褐 #2B2419 而不是黑 —— 黑會把整頁的暖調切斷。 */
+.cta,
+.ft {
+  background: var(--dark);
+  color: var(--bg);
 }
-.house-head { margin-bottom: 30px; }
-.house-head h3 {
-  margin: 8px 0 4px;
-  font-family: var(--f-disp);
-  font-size: 30px;
-  letter-spacing: 0.14em;
-}
-/* 還沒公布的那家沒有字標可排：改用 CJK 臉並淡一階。
-   位置留著，讀者看得出目錄替它留了頁碼，但不假裝它已經有名字。 */
-.house-head h3.tbd {
-  font-family: var(--f-cjk);
-  font-weight: 200;
-  font-size: 24px;
-  letter-spacing: 0.12em;
-  color: var(--ink-faint);
-}
-.house-head .loc {
-  margin-bottom: 14px;
-  font-family: var(--f-mono);
-  font-size: 11px;
-  letter-spacing: 0.12em;
-  color: var(--ink-faint);
-}
-.house-head .say { margin: 0 0 20px; max-width: 46ch; }
-.house-head .proof { margin-bottom: 26px; }
-
-/* ── 唯一的轉換點 ───────────────────────────────────────── */
-.cta {
-  padding: 66px var(--gutter) 72px;
-  border-top: 1px solid var(--line-strong);
-}
+.cta { padding: 70px var(--gutter) 76px; }
+.cta .kick { color: var(--gold-lit); }
 .cta h2 {
-  margin: 16px 0 16px;
+  margin: 18px 0;
   font-family: var(--f-cjk);
   font-weight: 200;
-  font-size: clamp(24px, 7vw, 36px);
+  font-size: clamp(27px, 7.5vw, 38px);
   letter-spacing: 0.12em;
   line-height: 1.4;
+  color: var(--bg);
 }
+.cta .lede { color: rgba(243, 237, 226, 0.8); }
+
 .btn {
   display: inline-flex;
   align-items: center;
-  gap: 14px;
-  margin-top: 30px;
-  padding: 15px 26px;
-  border: 1px solid var(--gold);
+  gap: 15px;
+  margin-top: 32px;
+  padding: 16px 28px;
+  border: 1px solid var(--gold-lit);
   font-family: var(--f-cjk);
   font-weight: 300;
-  font-size: 15px;
+  font-size: 16.5px;
   letter-spacing: 0.16em;
   transition: background 0.35s, color 0.35s;
 }
 .btn em {
   font-family: var(--f-mono);
   font-style: normal;
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 0.18em;
-  color: var(--gold-deep);
+  color: var(--gold-lit);
 }
-/* 滑過時整顆翻成墨色，金字浮在上面 —— 像深色封面上的燙金。
-   刻意不用金底白字：白字壓在 #C5A880 上只有 2.2:1，根本讀不出來。
-   翻墨之後正文 15:1、金色編號 7.4:1，兩個都遠超 AA。 */
+/* 滑過時翻成金底暗字 —— 金色當底可以，當字不行。
+   #D9BD8F 底配 #2B2419 字有 8.49:1，遠超 AA。 */
 .btn:hover,
-.btn:focus-visible {
-  background: var(--ink);
-  border-color: var(--ink);
-  color: var(--bg);
-}
+.btn:focus-visible { background: var(--gold-lit); color: var(--dark); }
 .btn:hover em,
-.btn:focus-visible em { color: #d9bd8f; }
+.btn:focus-visible em { color: var(--dark-soft); }
 
-/* ── 頁尾 ───────────────────────────────────────────────── */
+/* ── 頁尾：接在暗塊之後，同一塊底 ───────────────────────── */
 .ft {
-  padding: 40px var(--gutter) 52px;
-  border-top: 1px solid var(--line);
-  background: var(--bg-alt);
+  padding: 44px var(--gutter) 56px;
+  border-top: 1px solid rgba(217, 189, 143, 0.22);
 }
 .ft .co {
   font-family: var(--f-cjk);
   font-weight: 300;
-  font-size: 15px;
+  font-size: 17px;
   letter-spacing: 0.16em;
 }
 .ft .sub {
-  margin-top: 6px;
-  font-size: 12.5px;
-  color: var(--ink-faint);
+  margin-top: 8px;
+  font-size: 14px;
+  color: rgba(243, 237, 226, 0.72);
 }
 .ft .lk {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px 22px;
-  margin: 20px 0 18px;
+  gap: 10px 24px;
+  margin: 24px 0 20px;
   font-family: var(--f-mono);
-  font-size: 12px;
+  font-size: 13.5px;
   letter-spacing: 0.08em;
 }
-.ft .lk a { color: var(--gold-deep); box-shadow: inset 0 -1px 0 var(--line-strong); }
-.ft .fine { font-size: 12px; color: var(--ink-faint); max-width: 44ch; }
+.ft .lk a { color: var(--gold-lit); box-shadow: inset 0 -1px 0 rgba(217, 189, 143, 0.4); }
+.ft .fine { font-size: 13.5px; color: rgba(243, 237, 226, 0.7); max-width: 42ch; }
 
 /* ── 語域切換：拉丁與 CJK 是兩張臉，語言換了字體要跟著換 ─── */
 html[lang='en'] .hero h1,
@@ -596,10 +564,10 @@ html[lang='en'] .cta h2 {
   font-weight: 400;
   letter-spacing: 0.02em;
 }
-html[lang='en'] .hero-index a > span,
-html[lang='en'] .card h4,
+html[lang='en'] .hero-index span,
+html[lang='en'] .card h3,
 html[lang='en'] .rules h3,
-html[lang='en'] .cats .c {
+html[lang='en'] .houses .tbd h3 {
   font-family: var(--f-disp);
   font-weight: 400;
   letter-spacing: 0.03em;
@@ -609,9 +577,9 @@ html[lang='en'] .cats .c {
 html[lang='ko'] .hero h1,
 html[lang='ko'] .ch-head h2,
 html[lang='ko'] .cta h2,
-html[lang='ko'] .hero-index a > span,
-html[lang='ko'] .house-head h3.tbd,
-html[lang='ko'] .card h4 {
+html[lang='ko'] .hero-index span,
+html[lang='ko'] .houses .tbd h3,
+html[lang='ko'] .card h3 {
   font-family: var(--f-body);
   font-weight: 300;
   letter-spacing: 0.01em;
@@ -622,38 +590,42 @@ html[lang='ko'] .card h4 {
   :root {
     --rail: 30px;
     --gutter: 62px;
-    --hdr-h: 62px;
+    --hdr-h: 66px;
   }
-  body { font-size: 15.5px; }
+  body { font-size: 17.5px; }
 
-  .hero { padding-top: 104px; padding-bottom: 92px; }
-  .ch { padding-top: 88px; padding-bottom: 88px; }
+  .hero { padding-top: 110px; padding-bottom: 96px; }
+  .ch { padding-top: 92px; padding-bottom: 92px; }
 
-  /* 品牌索引橫排成三欄。容器自己有上框線，各項就不再各自畫底線 */
-  .hero-index { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0 clamp(24px, 3vw, 48px); }
-  .hero-index a { border-bottom: 0; padding: 22px 0 0; font-size: 25px; }
+  /* 品類索引橫排成四欄：品類名在上，編號與款數在下 */
+  .hero-index {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0 clamp(20px, 2.6vw, 40px);
+  }
+  .hero-index a {
+    display: block;
+    border-bottom: 0;
+    padding: 24px 0 0;
+  }
+  .hero-index span { display: block; font-size: 26px; }
+  .hero-index em { display: inline-block; margin: 8px 10px 0 0; }
+  .hero-index i { text-align: left; }
 
-  /* auto-fit 會把空軌收掉，剩下的自動撐滿 —— 每家品類數不同
-     （2 / 3 / 3），寫死欄數就會有人多一格空的。 */
-  .cats { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
-  .cats li:last-child:nth-child(odd) { grid-column: auto; }
+  .grid { grid-template-columns: repeat(2, 1fr); gap: 44px 36px; }
+  .rules { grid-template-columns: repeat(3, 1fr); gap: 36px 32px; }
+  .houses { grid-template-columns: repeat(3, 1fr); }
 
-  .grid { grid-template-columns: repeat(2, 1fr); gap: 40px 34px; }
-  .rules { grid-template-columns: repeat(3, 1fr); gap: 34px 30px; }
-
-  .house + .house { margin-top: 78px; padding-top: 72px; }
-
-  .cta, .ft { padding-left: var(--gutter); padding-right: var(--gutter); }
+  .cta { padding-top: 96px; padding-bottom: 104px; }
 }
 
-/* ════ 桌機：書脊變成真正的書口，章節牌立起來 ═══════════════ */
+/* ════ 桌機：書脊變成真正的書口，位置牌立起來 ═══════════════ */
 @media (min-width: 1040px) {
   :root {
     --rail: clamp(40px, 4.4vw, 64px);
     --gutter: clamp(112px, 11vw, 168px);
   }
 
-  /* 書脊變成真正的書口，章節牌才立得上去 */
   .chapter-tag {
     display: flex;
     top: 50%;
@@ -663,7 +635,7 @@ html[lang='ko'] .card h4 {
     gap: 12px;
     padding: 12px 3px;
     background: var(--bg);
-    font-size: 11px;
+    font-size: 12px;
     letter-spacing: 0.3em;
   }
   .chapter-tag b { writing-mode: vertical-rl; }
@@ -671,101 +643,74 @@ html[lang='ko'] .card h4 {
   .nav {
     display: flex;
     align-items: baseline;
-    gap: 30px;
-    font-size: 13px;
+    gap: clamp(20px, 2.2vw, 34px);
+    font-size: 15px;
     letter-spacing: 0.1em;
   }
-  .nav a { display: flex; align-items: baseline; gap: 7px; color: var(--ink-soft); }
-  .nav em {
-    font-family: var(--f-mono);
-    font-style: normal;
-    font-size: 10px;
-    letter-spacing: 0.18em;
-    color: var(--gold-deep);
-  }
+  .nav a { color: var(--ink-soft); transition: color 0.3s; }
   .nav a:hover { color: var(--gold-deep); }
 
   /* 扉頁排法：標題佔左欄放到最大，導言貼著標題底線收在右欄，
-     目次橫過整個版面收底。桌機不把內容全擠在左邊 —— 1440 的右半
-     空著不是留白，是沒排完。 */
+     品類索引橫過整個版面收底。1440 的右半空著不是留白，是沒排完。 */
   .hero {
     display: grid;
     grid-template-columns: minmax(0, 8fr) minmax(0, 4fr);
     align-items: end;
     gap: 0 clamp(40px, 5vw, 80px);
-    padding-top: 150px;
-    padding-bottom: 116px;
+    padding-top: 152px;
+    padding-bottom: 118px;
   }
   .hero .kick { grid-column: 1 / -1; }
-  /* 字級收到 68px 上限：標題第一行是九個中文字，再大就撐不下左欄，
-     會把「飾，」兩個字擠到第二行去，斷行就散了。 */
   .hero h1 {
     grid-column: 1;
-    margin: 26px 0 0;
-    font-size: clamp(46px, 4.6vw, 68px);
+    margin: 28px 0 0;
+    font-size: clamp(50px, 5vw, 74px);
   }
-  .hero .lede { grid-column: 2; margin-bottom: 10px; font-size: 16px; }
-  .hero .hero-index { grid-column: 1 / -1; margin-top: 56px; }
-  .ch { padding-top: 122px; padding-bottom: 122px; }
+  .hero .lede { grid-column: 2; margin-bottom: 10px; font-size: 17px; }
+  .hero .hero-index { grid-column: 1 / -1; margin-top: 58px; }
 
-  /* 區段頭兩欄：標題在左，導言在右。所有區段同一個形狀，
-     沒有例外要處理 —— 羅馬數字那一欄拿掉之後就簡單了。 */
+  .ch { padding-top: 126px; padding-bottom: 126px; }
+
+  /* 區段頭兩欄：標題在左，導言在右。全站同一個形狀，沒有例外。 */
   .ch-head {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     align-items: start;
     gap: 18px clamp(40px, 5vw, 80px);
-    margin-bottom: 56px;
+    margin-bottom: 58px;
   }
   .ch-head .kick { grid-area: 1 / 1; }
   .ch-head h2 { grid-area: 2 / 1; margin: 0; }
   .ch-head .lede { grid-area: 1 / 2 / span 2 / auto; }
+  .ch-head .proof { grid-area: 3 / 2; margin-top: 4px; }
 
-  /* 品牌頭同樣兩欄：字標與產地在左，介紹與品類在右 */
-  .house-head {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    align-items: start;
-    gap: 4px clamp(40px, 5vw, 80px);
-    margin-bottom: 44px;
-  }
-  .house-head .ref { grid-area: 1 / 1; margin-top: 0; }
-  .house-head h3 { grid-area: 2 / 1; }
-  .house-head .loc { grid-area: 3 / 1; }
-  .house-head .say { grid-area: 1 / 2 / span 2 / auto; margin: 0; }
-  .house-head .cats { grid-area: 3 / 2; margin: 6px 0 0; }
-  .house-head .proof { grid-area: 4 / 2; margin: 18px 0 0; }
+  .grid { grid-template-columns: repeat(3, 1fr); gap: 48px 42px; }
 
-  .grid { grid-template-columns: repeat(3, 1fr); gap: 44px 40px; }
-  .cats { margin-bottom: 56px; }
-  .cats li { padding: 20px 20px; }
-
-  /* 轉換區與頁尾比照章節頭分兩欄。單欄在 1440 只用掉左邊三分之一，
-     右半空著不是留白，是沒排完。 */
+  /* 轉換區與頁尾比照區段頭分兩欄 */
   .cta {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     align-items: start;
     gap: 8px clamp(40px, 5vw, 80px);
-    padding-top: 92px;
-    padding-bottom: 100px;
+    padding-top: 116px;
+    padding-bottom: 124px;
   }
   .cta .kick { grid-area: 1 / 1; }
-  .cta h2 { grid-area: 2 / 1; margin: 16px 0 0; }
+  .cta h2 { grid-area: 2 / 1; margin: 18px 0 0; }
   .cta .lede { grid-area: 1 / 2; }
-  .cta .btn { grid-area: 2 / 2; align-self: start; margin-top: 22px; }
+  .cta .btn { grid-area: 2 / 2; align-self: start; margin-top: 24px; }
 
   .ft {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     align-items: start;
     gap: 6px clamp(40px, 5vw, 80px);
-    padding-top: 52px;
-    padding-bottom: 64px;
+    padding-top: 58px;
+    padding-bottom: 70px;
   }
   .ft .co { grid-area: 1 / 1; }
   .ft .sub { grid-area: 2 / 1; }
-  .ft .lk { grid-area: 1 / 2; margin: 0 0 16px; }
+  .ft .lk { grid-area: 1 / 2; margin: 0 0 18px; }
   .ft .fine { grid-area: 2 / 2; }
 }
 
@@ -773,5 +718,5 @@ html[lang='ko'] .card h4 {
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .spine { animation: none; }
-  .hero-index a, .btn, .chapter-tag { transition: none; }
+  .hero-index a, .btn, .nav a { transition: none; }
 }

@@ -10,7 +10,7 @@
 <meta name="referrer" content="no-referrer">
 
 <title>維羅拉國際有限公司 | Velora International</title>
-<meta name="description" content="維羅拉國際代理韓國品牌：VUCA 居家香氛、SAINTMARI 真絲長巾與純銀飾品，以及韓國設計師手機包。批發條件與樣品請用 LINE 洽詢。">
+<meta name="description" content="維羅拉國際代理韓國品牌：居家香氛、真絲長巾、純銀飾品與設計師手機包。在首爾挑過，在台灣交貨。批發條件與樣品請用 LINE 洽詢。">
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -24,7 +24,7 @@
 <!-- ═══ 書脊：一條金線貫穿全頁，是這本目錄的裝訂邊 ═══ -->
 <span class="spine" aria-hidden="true"></span>
 
-<!-- 位置牌：隨捲動報出目前看到哪一家。桌機貼在書脊上直排 -->
+<!-- 位置牌：隨捲動報出目前在哪一個品類。桌機貼在書脊上直排 -->
 <p class="chapter-tag" id="chapterTag" aria-live="polite">
   <i aria-hidden="true"></i><b>Velora</b>
 </p>
@@ -32,12 +32,12 @@
 <header class="hdr">
   <a class="wm" href="#top">VELORA<span data-en="Velora" data-ko="벨로라">維羅拉</span></a>
 
-  <nav class="nav" aria-label="品牌與章節">
-    <a href="#vuca">VUCA</a>
-    <a href="#saintmari">SAINTMARI</a>
-    <a href="#mobile" data-en="Phone bags" data-ko="폰백">手機包</a>
-    <a href="#standard" data-en="Standard" data-ko="기준">選物準則</a>
-    <a href="#about" data-en="About" data-ko="소개">關於</a>
+  <nav class="nav" aria-label="品類">
+    <a href="#fragrance" data-en="Fragrance" data-ko="프래그런스">香氛</a>
+    <a href="#scarf" data-en="Scarves" data-ko="스카프">絲巾</a>
+    <a href="#jewelry" data-en="Jewelry" data-ko="주얼리">飾品</a>
+    <a href="#phonebag" data-en="Phone bags" data-ko="폰백">手機包</a>
+    <a href="#brands" data-en="Houses" data-ko="브랜드">品牌</a>
   </nav>
 
   <div class="lang" role="group" aria-label="切換語言">
@@ -50,197 +50,254 @@
 <main id="main">
 <div id="top"></div>
 
-<!-- ═══ 主視覺：標題直接就是目錄本身，不解釋也不修飾 ═══ -->
+<!-- ═══ 主視覺 ═══
+     標題不列舉品類 —— 四樣東西擺進同一句話，讀起來就是雜牌名詞。
+     品類交給下面的索引去排，標題只講維羅拉在做的那件事。 -->
 <section class="hero">
   <p class="kick" data-en="2026 · Korean Selection" data-ko="2026 · 한국 셀렉션">2026 · 韓國選品代理</p>
 
   <h1>
-    <span class="l1" data-en="Fragrance, silk, silver," data-ko="프래그런스, 실크, 실버,">香氛、絲巾、銀飾，</span>
-    <span class="l2" data-en="and phone bags." data-ko="그리고 폰백.">與手機配件。</span>
+    <span class="l1" data-en="Chosen in Seoul." data-ko="서울에서 고르고,">在首爾挑過，</span>
+    <span class="l2" data-en="Delivered in Taiwan." data-ko="대만에서 전합니다.">在台灣交貨。</span>
   </h1>
 
   <p class="lede" data-en="Velora represents Korean houses in Taiwan. Every line is seen in person in Seoul before we take it on. Wholesale terms and samples are quoted on LINE." data-ko="벨로라는 한국 브랜드를 대만에 소개합니다. 모든 라인은 서울에서 실물을 본 뒤에 취급을 결정합니다. 도매 조건과 샘플은 LINE으로 안내합니다.">維羅拉在台灣代理韓國品牌。每一條線都在首爾看過實品才決定代理。批發條件與樣品請用 LINE 洽詢。</p>
 
-  <!-- 品牌索引：這是全站的骨架，放在第一屏 -->
-  <nav class="hero-index" aria-label="代理品牌">
-    <a href="#vuca">VUCA<em data-en="Home fragrance" data-ko="홈 프래그런스">居家香氛</em></a>
-    <a href="#saintmari">SAINTMARI<em data-en="Silk &amp; silver" data-ko="실크 · 실버">絲巾與銀飾</em></a>
-    <a href="#mobile"><span data-en="To be announced" data-ko="공개 예정">品牌待公布</span><em data-en="Designer phone bags" data-ko="디자이너 폰백">設計師手機包</em></a>
+  <!-- 品類索引：全站骨架。四類並列，帶款數 -->
+  <nav class="hero-index" aria-label="品類">
+    <a href="#fragrance"><span data-en="Fragrance" data-ko="프래그런스">香氛</span><em>FRG</em><i>05</i></a>
+    <a href="#scarf"><span data-en="Scarves" data-ko="스카프">絲巾</span><em>SLK</em><i>13</i></a>
+    <a href="#jewelry"><span data-en="Jewelry" data-ko="주얼리">飾品</span><em>JWL</em><i>28</i></a>
+    <a href="#phonebag"><span data-en="Phone bags" data-ko="폰백">手機包</span><em>BAG</em><i>—</i></a>
   </nav>
 </section>
 
-<!-- ═══ 代理品牌：全站主體。一家一塊，各自完整 ═══ -->
-<section class="ch houses" id="houses">
+<!-- ═══ 香氛 ═══ -->
+<section class="ch cat" id="fragrance">
   <header class="ch-head">
-    <p class="kick" data-en="The houses we represent" data-ko="취급 브랜드">我們代理的品牌</p>
-    <h2 data-en="Three Korean houses" data-ko="세 개의 한국 브랜드">三家韓國品牌</h2>
-    <p class="lede" data-en="Each house is its own line, with its own materials and its own way of finishing things. What they have in common is Velora, not a category." data-ko="각 브랜드는 저마다의 소재와 마감을 가진 독립된 라인입니다. 공통점은 카테고리가 아니라 벨로라입니다.">每一家是各自獨立的一條線，材質不同、做工不同。它們的共通點是維羅拉，不是品類。</p>
+    <p class="kick">FRAGRANCE · FRG</p>
+    <h2 data-en="Fragrance" data-ko="프래그런스">香氛</h2>
+    <p class="lede" data-en="VUCA's home diffusers, in five scents. Formulated to IFRA standards on a base of corn-derived plant ethanol, and tested for seven key harmful substances." data-ko="VUCA의 홈 디퓨저, 다섯 가지 향. IFRA 기준에 맞춘 향료와 옥수수 유래 식물성 에탄올 베이스, 7가지 유해물질 검사를 통과했습니다.">VUCA 的居家擴香，五款香調。香精配方符合 IFRA 標準，基劑採用玉米萃取植物乙醇，並通過七項有害物質檢驗。</p>
   </header>
 
-  <!-- ── VUCA ─────────────────────────────────────────── -->
-  <article class="house" id="vuca">
-    <header class="house-head">
-      <p class="ref">HOUSE · 01</p>
-      <h3>VUCA</h3>
-      <p class="loc" data-en="Seoul, Korea · Home fragrance" data-ko="서울, 한국 · 홈 프래그런스">韓國首爾 · 居家香氛</p>
-      <p class="say" data-en="A house that treats scent as part of a room rather than an accessory to it. Formulated to IFRA standards on a base of corn-derived plant ethanol, and tested for seven key harmful substances." data-ko="향을 공간의 일부로 다루는 브랜드. IFRA 기준에 맞춘 향료와 옥수수 유래 식물성 에탄올 베이스, 7가지 유해물질 검사를 통과했습니다.">主張香氣是空間的一部分而非附加品。香精配方符合 IFRA 標準，基劑採用玉米萃取植物乙醇，並通過七項有害物質檢驗。</p>
-      <ul class="cats">
-        <li><span class="c" data-en="Home Fragrance" data-ko="홈 프래그런스">居家香氛</span><span class="r">FRG</span></li>
-        <li><span class="c" data-en="5 scents" data-ko="5가지 향">五款香調</span><span class="r">05</span></li>
-      </ul>
-    </header>
+  <div class="grid">
+    <article class="card">
+      <span class="plate"><img src="assets/media/vuca/ylang.jpg" alt="依蘭香氛" loading="lazy" decoding="async" width="800" height="1000"></span>
+      <p class="ref">VL · FRG · 001<em>VUCA</em></p>
+      <h3 data-en="Ylang Ylang" data-ko="일랑일랑">依蘭</h3>
+      <p class="say" data-en="Opens on peach and grapefruit, builds a powdery weight through iris and ylang, settles into musk and sandalwood. Not sweet — good for a bedroom." data-ko="복숭아와 자몽으로 열려 아이리스와 일랑일랑이 파우더리한 두께를 쌓고 머스크와 샌달우드로 가라앉습니다. 달지 않아 침실에 어울립니다.">開場帶著水蜜桃與葡萄柚的果酸，中段讓依蘭與鳶尾鋪出粉質的厚度，尾韻落在麝香與檀木。不甜膩，適合臥室。</p>
+      <dl class="hall">
+        <dt data-en="Base" data-ko="베이스">基劑</dt><dd data-en="Corn-derived plant ethanol" data-ko="옥수수 유래 식물성 에탄올">玉米萃取植物乙醇</dd>
+        <dt data-en="Standard" data-ko="기준">標準</dt><dd data-en="IFRA compliant" data-ko="IFRA 기준 충족">符合 IFRA</dd>
+      </dl>
+    </article>
 
-    <div class="grid">
-      <article class="card">
-        <span class="plate"><img src="assets/media/vuca/ylang.jpg" alt="依蘭香氛" loading="lazy" decoding="async" width="800" height="1000"></span>
-        <p class="ref">VL · FRG · 001</p>
-        <h4 data-en="Ylang Ylang" data-ko="일랑일랑">依蘭</h4>
-        <p class="say" data-en="Opens on peach and grapefruit, builds a powdery weight through iris and ylang, settles into musk and sandalwood. Not sweet — good for a bedroom." data-ko="복숭아와 자몽으로 열려 아이리스와 일랑일랑이 파우더리한 두께를 쌓고 머스크와 샌달우드로 가라앉습니다. 달지 않아 침실에 어울립니다.">開場帶著水蜜桃與葡萄柚的果酸，中段讓依蘭與鳶尾鋪出粉質的厚度，尾韻落在麝香與檀木。不甜膩，適合臥室。</p>
-        <dl class="hall">
-          <dt data-en="Base" data-ko="베이스">基劑</dt><dd data-en="Corn-derived plant ethanol" data-ko="옥수수 유래 식물성 에탄올">玉米萃取植物乙醇</dd>
-          <dt data-en="Standard" data-ko="기준">標準</dt><dd data-en="IFRA compliant" data-ko="IFRA 기준 충족">符合 IFRA</dd>
-        </dl>
-      </article>
+    <article class="card">
+      <span class="plate"><img src="assets/media/vuca/blackcherry.jpg" alt="黑櫻桃香氛" loading="lazy" decoding="async" width="800" height="1000"></span>
+      <p class="ref">VL · FRG · 002<em>VUCA</em></p>
+      <h3 data-en="Black Cherry" data-ko="블랙체리">黑櫻桃</h3>
+      <p class="say" data-en="Like a bowl of cherries just rinsed, still beaded with water. Tangerine steadies the sweetness, coconut and berries build the flesh of it. Good for a living room or entryway." data-ko="방금 씻어 물기가 맺힌 체리 한 바구니 같습니다. 탠저린이 단맛을 잡아주고 코코넛과 베리가 과육의 두께를 만듭니다. 거실이나 현관에 어울립니다.">像剛洗好、還帶著水珠的一籃櫻桃。前調的柑橘讓甜度先站穩，中段椰子與莓果堆疊出果肉的厚實。適合客廳與玄關。</p>
+      <dl class="hall">
+        <dt data-en="Base" data-ko="베이스">基劑</dt><dd data-en="Corn-derived plant ethanol" data-ko="옥수수 유래 식물성 에탄올">玉米萃取植物乙醇</dd>
+        <dt data-en="Standard" data-ko="기준">標準</dt><dd data-en="IFRA compliant" data-ko="IFRA 기준 충족">符合 IFRA</dd>
+      </dl>
+    </article>
 
-      <article class="card">
-        <span class="plate"><img src="assets/media/vuca/blackcherry.jpg" alt="黑櫻桃香氛" loading="lazy" decoding="async" width="800" height="1000"></span>
-        <p class="ref">VL · FRG · 002</p>
-        <h4 data-en="Black Cherry" data-ko="블랙체리">黑櫻桃</h4>
-        <p class="say" data-en="Like a bowl of cherries just rinsed, still beaded with water. Tangerine steadies the sweetness, coconut and berries build the flesh of it. Good for a living room or entryway." data-ko="방금 씻어 물기가 맺힌 체리 한 바구니 같습니다. 탠저린이 단맛을 잡아주고 코코넛과 베리가 과육의 두께를 만듭니다. 거실이나 현관에 어울립니다.">像剛洗好、還帶著水珠的一籃櫻桃。前調的柑橘讓甜度先站穩，中段椰子與莓果堆疊出果肉的厚實。適合客廳與玄關。</p>
-        <dl class="hall">
-          <dt data-en="Base" data-ko="베이스">基劑</dt><dd data-en="Corn-derived plant ethanol" data-ko="옥수수 유래 식물성 에탄올">玉米萃取植物乙醇</dd>
-          <dt data-en="Standard" data-ko="기준">標準</dt><dd data-en="IFRA compliant" data-ko="IFRA 기준 충족">符合 IFRA</dd>
-        </dl>
-      </article>
-
-      <article class="card">
-        <span class="plate"><img src="assets/media/vuca/aprilfresh.jpg" alt="四月棉柔香氛" loading="lazy" decoding="async" width="800" height="1000"></span>
-        <p class="ref">VL · FRG · 003</p>
-        <h4 data-en="April Fresh" data-ko="에이프릴 프레시">四月棉柔</h4>
-        <p class="say" data-en="Like a duvet just in from the sun. Green and pear open it, peach and apple blossom bring the warmth, and vanilla with cedar closes it softly. The safest one to give as a gift." data-ko="막 햇볕에 말린 이불 같습니다. 그린과 서양배로 열리고 복숭아와 사과꽃이 온기를 더하며 바닐라와 시더우드가 부드럽게 마무리합니다. 선물로 가장 무난한 향입니다.">像剛曬過太陽的棉被。綠意與西洋梨開場，水蜜桃與蘋果花帶出溫度，香草與雪松把香氣收得柔軟。送禮不容易出錯的一支。</p>
-        <dl class="hall">
-          <dt data-en="Base" data-ko="베이스">基劑</dt><dd data-en="Corn-derived plant ethanol" data-ko="옥수수 유래 식물성 에탄올">玉米萃取植物乙醇</dd>
-          <dt data-en="Standard" data-ko="기준">標準</dt><dd data-en="IFRA compliant" data-ko="IFRA 기준 충족">符合 IFRA</dd>
-        </dl>
-      </article>
-    </div>
-  </article>
-
-  <!-- ── SAINTMARI ────────────────────────────────────── -->
-  <article class="house" id="saintmari">
-    <header class="house-head">
-      <p class="ref">HOUSE · 02</p>
-      <h3>SAINTMARI</h3>
-      <p class="loc" data-en="Seoul, Korea · Silk &amp; silver" data-ko="서울, 한국 · 실크 · 실버">韓國首爾 · 真絲與純銀</p>
-      <p class="say" data-en="Silk scarves and sterling jewelry. The design is restrained and speaks through proportion and finish — things you wear daily, not only for occasions." data-ko="실크 스카프와 실버 주얼리. 절제된 디자인으로 비율과 마감이 말을 합니다 — 특별한 날이 아니라 매일 착용하는 물건입니다.">做真絲長巾與純銀首飾。設計克制，靠比例與收邊說話 —— 是每天戴的東西，不是場合才拿出來的。</p>
-      <ul class="cats">
-        <li><span class="c" data-en="Silk Scarves" data-ko="실크 스카프">真絲長巾</span><span class="r">SLK</span></li>
-        <li><span class="c" data-en="Sterling Jewelry" data-ko="실버 주얼리">純銀飾品</span><span class="r">JWL</span></li>
-        <li><span class="c" data-en="Scarf Rings" data-ko="스카프링">絲巾扣</span><span class="r">SCR</span></li>
-      </ul>
-    </header>
-
-    <div class="grid">
-      <article class="card">
-        <span class="plate"><img src="assets/media/saintmari/scarf-camel-blazer.jpg" alt="駝色外套搭配真絲長巾" loading="lazy" decoding="async" width="800" height="1000"></span>
-        <p class="ref">VL · SLK · 001</p>
-        <h4 data-en="Silk Twilly Scarf" data-ko="실크 스카프">真絲長巾</h4>
-        <p class="say" data-en="The edges are hand-rolled, so it hangs without curling. Prints are kept low in saturation and never compete with what you are wearing." data-ko="가장자리를 손으로 말아 박아 늘어뜨려도 말리지 않습니다. 프린트는 채도를 낮춰 옷의 주된 색을 방해하지 않습니다.">邊緣以手工捲縫收口，垂墜時不會翻捲。印花刻意壓低飽和度，不搶衣服的主色。</p>
-        <dl class="hall">
-          <dt data-en="Material" data-ko="소재">材質</dt><dd data-en="100% Silk" data-ko="실크 100%">100% 真絲</dd>
-          <dt data-en="Size" data-ko="사이즈">尺寸</dt><dd data-en="approx. 8 × 120 cm" data-ko="약 8 × 120 cm">約 8 × 120 cm</dd>
-        </dl>
-      </article>
-
-      <article class="card">
-        <span class="plate is-cutout"><img src="assets/media/saintmari/necklace-01.png" alt="純銀細鍊項鍊" loading="lazy" decoding="async" width="800" height="800"></span>
-        <p class="ref">VL · JWL · 001</p>
-        <h4 data-en="Necklace" data-ko="목걸이">項鍊</h4>
-        <p class="say" data-en="A fine chain with a scattered drop that catches very little light as you move. Five centimetres of adjustment, so it sits inside a collar or over a turtleneck." data-ko="가는 체인에 드문드문 놓인 드롭이 움직일 때 아주 옅은 빛을 냅니다. 5cm 조절이 가능해 셔츠 안이나 터틀넥 위에 모두 어울립니다.">細鍊配上零星的垂墜，走動時會有很輕的光。鍊長可調五公分，襯衫領內或高領外都能戴。</p>
-        <dl class="hall">
-          <dt data-en="Material" data-ko="소재">材質</dt><dd data-en="Sterling silver 925" data-ko="925 실버">925 純銀</dd>
-          <dt data-en="Chain" data-ko="체인">鍊長</dt><dd data-en="approx. 40 + 5 cm" data-ko="약 40 + 5 cm">約 40 + 5 cm</dd>
-        </dl>
-      </article>
-
-      <article class="card">
-        <span class="plate is-cutout"><img src="assets/media/saintmari/scarfring-01.png" alt="珍珠絲巾扣" loading="lazy" decoding="async" width="800" height="800"></span>
-        <p class="ref">VL · SCR · 001</p>
-        <h4 data-en="Pearl Scarf Ring" data-ko="스카프링">珍珠絲巾扣</h4>
-        <p class="say" data-en="How a scarf finishes. An open rectangular frame with a single pearl drop, in silver, gold or rose gold. Thread the scarf through, draw it closed, and the knot is done." data-ko="스카프의 마무리. 비어 있는 사각 프레임에 진주 한 알을 매단 형태로, 실버·골드·로즈골드 중에서 고르면 됩니다. 스카프를 통과시켜 당기면 매듭이 깔끔해집니다.">長巾的收尾。鏤空長方框搭一顆珍珠垂墜，銀、金、玫瑰金三色可依當天的首飾決定。穿過長巾一收，結就乾淨了。</p>
-        <dl class="hall">
-          <dt data-en="Material" data-ko="소재">材質</dt><dd data-en="Plated alloy · Freshwater pearl" data-ko="합금 도금 · 담수진주">合金鍍層 · 淡水珍珠</dd>
-          <dt data-en="Size" data-ko="사이즈">尺寸</dt><dd data-en="approx. 2.2 × 3.5 cm" data-ko="약 2.2 × 3.5 cm">約 2.2 × 3.5 cm</dd>
-        </dl>
-      </article>
-    </div>
-  </article>
-
-  <!-- ── 手機包（品牌待公布）───────────────────────────── -->
-  <article class="house" id="mobile">
-    <header class="house-head">
-      <p class="ref">HOUSE · 03</p>
-      <h3 class="tbd" data-en="To be announced" data-ko="공개 예정">品牌待公布</h3>
-      <p class="loc" data-en="Seoul, Korea · Designer phone bags" data-ko="서울, 한국 · 디자이너 폰백">韓國首爾 · 設計師手機包</p>
-      <p class="say" data-en="Korean designer phone bags — the pouch you wear rather than the case you clip on. Leather and suede bodies with detachable straps, sized so the phone comes out without turning the bag over." data-ko="한국 디자이너 폰백 — 끼우는 케이스가 아니라 몸에 걸치는 가방입니다. 가죽과 스웨이드 보디에 탈착식 스트랩, 가방을 뒤집지 않아도 폰이 나오는 크기입니다.">韓國設計師手機包 —— 是背在身上的包，不是套在機身上的殼。皮革與麂皮絨包身搭可拆背帶，尺寸做到不必翻面就拿得出手機。</p>
-      <ul class="cats">
-        <li><span class="c" data-en="Phone Bags" data-ko="폰백">手機包</span><span class="r">BAG</span></li>
-        <li><span class="c" data-en="Straps" data-ko="스트랩">背帶</span><span class="r">STR</span></li>
-        <li><span class="c" data-en="Cases" data-ko="케이스">保護殼</span><span class="r">CSE</span></li>
-      </ul>
-      <p class="proof" data-en="Editor's note — this house is laid out with placeholder copy and empty plates. Product names, photography and specifications will be replaced from the actual line." data-ko="편집 노트 — 이 브랜드는 예시 문안과 빈 도판으로 구성되어 있습니다. 품명·사진·사양은 실제 라인으로 교체됩니다.">編按 —— 本家目前是示意文案與空版。品名、照片與規格待實際品項提供後替換。</p>
-    </header>
-
-    <div class="grid">
-      <article class="card">
-        <span class="plate pending" role="img" aria-label="圖片製版中">
-          <b aria-hidden="true"></b>
-          <span class="p1" data-en="Plate pending" data-ko="제작 중">圖片製版中</span>
-          <span class="p2">VL · BAG · 001</span>
-        </span>
-        <p class="ref">VL · BAG · 001</p>
-        <h4 data-en="Leather Crossbody Phone Bag" data-ko="레더 크로스백 폰백">真皮斜背手機包</h4>
-        <p class="say" data-en="A body just deep enough for a phone and two cards, with a folded, stitched edge rather than a cut one so the rim will not chalk. The strap comes off if you want it as a clutch." data-ko="폰과 카드 두 장이 들어갈 깊이의 보디에, 재단면이 아닌 접어 박은 마감이라 테두리가 하얗게 일어나지 않습니다. 스트랩을 떼면 클러치로 쓸 수 있습니다.">包身深度剛好放手機加兩張卡，邊緣是折邊車縫而不是切邊，用久了不會起白邊。背帶可拆，拆掉就是手拿包。</p>
-        <dl class="hall">
-          <dt data-en="Material" data-ko="소재">材質</dt><dd data-en="Full-grain cowhide" data-ko="풀그레인 소가죽">頭層牛皮</dd>
-          <dt data-en="Strap" data-ko="스트랩">背帶</dt><dd data-en="Detachable, adjustable" data-ko="탈착식 · 길이 조절">可拆 · 可調長度</dd>
-        </dl>
-      </article>
-
-      <article class="card">
-        <span class="plate pending" role="img" aria-label="圖片製版中">
-          <b aria-hidden="true"></b>
-          <span class="p1" data-en="Plate pending" data-ko="제작 중">圖片製版中</span>
-          <span class="p2">VL · BAG · 002</span>
-        </span>
-        <p class="ref">VL · BAG · 002</p>
-        <h4 data-en="Suede Neck Phone Pouch" data-ko="스웨이드 넥 폰파우치">麂皮絨掛頸手機包</h4>
-        <p class="say" data-en="Worn at the chest, where you can see it. The suede is backed so it keeps its shape instead of collapsing around the phone, and there are two card slots behind." data-ko="가슴 높이에 걸쳐 눈으로 확인할 수 있는 위치에 옵니다. 스웨이드에 심지를 대어 폰을 감싸며 주저앉지 않고 형태를 유지하며, 뒤쪽에 카드 슬롯 두 개가 있습니다.">掛在胸前，走路時看得到。麂皮絨有襯裡撐著，不會軟塌貼著手機，背面有兩個卡夾。</p>
-        <dl class="hall">
-          <dt data-en="Material" data-ko="소재">材質</dt><dd data-en="Backed suede" data-ko="심지 보강 스웨이드">麂皮絨 · 加襯</dd>
-          <dt data-en="Pockets" data-ko="포켓">內袋</dt><dd data-en="2 card slots" data-ko="카드 슬롯 2">卡夾 × 2</dd>
-        </dl>
-      </article>
-
-      <article class="card">
-        <span class="plate pending" role="img" aria-label="圖片製版中">
-          <b aria-hidden="true"></b>
-          <span class="p1" data-en="Plate pending" data-ko="제작 중">圖片製版中</span>
-          <span class="p2">VL · CSE · 001</span>
-        </span>
-        <p class="ref">VL · CSE · 001</p>
-        <h4 data-en="Leather MagSafe Case" data-ko="레더 맥세이프 케이스">皮革磁吸手機殼</h4>
-        <p class="say" data-en="For when the bag stays home. Vegetable-tanned hide that darkens with handling, the way a good watch strap does, and a lug on each side so it takes the same strap as the bags." data-ko="가방을 두고 나가는 날을 위한 것. 식물성 타닌으로 무두질한 가죽은 좋은 시계 스트랩처럼 손을 탈수록 짙어지며, 양옆 러그로 가방과 같은 스트랩을 끼울 수 있습니다.">給不背包的日子。植鞣牛皮握過會慢慢變深，像一條用得好的錶帶；兩側有耳扣，可以接手機包同一條背帶。</p>
-        <dl class="hall">
-          <dt data-en="Material" data-ko="소재">材質</dt><dd data-en="Vegetable-tanned hide" data-ko="식물성 타닌 가죽">植鞣牛皮</dd>
-          <dt data-en="Fit" data-ko="호환">相容</dt><dd>MagSafe</dd>
-        </dl>
-      </article>
-    </div>
-  </article>
+    <article class="card">
+      <span class="plate"><img src="assets/media/vuca/aprilfresh.jpg" alt="四月棉柔香氛" loading="lazy" decoding="async" width="800" height="1000"></span>
+      <p class="ref">VL · FRG · 003<em>VUCA</em></p>
+      <h3 data-en="April Fresh" data-ko="에이프릴 프레시">四月棉柔</h3>
+      <p class="say" data-en="Like a duvet just in from the sun. Green and pear open it, peach and apple blossom bring the warmth, and vanilla with cedar closes it softly. The safest one to give as a gift." data-ko="막 햇볕에 말린 이불 같습니다. 그린과 서양배로 열리고 복숭아와 사과꽃이 온기를 더하며 바닐라와 시더우드가 부드럽게 마무리합니다. 선물로 가장 무난한 향입니다.">像剛曬過太陽的棉被。綠意與西洋梨開場，水蜜桃與蘋果花帶出溫度，香草與雪松把香氣收得柔軟。送禮不容易出錯的一支。</p>
+      <dl class="hall">
+        <dt data-en="Base" data-ko="베이스">基劑</dt><dd data-en="Corn-derived plant ethanol" data-ko="옥수수 유래 식물성 에탄올">玉米萃取植物乙醇</dd>
+        <dt data-en="Standard" data-ko="기준">標準</dt><dd data-en="IFRA compliant" data-ko="IFRA 기준 충족">符合 IFRA</dd>
+      </dl>
+    </article>
+  </div>
 </section>
 
-<!-- ═══ 選物準則：講維羅拉怎麼決定要不要代理，不是講商品像不像 ═══ -->
+<!-- ═══ 絲巾 ═══ -->
+<section class="ch cat" id="scarf">
+  <header class="ch-head">
+    <p class="kick">SCARVES · SLK</p>
+    <h2 data-en="Scarves" data-ko="스카프">絲巾</h2>
+    <p class="lede" data-en="SAINTMARI's narrow silk twillies, thirteen prints. The edges are hand-rolled so they hang without curling, and the prints are kept low in saturation so they never compete with what you are wearing." data-ko="SAINTMARI의 좁은 폭 실크 스카프, 열세 가지 프린트. 가장자리를 손으로 말아 박아 말리지 않으며, 프린트는 채도를 낮춰 옷의 주된 색을 방해하지 않습니다.">SAINTMARI 的窄版真絲長巾，十三款印花。邊緣以手工捲縫收口，垂墜時不會翻捲；印花刻意壓低飽和度，不搶衣服的主色。</p>
+  </header>
+
+  <div class="grid">
+    <article class="card">
+      <span class="plate"><img src="assets/media/saintmari/scarf-camel-blazer.jpg" alt="駝色外套搭配真絲長巾" loading="lazy" decoding="async" width="800" height="1000"></span>
+      <p class="ref">VL · SLK · 001<em>SAINTMARI</em></p>
+      <h3 data-en="Twilly · Camel" data-ko="트윌리 · 카멜">真絲長巾 · 駝</h3>
+      <p class="say" data-en="Tied at the neck over a blazer. The low-saturation print sits back and lets the coat carry the outfit." data-ko="블레이저 위 목에 매는 방식. 채도가 낮은 프린트가 뒤로 물러나 코트가 중심을 잡습니다.">繫在西裝外套的領口。壓低飽和度的印花退到後面，讓外套本身當主角。</p>
+      <dl class="hall">
+        <dt data-en="Material" data-ko="소재">材質</dt><dd data-en="100% Silk" data-ko="실크 100%">100% 真絲</dd>
+        <dt data-en="Size" data-ko="사이즈">尺寸</dt><dd data-en="approx. 8 × 120 cm" data-ko="약 8 × 120 cm">約 8 × 120 cm</dd>
+      </dl>
+    </article>
+
+    <article class="card">
+      <span class="plate"><img src="assets/media/saintmari/scarf-pink-bow.jpg" alt="粉色蝴蝶結綁法真絲長巾" loading="lazy" decoding="async" width="800" height="1000"></span>
+      <p class="ref">VL · SLK · 002<em>SAINTMARI</em></p>
+      <h3 data-en="Twilly · Pink" data-ko="트윌리 · 핑크">真絲長巾 · 粉</h3>
+      <p class="say" data-en="Tied in a bow at the collar. Narrow enough that the knot stays small and does not bulk up under a coat." data-ko="칼라 위에 리본으로 묶는 방식. 폭이 좁아 매듭이 작게 남고 코트 안에서 부피가 생기지 않습니다.">在領口打成蝴蝶結。寬度夠窄，結不會太大，穿外套時也不會鼓起來。</p>
+      <dl class="hall">
+        <dt data-en="Material" data-ko="소재">材質</dt><dd data-en="100% Silk" data-ko="실크 100%">100% 真絲</dd>
+        <dt data-en="Size" data-ko="사이즈">尺寸</dt><dd data-en="approx. 8 × 120 cm" data-ko="약 8 × 120 cm">約 8 × 120 cm</dd>
+      </dl>
+    </article>
+
+    <article class="card">
+      <span class="plate"><img src="assets/media/saintmari/scarf-mauve-pearl.jpg" alt="藕紫色真絲長巾搭配珍珠" loading="lazy" decoding="async" width="800" height="1000"></span>
+      <p class="ref">VL · SLK · 003<em>SAINTMARI</em></p>
+      <h3 data-en="Twilly · Mauve" data-ko="트윌리 · 모브">真絲長巾 · 藕紫</h3>
+      <p class="say" data-en="Threaded through a scarf ring instead of knotted. The ring takes the bulk out and the ends hang straight." data-ko="매듭 대신 스카프링에 통과시키는 방식. 부피가 줄고 양끝이 곧게 늘어집니다.">不打結，穿過絲巾扣收起來。少了結的體積，兩端會垂得比較直。</p>
+      <dl class="hall">
+        <dt data-en="Material" data-ko="소재">材質</dt><dd data-en="100% Silk" data-ko="실크 100%">100% 真絲</dd>
+        <dt data-en="Size" data-ko="사이즈">尺寸</dt><dd data-en="approx. 8 × 120 cm" data-ko="약 8 × 120 cm">約 8 × 120 cm</dd>
+      </dl>
+    </article>
+  </div>
+</section>
+
+<!-- ═══ 飾品 ═══
+     飾品 = 純銀首飾 + 絲巾扣。刻意不叫「配件」——
+     手機包也是配件，兩類並存會讓人問手機包為什麼不在裡面。 -->
+<section class="ch cat" id="jewelry">
+  <header class="ch-head">
+    <p class="kick">JEWELRY · JWL</p>
+    <h2 data-en="Jewelry" data-ko="주얼리">飾品</h2>
+    <p class="lede" data-en="SAINTMARI's sterling silver and scarf rings. Sizes are kept deliberately small — these are things you wear daily, not only for occasions." data-ko="SAINTMARI의 925 실버와 스카프링. 크기를 일부러 작게 잡았습니다 — 특별한 날이 아니라 매일 착용하는 물건입니다.">SAINTMARI 的 925 純銀首飾與絲巾扣。尺寸刻意做小 —— 是每天戴的東西，不是場合才拿出來的。</p>
+  </header>
+
+  <div class="grid">
+    <article class="card">
+      <span class="plate is-cutout"><img src="assets/media/saintmari/necklace-01.png" alt="純銀細鍊項鍊" loading="lazy" decoding="async" width="800" height="800"></span>
+      <p class="ref">VL · JWL · 001<em>SAINTMARI</em></p>
+      <h3 data-en="Necklace" data-ko="목걸이">項鍊</h3>
+      <p class="say" data-en="A fine chain with a scattered drop that catches very little light as you move. Five centimetres of adjustment, so it sits inside a collar or over a turtleneck." data-ko="가는 체인에 드문드문 놓인 드롭이 움직일 때 아주 옅은 빛을 냅니다. 5cm 조절이 가능해 셔츠 안이나 터틀넥 위에 모두 어울립니다.">細鍊配上零星的垂墜，走動時會有很輕的光。鍊長可調五公分，襯衫領內或高領外都能戴。</p>
+      <dl class="hall">
+        <dt data-en="Material" data-ko="소재">材質</dt><dd data-en="Sterling silver 925" data-ko="925 실버">925 純銀</dd>
+        <dt data-en="Chain" data-ko="체인">鍊長</dt><dd data-en="approx. 40 + 5 cm" data-ko="약 40 + 5 cm">約 40 + 5 cm</dd>
+      </dl>
+    </article>
+
+    <article class="card">
+      <span class="plate is-cutout"><img src="assets/media/saintmari/earring-01.png" alt="純銀密釘耳環" loading="lazy" decoding="async" width="800" height="800"></span>
+      <p class="ref">VL · JWL · 002<em>SAINTMARI</em></p>
+      <h3 data-en="Earrings" data-ko="귀걸이">耳環</h3>
+      <p class="say" data-en="Sterling silver with pavé-set cubic zirconia. Made small on purpose so they sit against the lobe without swinging — an everyday pair." data-ko="925 실버 바탕에 큐빅을 파베 세팅했습니다. 일부러 작게 만들어 귓불에 붙어 흔들리지 않는, 매일 착용하는 귀걸이입니다.">925 純銀為基底，鑲面以密釘方式排列方晶鋯石。尺寸刻意做小，貼著耳垂不晃動，適合每天戴。</p>
+      <dl class="hall">
+        <dt data-en="Material" data-ko="소재">材質</dt><dd data-en="Sterling silver 925" data-ko="925 실버">925 純銀</dd>
+        <dt data-en="Fitting" data-ko="유형">款式</dt><dd data-en="Stud fitting" data-ko="스터드">耳針式</dd>
+      </dl>
+    </article>
+
+    <article class="card">
+      <span class="plate is-cutout"><img src="assets/media/saintmari/scarfring-01.png" alt="珍珠絲巾扣" loading="lazy" decoding="async" width="800" height="800"></span>
+      <p class="ref">VL · JWL · 003<em>SAINTMARI</em></p>
+      <h3 data-en="Pearl Scarf Ring" data-ko="스카프링">珍珠絲巾扣</h3>
+      <p class="say" data-en="How a scarf finishes. An open rectangular frame with a single pearl drop, in silver, gold or rose gold. Thread the scarf through, draw it closed, and the knot is done." data-ko="스카프의 마무리. 비어 있는 사각 프레임에 진주 한 알을 매단 형태로, 실버·골드·로즈골드 중에서 고르면 됩니다. 스카프를 통과시켜 당기면 매듭이 깔끔해집니다.">長巾的收尾。鏤空長方框搭一顆珍珠垂墜，銀、金、玫瑰金三色可依當天的首飾決定。穿過長巾一收，結就乾淨了。</p>
+      <dl class="hall">
+        <dt data-en="Material" data-ko="소재">材質</dt><dd data-en="Plated alloy · Freshwater pearl" data-ko="합금 도금 · 담수진주">合金鍍層 · 淡水珍珠</dd>
+        <dt data-en="Size" data-ko="사이즈">尺寸</dt><dd data-en="approx. 2.2 × 3.5 cm" data-ko="약 2.2 × 3.5 cm">約 2.2 × 3.5 cm</dd>
+      </dl>
+    </article>
+  </div>
+</section>
+
+<!-- ═══ 手機包 ═══ -->
+<section class="ch cat" id="phonebag">
+  <header class="ch-head">
+    <p class="kick">PHONE BAGS · BAG</p>
+    <h2 data-en="Phone bags" data-ko="폰백">手機包</h2>
+    <p class="lede" data-en="Korean designer phone bags — the pouch you wear rather than the case you clip on. Leather and suede bodies with detachable straps, sized so the phone comes out without turning the bag over." data-ko="한국 디자이너 폰백 — 끼우는 케이스가 아니라 몸에 걸치는 가방입니다. 가죽과 스웨이드 보디에 탈착식 스트랩, 가방을 뒤집지 않아도 폰이 나오는 크기입니다.">韓國設計師手機包 —— 是背在身上的包，不是套在機身上的殼。皮革與麂皮絨包身搭可拆背帶，尺寸做到不必翻面就拿得出手機。</p>
+    <p class="proof" data-en="Editor's note — this category is laid out with placeholder copy and empty plates. Product names, photography and specifications will be replaced from the actual line." data-ko="편집 노트 — 이 카테고리는 예시 문안과 빈 도판으로 구성되어 있습니다. 품명·사진·사양은 실제 라인으로 교체됩니다.">編按 —— 本品類目前是示意文案與空版。品名、照片與規格待實際品項提供後替換。</p>
+  </header>
+
+  <div class="grid">
+    <article class="card">
+      <span class="plate pending" role="img" aria-label="圖片製版中">
+        <b aria-hidden="true"></b>
+        <span class="p1" data-en="Plate pending" data-ko="제작 중">圖片製版中</span>
+        <span class="p2">VL · BAG · 001</span>
+      </span>
+      <p class="ref">VL · BAG · 001<em data-en="To be announced" data-ko="공개 예정">品牌待公布</em></p>
+      <h3 data-en="Leather Crossbody Phone Bag" data-ko="레더 크로스백 폰백">真皮斜背手機包</h3>
+      <p class="say" data-en="A body just deep enough for a phone and two cards, with a folded, stitched edge rather than a cut one so the rim will not chalk. The strap comes off if you want it as a clutch." data-ko="폰과 카드 두 장이 들어갈 깊이의 보디에, 재단면이 아닌 접어 박은 마감이라 테두리가 하얗게 일어나지 않습니다. 스트랩을 떼면 클러치로 쓸 수 있습니다.">包身深度剛好放手機加兩張卡，邊緣是折邊車縫而不是切邊，用久了不會起白邊。背帶可拆，拆掉就是手拿包。</p>
+      <dl class="hall">
+        <dt data-en="Material" data-ko="소재">材質</dt><dd data-en="Full-grain cowhide" data-ko="풀그레인 소가죽">頭層牛皮</dd>
+        <dt data-en="Strap" data-ko="스트랩">背帶</dt><dd data-en="Detachable, adjustable" data-ko="탈착식 · 길이 조절">可拆 · 可調長度</dd>
+      </dl>
+    </article>
+
+    <article class="card">
+      <span class="plate pending" role="img" aria-label="圖片製版中">
+        <b aria-hidden="true"></b>
+        <span class="p1" data-en="Plate pending" data-ko="제작 중">圖片製版中</span>
+        <span class="p2">VL · BAG · 002</span>
+      </span>
+      <p class="ref">VL · BAG · 002<em data-en="To be announced" data-ko="공개 예정">品牌待公布</em></p>
+      <h3 data-en="Suede Neck Phone Pouch" data-ko="스웨이드 넥 폰파우치">麂皮絨掛頸手機包</h3>
+      <p class="say" data-en="Worn at the chest, where you can see it. The suede is backed so it keeps its shape instead of collapsing around the phone, and there are two card slots behind." data-ko="가슴 높이에 걸쳐 눈으로 확인할 수 있는 위치에 옵니다. 스웨이드에 심지를 대어 폰을 감싸며 주저앉지 않고 형태를 유지하며, 뒤쪽에 카드 슬롯 두 개가 있습니다.">掛在胸前，走路時看得到。麂皮絨有襯裡撐著，不會軟塌貼著手機，背面有兩個卡夾。</p>
+      <dl class="hall">
+        <dt data-en="Material" data-ko="소재">材質</dt><dd data-en="Backed suede" data-ko="심지 보강 스웨이드">麂皮絨 · 加襯</dd>
+        <dt data-en="Pockets" data-ko="포켓">內袋</dt><dd data-en="2 card slots" data-ko="카드 슬롯 2">卡夾 × 2</dd>
+      </dl>
+    </article>
+
+    <article class="card">
+      <span class="plate pending" role="img" aria-label="圖片製版中">
+        <b aria-hidden="true"></b>
+        <span class="p1" data-en="Plate pending" data-ko="제작 중">圖片製版中</span>
+        <span class="p2">VL · BAG · 003</span>
+      </span>
+      <p class="ref">VL · BAG · 003<em data-en="To be announced" data-ko="공개 예정">品牌待公布</em></p>
+      <h3 data-en="Woven Strap" data-ko="우븐 스트랩">編織背帶</h3>
+      <p class="say" data-en="Sold on its own so one bag can change register. Woven webbing with leather tabs, and the same clip as the bags, so it swaps in a second." data-ko="가방 하나로 분위기를 바꿀 수 있도록 단품으로 판매합니다. 우븐 웨빙에 가죽 탭, 가방과 같은 후크라 몇 초면 교체됩니다.">單獨賣，讓同一個包換個樣子。編織織帶配皮革接片，扣具跟包身同一規格，幾秒就換好。</p>
+      <dl class="hall">
+        <dt data-en="Material" data-ko="소재">材質</dt><dd data-en="Woven webbing · leather tabs" data-ko="우븐 웨빙 · 가죽 탭">編織織帶 · 皮革接片</dd>
+        <dt data-en="Length" data-ko="길이">長度</dt><dd data-en="Adjustable" data-ko="길이 조절">可調</dd>
+      </dl>
+    </article>
+  </div>
+</section>
+
+<!-- ═══ 代理品牌（含關於）═══
+     分類負責瀏覽，品牌負責信任感。商品卡上已有品牌小字，
+     這一節把三家的背景交代清楚。 -->
+<section class="ch tint" id="brands">
+  <header class="ch-head">
+    <p class="kick" data-en="About · The houses we represent" data-ko="소개 · 취급 브랜드">關於 · 代理品牌</p>
+    <h2 data-en="Velora International" data-ko="벨로라 인터내셔널">維羅拉國際</h2>
+    <p class="lede" data-en="Velora International is a Taiwanese agency for Korean design-led brands. We handle import, wholesale and retail supply — from a single sample to a full container." data-ko="벨로라 인터내셔널은 한국 디자인 브랜드의 대만 총판입니다. 샘플 한 점부터 컨테이너 단위까지 수입·도매·소매 공급을 담당합니다.">維羅拉國際有限公司代理韓國設計品牌進入台灣，承接進口、批發與零售供貨 —— 從單件樣品到整櫃都做。</p>
+  </header>
+
+  <div class="houses">
+    <article>
+      <p class="ref">HOUSE · 01</p>
+      <h3>VUCA</h3>
+      <p class="loc" data-en="Seoul, Korea · Fragrance" data-ko="서울, 한국 · 프래그런스">韓國首爾 · 香氛</p>
+      <p data-en="A house that treats scent as part of a room rather than an accessory to it. Formulated to IFRA standards and tested for seven key harmful substances." data-ko="향을 공간의 일부로 다루는 브랜드. IFRA 기준에 맞춘 향료와 7가지 유해물질 검사를 통과했습니다.">主張香氣是空間的一部分而非附加品。香精配方符合 IFRA 標準，並通過七項有害物質檢驗。</p>
+    </article>
+
+    <article>
+      <p class="ref">HOUSE · 02</p>
+      <h3>SAINTMARI</h3>
+      <p class="loc" data-en="Seoul, Korea · Scarves &amp; jewelry" data-ko="서울, 한국 · 스카프 · 주얼리">韓國首爾 · 絲巾與飾品</p>
+      <p data-en="Silk scarves and sterling jewelry. The design is restrained and speaks through proportion and finish — things you wear daily, not only for occasions." data-ko="실크 스카프와 실버 주얼리. 절제된 디자인으로 비율과 마감이 말을 합니다 — 특별한 날이 아니라 매일 착용하는 물건입니다.">做真絲長巾與純銀首飾。設計克制，靠比例與收邊說話 —— 是每天戴的東西，不是場合才拿出來的。</p>
+    </article>
+
+    <article class="tbd">
+      <p class="ref">HOUSE · 03</p>
+      <h3 data-en="To be announced" data-ko="공개 예정">品牌待公布</h3>
+      <p class="loc" data-en="Seoul, Korea · Phone bags" data-ko="서울, 한국 · 폰백">韓國首爾 · 手機包</p>
+      <p data-en="The designer house behind the phone bags will be named here once the agency agreement is signed." data-ko="폰백을 맡을 디자이너 브랜드는 계약 체결 후 이곳에 표기됩니다.">手機包的設計師品牌將在代理合約簽訂後於此列出。</p>
+    </article>
+  </div>
+</section>
+
+<!-- ═══ 選物準則 ═══ -->
 <section class="ch std" id="standard">
   <header class="ch-head">
     <p class="kick" data-en="How we decide" data-ko="선정 방식">代理之前</p>
@@ -264,15 +321,6 @@
   </ul>
 </section>
 
-<!-- ═══ 關於 ═══ -->
-<section class="ch about" id="about">
-  <header class="ch-head">
-    <p class="kick" data-en="About" data-ko="소개">關於</p>
-    <h2 data-en="Velora International" data-ko="벨로라 인터내셔널">維羅拉國際</h2>
-    <p class="lede" data-en="Velora International is a Taiwanese agency for Korean design-led brands. We handle import, wholesale and retail supply — from a single sample to a full container." data-ko="벨로라 인터내셔널은 한국 디자인 브랜드의 대만 총판입니다. 샘플 한 점부터 컨테이너 단위까지 수입·도매·소매 공급을 담당합니다.">維羅拉國際有限公司代理韓國設計品牌進入台灣，承接進口、批發與零售供貨 —— 從單件樣品到整櫃都做。</p>
-  </header>
-</section>
-
 <!-- ═══ 唯一的轉換點：LINE。不放價格、購物車或下單 ═══ -->
 <section class="cta">
   <p class="kick" data-en="Enquiries" data-ko="문의">洽詢</p>
@@ -286,7 +334,7 @@
 
 <footer class="ft">
   <p class="co" data-en="Velora International CO., LTD" data-ko="벨로라 인터내셔널">維羅拉國際有限公司</p>
-  <p class="sub" data-en="Korean design agency · Fragrance, silk, silver, phone bags" data-ko="한국 디자인 브랜드 총판 · 프래그런스 · 실크 · 실버 · 폰백">韓國選品代理 · 香氛、絲巾、銀飾與手機包</p>
+  <p class="sub" data-en="Korean design agency · Fragrance · Scarves · Jewelry · Phone bags" data-ko="한국 디자인 브랜드 총판 · 프래그런스 · 스카프 · 주얼리 · 폰백">韓國選品代理 · 香氛 · 絲巾 · 飾品 · 手機包</p>
   <p class="lk">
     <a href="mailto:hello@velora.com.tw">hello@velora.com.tw</a>
     <a href="https://lin.ee/uzoQ8dl" target="_blank" rel="noopener noreferrer">LINE @velora</a>
