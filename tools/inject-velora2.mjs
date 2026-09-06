@@ -141,7 +141,11 @@ function card(p, houseName) {
 
   const parts = [
     plate(p),
-    `<p class="ref">${esc(one(p.ref))}<em>${esc(one(houseName))}</em></p>`,
+    // 沒掛品牌（或品牌設成不露出）就整個 <em> 不輸出。空的 <em> 在手機版
+    // 是 display:block 還帶 margin-top，會留下一段沒有內容的空白。
+    // <em> 在 <p class="ref"> 裡面，不是 .card 的直接子元素，卡片不變式不受影響。
+    `<p class="ref">${esc(one(p.ref))}` +
+      (one(houseName) ? `<em>${esc(one(houseName))}</em>` : '') + `</p>`,
     tri('h3', '', p.name),
     detail,
   ]
@@ -311,9 +315,9 @@ async function main() {
     /*
      * 一件上架商品都沒有 → 整個 <section> 拿掉。
      *
-     * 第一版是丟例外。那在「品類永遠有商品」的假設下是對的，但暫停一個
-     * 代理品牌（houses 的 listed 取消勾選）之後，它底下的品類就會變成
-     * 0 件 —— 那是正常操作，不是錯誤。
+     * 第一版是丟例外。那在「品類永遠有商品」的假設下是對的，但一個品類
+     * 底下的商品全部取消上架（products 的 listed）之後就會變成 0 件 ——
+     * 那是正常操作，不是錯誤。
      *
      * 只清掉卡片而留下標題會更糟：畫面上出現一個有標題、有導言、
      * 卻什麼都沒有的區塊，那看起來像壞掉。
@@ -332,9 +336,9 @@ async function main() {
   /*
    * 品牌區。只有「上架中而且真的有商品」的品牌會出現。
    *
-   * houses 的 listed 是整包代理的開關；有品牌但一件商品都沒有的情況
-   * （例如剛簽約還沒上架）也不該出現在「代理品牌」那一區 ——
-   * 那會讓人以為點得進去。
+   * houses 的 listed 控制品牌露不露出（不影響商品上下架）；有品牌但
+   * 一件商品都沒有的情況（例如剛簽約還沒上架）也不該出現在
+   * 「代理品牌」那一區 —— 那會讓人以為點得進去。
    */
   const { houses: allHouses } = await loadSite()
   const withProducts = new Set(products.map((p) => p.houseKey))

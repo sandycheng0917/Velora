@@ -246,11 +246,18 @@ async function main() {
   assertNoCost(data, 'export')
 
   /*
-   * 下架的品牌整包排除。
+   * 不顯示的品牌。
    *
-   * houses 分頁的 listed 是整個品牌的開關 —— 暫停代理時要動的是一整個
-   * 品牌，不是逐件商品。舊的 Sheet 沒有這一欄，那時視同全部上架，
-   * 否則升欄位前的建置會把整個網站清空。
+   * houses 分頁的 listed 控制的是**品牌要不要露出**，不是商品的上下架。
+   * 取消勾選之後：品牌館少一塊、商品卡上的品牌名不再出現，
+   * 但那些商品照樣在架上 —— 它們只是變成「沒有掛品牌」的商品。
+   *
+   * 🔴 2026-09-07 改過語意。原本是整包排除，暫停 SAINTMARI 會讓 8 件
+   *    絲巾與飾品從網站上消失，整個品類區塊跟著不見。那不是使用者要的：
+   *    「我只是沒有要顯示品牌而已，並沒有說商品要下架。」
+   *
+   * 本來就沒填 house 的商品一直都是這樣運作的，所以這不是新行為，
+   * 只是讓「隱藏品牌」跟「本來就沒品牌」走同一條路。
    */
   const houseOff = new Set(
     (data.houses || [])
@@ -258,17 +265,19 @@ async function main() {
       .map((h) => str(h.key))
   )
   if (houseOff.size) {
-    console.error(`品牌已下架：${[...houseOff].join('、')}（其商品與介紹都不會進前台）`)
+    console.error(`品牌不露出：${[...houseOff].join('、')}（商品留在架上，只是不掛品牌）`)
   }
 
   // ── 商品：白名單 → 正規化 ───────────────────────────────────────
   const rows = (data.products || [])
     .map(pick)
     .filter((r) => str(r.id))
-    .filter((r) => !houseOff.has(str(r.house)))
     .map((r) => {
+      // 不露出的品牌：把 house 留白。前台從此看不到品牌名，也不會出現
+      // 指向一個不存在品牌的斷鏈（site.generated.js 只含要露出的品牌）。
+      const house = houseOff.has(str(r.house)) ? '' : str(r.house)
       const o = {
-        id: str(r.id), ref: str(r.ref), category: str(r.category), house: str(r.house),
+        id: str(r.id), ref: str(r.ref), category: str(r.category), house,
         hs: str(r.hs), origin: str(r.origin) || 'KR',
         listed: bool(r.listed), featured: bool(r.featured),
         order: Number(r.order) || 0,

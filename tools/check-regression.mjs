@@ -126,42 +126,31 @@ const old = await loadOld()
 const now = await loadNew()
 
 /**
- * 目前還在上架的品牌。
+ * 目前要露出的品牌。
  *
- * site.generated.js 只含 listed 的品牌 —— houses 分頁的 listed 是整包
- * 代理的開關。所以「基準線裡有、產生的檔案裡沒有」的品牌，就是被刻意
- * 暫停的，它底下的商品與品類跟著消失是預期內的，不是資料掉了。
+ * site.generated.js 只含 listed 的品牌 —— houses 分頁的 listed 控制的是
+ * 「品牌露不露出」，不是商品的上下架。取消勾選之後，那個品牌會從品牌館
+ * 消失，它底下的商品則留在架上，只是 house 欄變空（＝沒掛品牌）。
  *
- * 🔴 這一段是 2026-09-07 補的。在那之前，暫停一個代理品牌會讓這支
- *    檢查報八件商品遺失，發布直接被自己的關卡擋下來 ——
- *    而使用者看到的只有「發布失敗」。
+ * 🔴 這一段改過兩次，兩次都是同一個教訓。
+ *    2026-09-07 早：暫停代理會讓 8 件商品從輸出裡消失，這支檢查照實
+ *    報「遺失」，發布被自己的關卡擋下，使用者只看到「發布失敗」。
+ *    2026-09-07 晚：真正的錯不在檢查，在產生器 —— 使用者要的是不顯示
+ *    品牌，從來沒說商品要下架。產生器改成留白 house 之後，商品不再消失，
+ *    這裡要放行的就只剩「house 由某個品牌變成空」這一件事。
  *
- *    一道分不出「刻意」與「意外」的關卡，會在正常操作時擋住人，
- *    那比沒有關卡更糟：它會被繞過，然後就再也擋不住真正的問題。
+ *    一道分不出「刻意」與「意外」的關卡比沒有關卡更糟：它會在正常操作時
+ *    擋住人，然後被繞過，之後就再也擋不住真正的問題。
  */
 const activeHouses = new Set(now.houses.map((h) => h.key))
 const pausedHouses = Object.keys(old.houses).filter((k) => !activeHouses.has(k))
-/** 因為品牌暫停而預期會消失的商品 id */
-const expectedGone = new Set(
-  old.products.filter((p) => !activeHouses.has(p.house)).map((p) => p.id)
-)
-/** 同理：整個品類的商品都屬於已暫停的品牌時，那個品類消失也是預期的 */
-const expectedGoneCats = new Set(
-  old.categories
-    .filter((c) => {
-      const inCat = old.products.filter((p) => p.category === c.key)
-      return inCat.length > 0 && inCat.every((p) => expectedGone.has(p.id))
-    })
-    .map((c) => c.key)
-)
 
 /* 商品：逐件逐欄 */
 const newById = new Map(now.products.map((p) => [p.id, p]))
 for (const p of old.products) {
   const n = newById.get(p.id)
   if (!n) {
-    fail(`商品 ${p.id}`, '存在', '整件不見了',
-      expectedGone.has(p.id) ? `品牌 ${p.house} 目前暫停代理（houses 的 listed 未勾選）` : null)
+    fail(`商品 ${p.id}`, '存在', '整件不見了')
     continue
   }
   const w = `商品 ${p.id}`
@@ -171,7 +160,12 @@ for (const p of old.products) {
   cmp(w, 'material', p.material, { zh: n.material_zh, en: n.material_en, ko: n.material_ko })
   cmp(w, 'spec', p.spec, { zh: n.spec_zh, en: n.spec_en, ko: n.spec_ko })
   cmp(w, 'ref', p.ref, n.ref)
-  cmp(w, 'house', p.house, n.house)
+  // 品牌不露出時 house 會留白，那是刻意的；變成**別的**品牌仍然要報
+  if (pausedHouses.includes(p.house) && !n.house) {
+    accepted.push([`${w} · house`, p.house, '(空)', '品牌不露出，商品仍在架上'])
+  } else {
+    cmp(w, 'house', p.house, n.house)
+  }
   if (p.notes) {
     for (const [slot, col] of [['top', 'notes_top'], ['middle', 'notes_mid'], ['base', 'notes_base']]) {
       cmp(w, `notes.${slot}`, p.notes[slot], {
@@ -192,8 +186,7 @@ const newCats = new Map(now.categories.map((c) => [c.key, c]))
 for (const c of old.categories) {
   const n = newCats.get(c.key)
   if (!n) {
-    fail(`品類 ${c.key}`, `存在（${c.name.zh}）`, '整個不見了',
-      expectedGoneCats.has(c.key) ? '這個品類的商品全部屬於已暫停的品牌' : null)
+    fail(`品類 ${c.key}`, `存在（${c.name.zh}）`, '整個不見了')
     continue
   }
   cmp(`品類 ${c.key}`, 'name', c.name, n.name)
@@ -211,7 +204,7 @@ for (const key of Object.keys(old.houses)) {
   const n = newHouses.get(key)
   if (!n) {
     fail(`品牌 ${key}`, '存在', '整個不見了',
-      `houses 分頁的 listed 未勾選，代理暫停中。資料完全保留，勾回去再發布就會回來`)
+      `houses 分頁的 listed 未勾選 —— 品牌不露出，商品仍在架上。勾回去再發布就會回來`)
     continue
   }
   cmp(`品牌 ${key}`, 'name', o.name, n.name)

@@ -205,7 +205,7 @@ function askOnLine() {
           </span>
           <div class="wide-body">
             <div class="top">
-              <span class="pill">{{ houses[p.house].name }}</span>
+              <span v-if="houses[p.house]" class="pill">{{ houses[p.house].name }}</span>
               <span class="ref">{{ p.ref }}</span>
             </div>
             <h3 class="disp">{{ p.name.en }}</h3>

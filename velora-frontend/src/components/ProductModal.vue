@@ -61,7 +61,7 @@ watch(
           </dl>
 
           <dl class="facts">
-            <div><dt>{{ t('brand') }}</dt><dd>{{ house?.name }}</dd></div>
+            <div v-if="house"><dt>{{ t('brand') }}</dt><dd>{{ house.name }}</dd></div>
             <div><dt>{{ t('material') }}</dt><dd>{{ pick(product.material) }}</dd></div>
             <div><dt>{{ t('spec') }}</dt><dd>{{ pick(product.spec) }}</dd></div>
             <div><dt>{{ t('origin') }}</dt><dd>{{ pick(product.origin) }}</dd></div>
