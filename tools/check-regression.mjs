@@ -271,9 +271,10 @@ if (problems.length) {
    * 要知道是哪一項得點進去展開步驟往下捲。訊息寫得再清楚，看不到就等於沒寫。
    */
   if (process.env.GITHUB_ACTIONS) {
-    const lines = problems.slice(0, 12).map(([l, was, n]) => `${l}：${was} → ${n}`)
-    console.log('::error::內容遺失 ' + problems.length + ' 項%0A' +
-      lines.join('%0A').replace(/?\n/g, ' '))
+    // 每一項壓成單行；註記的換行要寫成 %0A，送真的換行字元只會留下第一行
+    const flat = (v) => String(v).split(/\s+/).join(' ').slice(0, 60)
+    const lines = problems.slice(0, 12).map(([l, was, n]) => `${l}：${flat(was)} → ${flat(n)}`)
+    console.log('::error::內容遺失 ' + problems.length + ' 項%0A' + lines.join('%0A'))
   }
   process.exit(1)
 }
