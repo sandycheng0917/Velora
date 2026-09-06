@@ -76,8 +76,11 @@ function validateProduct_(p, cats, houses) {
   if (cats.indexOf(String(p.category)) === -1) {
     errs.push('品類「' + p.category + '」不存在，可用的有：' + cats.join(' / '));
   }
-  if (houses.indexOf(String(p.house)) === -1) {
-    errs.push('品牌「' + p.house + '」不存在，可用的有：' + houses.join(' / '));
+  // 品牌是選填的 —— 有些商品本來就不掛品牌。空白直接放行；
+  // 但填了一個不存在的品牌仍然要擋，那是打錯字不是「不掛品牌」。
+  var house = String(p.house == null ? '' : p.house).trim();
+  if (house !== '' && houses.indexOf(house) === -1) {
+    errs.push('品牌「' + house + '」不存在，可用的有：' + houses.join(' / ') + '（也可以留白，代表不掛品牌）');
   }
   if (p.price !== undefined && p.price !== '' && isNaN(Number(p.price))) {
     errs.push('售價必須是數字，收到「' + p.price + '」');
@@ -544,6 +547,9 @@ function testValidate() {
     ['中文品名空白', w({ name_zh: '' }), 1],
     ['品類不存在', w({ category: 'nope' }), 1],
     ['品牌不存在', w({ house: 'nope' }), 1],
+    ['品牌留白（選填）', w({ house: '' }), 0],
+    ['品牌整個沒給', w({ house: undefined }), 0],
+    ['品牌只有空白字元', w({ house: '   ' }), 0],
     ['售價不是數字', w({ price: 'abc' }), 1],
     ['勾公開卻沒填價', w({ price_public: true, price: '' }), 1],
     ['勾公開且有填價', w({ price_public: true, price: 1280 }), 0],

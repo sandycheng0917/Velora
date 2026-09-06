@@ -46,7 +46,7 @@ const truthy = (v) => v === true || String(v).toUpperCase() === 'TRUE'
 
 function blank() {
   const o = {
-    id: '', ref: '', category: props.categories[0]?.key || '', house: props.houses[0]?.key || '',
+    id: '', ref: '', category: props.categories[0]?.key || '', house: '',
     hs: '', origin: 'KR', price: '', price_public: false,
     listed: true, featured: false, order: 0,
     img_main: '', img_2: '', img_3: '',
@@ -305,12 +305,18 @@ async function remove() {
         </div>
         <div class="tri" style="padding-bottom: 24px">
           <div>
-            <label>品牌</label>
+            <label>品牌（選填）</label>
             <select v-model="form.house">
+              <!-- 品牌是選填的：有些商品不掛品牌，前台就不顯示品牌那一欄 -->
+              <option value="">（不掛品牌）</option>
               <option v-for="h in houses" :key="h.key" :value="h.key">{{ h.name }}</option>
             </select>
           </div>
-          <div><label>HS 碼</label><input v-model="form.hs" type="text" placeholder="3307.49.0000" /></div>
+          <div>
+            <!-- 報關用的商品分類號。不填不影響網站，前台也不顯示 -->
+            <label title="海關的商品分類號碼，報關與計稅用。不填不影響網站。">HS 碼（報關用，選填）</label>
+            <input v-model="form.hs" type="text" placeholder="3307.49.0000" />
+          </div>
           <div><label>產地</label><input v-model="form.origin" type="text" placeholder="KR" /></div>
         </div>
 

@@ -146,7 +146,6 @@ function pick(key) {
   page.value = 0
 }
 
-const houseName = (k) => (props.houses.find((h) => h.key === k) || {}).name || k
 
 /** 缺譯要看得見。前台缺譯會自動回退中文，所以在前台反而看不出來 */
 function missing(p) {
