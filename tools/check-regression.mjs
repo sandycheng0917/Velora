@@ -14,40 +14,50 @@
  * 用法：
  *   node tools/check-regression.mjs
  *
- * 離線可跑，不需要 Sheet —— 它比的是「已經產生出來的檔案」。
+ * 離線可跑，不需要 Sheet、也不需要 git —— 它比的是
+ *   tools/baseline.json（改版前的內容快照）
+ * 對上
+ *   src/data/*.generated.js（這次建置產生的內容）
  */
-import { execFileSync } from 'node:child_process'
-import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { pathToFileURL } from 'node:url'
 
 const ROOT = new URL('..', import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1')
 const DATA = join(ROOT, 'velora-frontend', 'src', 'data')
 
-/* ── 取得「改版前」的 catalog.js ────────────────────────────────
-   從 git 取 HEAD 版本，而不是讀工作目錄裡的檔案 —— 介面層改寫之後
-   工作目錄裡那份就是新的了，比對會變成自己跟自己比，永遠通過。 */
-function oldCatalogSource() {
+/**
+ * 「改版前」的基準線。
+ *
+ * 🔴 第一版是 `git show HEAD:...catalog.js`，那是錯的 ——
+ *    基準線不能是會移動的東西。改版一 commit 進去，HEAD 上的 catalog.js
+ *    就變成介面層了，而介面層會去 import 產生的檔案，
+ *    載入時直接 ERR_MODULE_NOT_FOUND。就算沒炸，也會變成拿新的比新的，
+ *    永遠通過 —— 那是更糟的失敗方式，因為看起來像成功。
+ *
+ *    改成固定的快照檔（tools/baseline.json，取自 commit 161906b）。
+ *    它不隨任何東西移動，也不需要 git 才能跑。
+ *
+ * 什麼時候該更新這個檔案：**幾乎不該**。它記錄的是「Sheet 化之前，
+ * 網站上確實有的內容」。如果哪天刻意要移除某些內容，把差異登記到
+ * ACCEPTED 裡並寫下理由，不要去改基準線 —— 改了就沒有基準了。
+ */
+async function loadOld() {
+  const path = join(ROOT, 'tools', 'baseline.json')
+  let raw
   try {
-    return execFileSync('git', ['show', 'HEAD:velora-frontend/src/data/catalog.js'], {
-      cwd: ROOT,
-      encoding: 'utf8',
-      maxBuffer: 8 * 1024 * 1024,
-    })
+    raw = readFileSync(path, 'utf8')
   } catch {
-    console.error('✗ 取不到 HEAD 的 catalog.js。這支必須在 git repo 裡跑。')
+    console.error(`✗ 找不到基準線 ${path}。這個檔案要進版控。`)
     process.exit(2)
   }
-}
-
-/** catalog.js 用了 import.meta.env，Node 直接載入會炸。複製一份改掉再載。 */
-async function loadOld() {
-  const dir = mkdtempSync(join(tmpdir(), 'velora-reg-'))
-  const src = oldCatalogSource().replace("import.meta.env.BASE_URL || '/'", "'/'")
-  writeFileSync(join(dir, 'catalog.mjs'), src)
-  writeFileSync(join(dir, 'media-manifest.js'), readFileSync(join(DATA, 'media-manifest.js')))
-  return import(pathToFileURL(join(dir, 'catalog.mjs')).href)
+  const b = JSON.parse(raw)
+  return {
+    products: b.products,
+    categories: b.categories,
+    houses: b.houses,
+    _at: b.at,
+  }
 }
 
 async function loadNew() {
@@ -137,7 +147,7 @@ for (const p of old.products) {
       })
     }
   }
-  const oldImgs = (p.gallery || []).length
+  const oldImgs = p.images || 0
   const newImgs = (n.files || []).length
   if (oldImgs > newImgs) fail(`${w} · 圖片`, `${oldImgs} 張`, `${newImgs} 張`)
 }
