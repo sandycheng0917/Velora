@@ -47,7 +47,7 @@
  * 版本字串。**改了端點就要改這裡**，否則沒辦法分辨線上跑的是哪一版。
  * ping 會連同 ops 清單一起回傳，貼上不完整或忘了重新部署一眼就看得出來。
  */
-var VERSION = 'v3-crud';
+var VERSION = 'v4-imagebook';
 
 /** 令牌壽命。用算式寫，不要展開成 28800000 —— 十位數字面值會誤觸機密掃描 */
 var TOKEN_TTL_MS = 8 * 60 * 60 * 1000;
@@ -414,8 +414,9 @@ function opExport_(b) {
   }
 
   if (part === 'images') {
-    // 影像分頁可能很大（一格四萬字元）。分頁回傳，避免單次回應撐爆
-    var rows = readSheet_(ss, 'images');
+    // 影像分頁可能很大（一格四萬字元）。分頁回傳，避免單次回應撐爆。
+    // 它在另一份試算表裡 —— 分開是為了讓主檔維持可用的速度
+    var rows = readSheet_(openImages_(), 'images');
     var page = Math.max(0, Number(b.page || 0));
     var size = Math.min(Math.max(1, Number(b.size || 40)), 200);
     var slice = rows.slice(page * size, (page + 1) * size);

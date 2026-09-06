@@ -85,6 +85,21 @@ var COLS = {
 /** 建立後不可更動的欄位。後台的儲存端會擋下對這些欄的修改 */
 var IMMUTABLE = ['id'];
 
+/**
+ * 這些分頁放在「另一份」試算表裡。
+ *
+ * 🔴 為什麼要分開：base64 一格四萬字元。Google Sheets 會把每一格的內容
+ *    都載進瀏覽器並渲染，二十幾列就足以讓整個檔案捲動卡頓 ——
+ *    而且是連帶拖慢你真正在編輯的 products 分頁。
+ *
+ *    分成兩個檔案之後，你平常開的那份只有純文字，維持原本的速度；
+ *    影像那份你永遠不需要打開。
+ *
+ * 代價是多一個 ID 要管（指令碼屬性 IMAGES_SHEET_ID），
+ * 而且備份時兩份都要備。
+ */
+var IN_IMAGE_BOOK = ['images'];
+
 /* ── 種子資料：從現有的 catalog.js 搬過來，不是憑空編的 ─────────────── */
 
 var SEED_CATEGORIES = [
@@ -117,10 +132,24 @@ function setupSheets() {
   var report = [];
 
   for (var name in COLS) {
+    if (IN_IMAGE_BOOK.indexOf(name) !== -1) continue;   // 影像另存一份檔案
     var sh = ss.getSheetByName(name) || ss.insertSheet(name);
     writeHeader_(sh, COLS[name]);
     report.push(name + '（' + COLS[name].length + ' 欄）');
   }
+
+  // 影像分頁在另一份試算表裡。理由是效能：base64 一格四萬字元，
+  // Google Sheets 會把每一格都載進瀏覽器並渲染，二十幾列就足以讓
+  // 整個檔案捲動卡頓。分開之後你平常開的那份維持乾淨。
+  var ib = openImages_();
+  for (var k = 0; k < IN_IMAGE_BOOK.length; k++) {
+    var n2 = IN_IMAGE_BOOK[k];
+    var sh2 = ib.getSheetByName(n2) || ib.insertSheet(n2);
+    writeHeader_(sh2, COLS[n2]);
+    report.push(n2 + '（' + COLS[n2].length + ' 欄，另一份檔案）');
+  }
+  var junk2 = ib.getSheetByName('工作表1') || ib.getSheetByName('Sheet1');
+  if (junk2 && ib.getSheets().length > 1 && junk2.getLastRow() === 0) ib.deleteSheet(junk2);
 
   // 有些試算表建立時會有一張叫「工作表1」的空分頁，礙眼但不能盲刪 ——
   // 只有在它確實是空的、而且不是唯一一張時才移除
@@ -166,6 +195,33 @@ function openBook_() {
   var ss = SpreadsheetApp.create('Velora 商品資料');
   props.setProperty('SHEET_ID', ss.getId());
   Logger.log('已建立新的試算表並記住它的 ID：' + ss.getUrl());
+  return ss;
+}
+
+/**
+ * 取得影像專用的試算表。沒設 IMAGES_SHEET_ID 就自己建一份並記住 ID。
+ *
+ * 跟 openBook_ 是同一套做法，理由也一樣：手動建檔、抄網址中間那一段、
+ * 貼進設定頁 —— 三步每一步都可能抄錯，而且錯了要到執行時才發現。
+ */
+function openImages_() {
+  var props = PropertiesService.getScriptProperties();
+  var id = props.getProperty('IMAGES_SHEET_ID');
+
+  if (id) {
+    try {
+      return SpreadsheetApp.openById(id);
+    } catch (err) {
+      throw new Error(
+        '指令碼屬性 IMAGES_SHEET_ID 打不開：' + id +
+        '。可能是 ID 貼錯，或那份試算表已被刪除。' +
+        '把該屬性刪掉再執行一次 setupSheets，就會自動建一份新的。');
+    }
+  }
+
+  var ss = SpreadsheetApp.create('Velora 影像儲存');
+  props.setProperty('IMAGES_SHEET_ID', ss.getId());
+  Logger.log('已建立影像試算表並記住它的 ID：' + ss.getUrl());
   return ss;
 }
 
@@ -262,8 +318,9 @@ function applyValidation_(ss) {
   });
 
   // 影像的 data 欄是動輒四萬字元的 base64，讓它顯示成一行，
-  // 否則捲動整張表會卡到動不了
-  var im = ss.getSheetByName('images');
+  // 否則捲動整張表會卡到動不了。它在另一份試算表裡
+  var im = openImages_().getSheetByName('images');
+  if (!im) return;
   ensureRows_(im, 501);
   var imRows = im.getMaxRows() - 1;
   im.getRange(2, COLS.images.indexOf('data') + 1, imRows, 1)
@@ -521,8 +578,8 @@ function verifySetup() {
       '誘餌列存在且格式正確（COSTCANARY- + 16 碼，長度 ' + v.length + '）');
   }
 
-  // ── 5. 影像分頁 ────────────────────────────────────────────────
-  var im = ss.getSheetByName('images');
+  // ── 5. 影像分頁（在另一份試算表）────────────────────────────────
+  var im = openImages_().getSheetByName('images');
   ok(im.getRange(2, COLS.images.indexOf('data') + 1).getWrapStrategy() ===
      SpreadsheetApp.WrapStrategy.CLIP, 'images.data 設為不換行（否則捲動會卡）');
 
@@ -645,4 +702,79 @@ function patchCategories() {
     '  共 ' + out.length + ' 個品類' + (kept ? '，其中 ' + kept + ' 個是你自己加的，內容沒動' : '') + '\n\n' +
     '新增的欄位：short_zh / short_en / short_ko（後台頁籤）、cover（品類封面圖）。\n' +
     'name_* 改成長名給前台導覽列用 —— 「純銀飾品」講得出材質，「飾品」什麼都沒說。');
+}
+
+
+/**
+ * 把影像分頁從主試算表搬到獨立的影像檔。
+ *
+ * ── 為什麼要分開 ────────────────────────────────────────────────────
+ *
+ * base64 一格四萬字元。Google Sheets 會把每一格的內容都載進瀏覽器並
+ * 渲染，二十幾列就足以讓整個檔案捲動卡頓 —— 而且是連帶拖慢你真正在
+ * 編輯的 products 分頁。分成兩個檔案之後，你平常開的那份只有純文字。
+ *
+ * 代價是多一個 ID 要管（指令碼屬性 IMAGES_SHEET_ID），備份時兩份都要備。
+ *
+ * ── 可以重複執行 ────────────────────────────────────────────────────
+ *
+ * 已經分開的話會直接回報現況。主檔那張分頁有資料時會先搬過去再刪 ——
+ * 不會弄丟任何東西。
+ */
+function splitImagesBook() {
+  var main = openBook_();
+  var ib = openImages_();
+  var lines = [];
+
+  // 目標檔的分頁
+  var dst = ib.getSheetByName('images');
+  if (!dst) {
+    dst = ib.insertSheet('images');
+    writeHeader_(dst, COLS.images);
+    lines.push('  在影像檔建立 images 分頁');
+  }
+  var junk = ib.getSheetByName('工作表1') || ib.getSheetByName('Sheet1');
+  if (junk && ib.getSheets().length > 1 && junk.getLastRow() === 0) {
+    ib.deleteSheet(junk);
+    lines.push('  移除影像檔的空白預設分頁');
+  }
+
+  // 主檔還有沒有殘留
+  var src = main.getSheetByName('images');
+  if (!src) {
+    lines.push('  主檔沒有 images 分頁（已經分開了）');
+  } else {
+    var rows = lastIdRow_(src) - 1;
+    if (rows > 0) {
+      // 有資料就先搬。逐列複製而不是整段搬移 ——
+      // moveSheet 只能在同一份試算表裡動
+      var width = COLS.images.length;
+      var vals = src.getRange(2, 1, rows, width).getValues();
+      var at = lastIdRow_(dst) + 1;
+      ensureRows_(dst, at + rows + 1);
+      dst.getRange(at, 1, rows, width).setValues(vals);
+      SpreadsheetApp.flush();
+
+      // 搬完讀回來比對再刪。沒有這一步的話，複製失敗就是資料消失
+      var back = dst.getRange(at, 1, rows, 1).getValues();
+      var same = true;
+      for (var i = 0; i < rows; i++) {
+        if (String(back[i][0]) !== String(vals[i][0])) { same = false; break; }
+      }
+      if (!same) {
+        return say_('✗ 搬過去之後讀回來對不上，主檔那張分頁保留不動。請再執行一次。');
+      }
+      lines.push('  搬移 ' + rows + ' 列到影像檔並驗證通過');
+    } else {
+      lines.push('  主檔的 images 分頁是空的，直接移除');
+    }
+    main.deleteSheet(src);
+    lines.push('  已從主檔移除 images 分頁');
+  }
+
+  return say_(
+    '影像分頁拆分完成\n' + lines.join('\n') + '\n\n' +
+    '  商品資料　' + main.getUrl() + '\n' +
+    '  影像儲存　' + ib.getUrl() + '\n\n' +
+    '影像那份你平常不需要打開。兩份都要記得備份。');
 }

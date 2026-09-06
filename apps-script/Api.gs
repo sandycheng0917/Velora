@@ -285,7 +285,8 @@ function opUpload_(b) {
   try { lock.waitLock(30000); } catch (e) { return { ok: false, err: 'busy' }; }
 
   try {
-    var sh = openBook_().getSheetByName('images');
+    // 影像在另一份試算表（見 Setup.gs 的 IN_IMAGE_BOOK）
+    var sh = openImages_().getSheetByName('images');
     if (!sh) return { ok: false, err: 'no-sheet' };
     var idx = headIndex_(sh);
     var width = COLS.images.length;
@@ -337,7 +338,7 @@ function opImage_(b) {
   var key = String(b.key || '').trim();
   if (!key) return { ok: false, err: 'no-key' };
 
-  var sh = openBook_().getSheetByName('images');
+  var sh = openImages_().getSheetByName('images');
   if (!sh) return { ok: false, err: 'no-sheet' };
   var last = lastIdRow_(sh);
   if (last < 2) return { ok: true, key: key, found: false };

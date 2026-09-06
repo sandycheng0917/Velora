@@ -53,8 +53,8 @@ var SEED_IMAGES = [
 var SEED_BATCH = 8;
 
 function seedImages() {
-  var ss = openBook_();
-  var sh = ss.getSheetByName('images');
+  // 影像在另一份試算表（Setup.gs 的 IN_IMAGE_BOOK / openImages_）
+  var sh = openImages_().getSheetByName('images');
   if (!sh) return pwSay_('找不到 images 分頁，請先執行 setupSheets。');
 
   var idx = headIndex_(sh);
@@ -171,7 +171,7 @@ function writeImage_(sh, idx, width, meta, b64) {
  * 檢查目前 Sheet 裡有幾張圖，以及跟這份清單差多少。不會寫入。
  */
 function checkImages() {
-  var sh = openBook_().getSheetByName('images');
+  var sh = openImages_().getSheetByName('images');
   if (!sh) return pwSay_('找不到 images 分頁。');
   var idx = headIndex_(sh);
   var last = lastIdRow_(sh);

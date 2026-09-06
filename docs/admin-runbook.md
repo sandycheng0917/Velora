@@ -21,11 +21,25 @@
 
 商品資料在一份 Google 試算表裡，不在程式碼裡。分頁如下：
 
+**有兩份試算表**，這是刻意的：
+
+| 檔案 | 分頁 | 你會不會打開 |
+|---|---|---|
+| **Velora 商品資料** | `products`、`products_private`、`houses`、`categories`、`audit` | 常常 |
+| **Velora 影像儲存** | `images` | 幾乎不會 |
+
+分開的理由是效能：圖片以 base64 存放，一格四萬字元。Google Sheets 會把
+每一格的內容都載進瀏覽器並渲染，二十幾列就足以讓整個檔案捲動卡頓 ——
+而且會連帶拖慢你真正在編輯的 `products`。
+
+代價：兩個 ID 要管（指令碼屬性 `SHEET_ID` 與 `IMAGES_SHEET_ID`），
+**備份時兩份都要備**。
+
 | 分頁 | 放什麼 | 建置流程讀得到 |
 |---|---|---|
 | `products` | 商品主表，只有可公開的欄位 | ✓ |
 | `products_private` | FOB 成本、供應商備註、誘餌列 | ✗ |
-| `images` | 圖片的位元組（base64，一列一格） | ✓ |
+| `images` | 圖片的位元組（base64，另一份檔案） | ✓ |
 | `houses` / `categories` | 品牌、品類 | ✓ |
 | `audit` | 操作紀錄 | ✗ |
 
@@ -174,6 +188,10 @@ Apps Script 的部署可能是舊版。到編輯器：
 | `testWriteCycle` | 真的寫一件測試商品進去再刪掉 | **會寫入，跑完自動清除** |
 | `checkAll` | 檢查 Sheet 結構 | 無 |
 | `patchCategories` | 把 categories 分頁升到 11 欄 | 會改表 |
+| `splitImagesBook` | 把 images 分頁搬到獨立的影像檔 | 會改表，有驗證後才刪 |
+| `checkImages` | 看 Sheet 裡有幾張圖 | 無 |
+| `seedImages` | 從線上站台把既有商品圖搬進 Sheet | 會寫入，可重複執行 |
+| `testGithub` | 驗 GitHub 設定（唯讀，不觸發建置） | 無 |
 | `setPassword` | 換密碼（讀 `PW_NEW` 屬性） | 會改，舊令牌全失效 |
 | `unlock` | 解除鎖定 | 會改 |
 | `revokeAllTokens` | 撤銷所有令牌 | 會改 |
