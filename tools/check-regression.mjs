@@ -87,7 +87,8 @@ const additions = []
 const accepted = []
 
 /** 記一筆遺失。已登記為刻意差異的走另一區，不算失敗。 */
-function fail(label, was, now_) {
+function fail(label, was, now_, why) {
+  if (why) { accepted.push([label, was, now_, why]); return }
   const key = Object.keys(ACCEPTED).find((k) => label === k || label.startsWith(k + " ·"))
   if (key) accepted.push([label, was, now_, ACCEPTED[key]])
   else problems.push([label, was, now_])
@@ -124,12 +125,43 @@ function cmp(where, field, was, now) {
 const old = await loadOld()
 const now = await loadNew()
 
+/**
+ * 目前還在上架的品牌。
+ *
+ * site.generated.js 只含 listed 的品牌 —— houses 分頁的 listed 是整包
+ * 代理的開關。所以「基準線裡有、產生的檔案裡沒有」的品牌，就是被刻意
+ * 暫停的，它底下的商品與品類跟著消失是預期內的，不是資料掉了。
+ *
+ * 🔴 這一段是 2026-09-07 補的。在那之前，暫停一個代理品牌會讓這支
+ *    檢查報八件商品遺失，發布直接被自己的關卡擋下來 ——
+ *    而使用者看到的只有「發布失敗」。
+ *
+ *    一道分不出「刻意」與「意外」的關卡，會在正常操作時擋住人，
+ *    那比沒有關卡更糟：它會被繞過，然後就再也擋不住真正的問題。
+ */
+const activeHouses = new Set(now.houses.map((h) => h.key))
+const pausedHouses = Object.keys(old.houses).filter((k) => !activeHouses.has(k))
+/** 因為品牌暫停而預期會消失的商品 id */
+const expectedGone = new Set(
+  old.products.filter((p) => !activeHouses.has(p.house)).map((p) => p.id)
+)
+/** 同理：整個品類的商品都屬於已暫停的品牌時，那個品類消失也是預期的 */
+const expectedGoneCats = new Set(
+  old.categories
+    .filter((c) => {
+      const inCat = old.products.filter((p) => p.category === c.key)
+      return inCat.length > 0 && inCat.every((p) => expectedGone.has(p.id))
+    })
+    .map((c) => c.key)
+)
+
 /* 商品：逐件逐欄 */
 const newById = new Map(now.products.map((p) => [p.id, p]))
 for (const p of old.products) {
   const n = newById.get(p.id)
   if (!n) {
-    fail(`商品 ${p.id}`, '存在', '整件不見了')
+    fail(`商品 ${p.id}`, '存在', '整件不見了',
+      expectedGone.has(p.id) ? `品牌 ${p.house} 目前暫停代理（houses 的 listed 未勾選）` : null)
     continue
   }
   const w = `商品 ${p.id}`
@@ -160,7 +192,8 @@ const newCats = new Map(now.categories.map((c) => [c.key, c]))
 for (const c of old.categories) {
   const n = newCats.get(c.key)
   if (!n) {
-    fail(`品類 ${c.key}`, `存在（${c.name.zh}）`, '整個不見了')
+    fail(`品類 ${c.key}`, `存在（${c.name.zh}）`, '整個不見了',
+      expectedGoneCats.has(c.key) ? '這個品類的商品全部屬於已暫停的品牌' : null)
     continue
   }
   cmp(`品類 ${c.key}`, 'name', c.name, n.name)
@@ -177,7 +210,8 @@ for (const key of Object.keys(old.houses)) {
   const o = old.houses[key]
   const n = newHouses.get(key)
   if (!n) {
-    fail(`品牌 ${key}`, '存在', '整個不見了')
+    fail(`品牌 ${key}`, '存在', '整個不見了',
+      `houses 分頁的 listed 未勾選，代理暫停中。資料完全保留，勾回去再發布就會回來`)
     continue
   }
   cmp(`品牌 ${key}`, 'name', o.name, n.name)
@@ -206,6 +240,12 @@ function section(title, rows, mark) {
     console.log(`      舊  ${trim(was)}`)
     console.log(`      新  ${trim(now_)}`)
   }
+}
+
+if (pausedHouses.length) {
+  console.log(line)
+  console.log(`○ 暫停中的品牌：${pausedHouses.join('、')}`)
+  console.log('  它們的商品與品類消失是預期的，不算內容遺失。')
 }
 
 section('✗ 內容遺失　舊的有值、新的空了或不見了', problems, '✗')
