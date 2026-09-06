@@ -279,11 +279,20 @@ async function main() {
   // ── 影像 ────────────────────────────────────────────────────────
   const assembled = assembleImages(data.images || [])
 
-  // 遷移用的退路：13 件既有商品的圖還在 repo 裡，Sheet 的 images 分頁還沒有。
-  // 這份對照由 tools/migrate-seed.mjs 產生，等圖片都從後台上傳過之後就用不到了。
+  /*
+   * repo 素材的退路 —— **只在離線開發時生效**。
+   *
+   * 用 --from fixture.json 跑的時候（本機沒有 CI 金鑰），圖片得從 repo 拿，
+   * 否則 npm run dev 是一片空白。但**接真的匯出端點時絕不退回** ——
+   * 那時 Sheet 就是唯一的來源，缺圖必須讓建置失敗。
+   *
+   * 沒有這個區分的話，Sheet 是空的、建置照樣成功、網站照樣有圖，
+   * 而沒有人會發現「資料其實不在 Sheet 裡」。那是最糟的一種靜默成功。
+   */
+  const offline = args.includes('--from')
   let legacy = {}
   const legacyPath = join(ROOT, 'tools', 'images.json')
-  if (existsSync(legacyPath)) {
+  if (offline && existsSync(legacyPath)) {
     for (const e of JSON.parse(await readFile(legacyPath, 'utf8'))) legacy[e.key] = e.path
   }
 
@@ -304,6 +313,7 @@ async function main() {
 
   const fileFor = new Map()   // key → 檔名
   const stats = { sheet: 0, legacy: 0, missing: 0 }
+  const orphans = []
 
   for (const row of rows) {
     for (const key of row.images) {
@@ -341,6 +351,10 @@ async function main() {
       }
 
       stats.missing++
+      // 在這裡記下來。下面那個迴圈會 delete row.images，
+      // 等到最後才想找是哪幾張就找不到了 —— 錯誤訊息說不出哪裡壞，
+      // 價值就少一半
+      orphans.push(`${row.id} → ${key}`)
     }
   }
 
@@ -402,6 +416,18 @@ async function main() {
   console.error(`上架 ${rows.filter((r) => r.listed).length} 件、精選 ${rows.filter((r) => r.featured).length} 件`)
   console.error(`影像 ${fileFor.size} 張（Sheet ${stats.sheet}、既有素材 ${stats.legacy}）` +
     (stats.missing ? `，${stats.missing} 個影像鍵找不到圖 → 顯示製版中空版` : ''))
+  /*
+   * 有影像鍵卻拿不到位元組 —— 這在畫面上會變成「圖片製版中」的空版，
+   * 看起來像刻意的設計，實際上是資料掉了。接真端點時一律失敗。
+   */
+  if (stats.missing && !offline) {
+    throw new Error(
+      `有 ${stats.missing} 個影像鍵在 Sheet 的 images 分頁裡找不到位元組：\n  ` +
+      orphans.slice(0, 10).join('\n  ') +
+      `\n\n這些商品在網站上會變成「圖片製版中」的空版 —— 看起來像設計，其實是資料掉了。\n` +
+      `到 Apps Script 執行 checkImages 看 Sheet 裡實際有幾張，缺的用 seedImages 或從後台補上。`)
+  }
+
   const withPrice = rows.filter((r) => r.price !== undefined).length
   console.error(`售價：${withPrice} 件有輸出（其餘 price_public 未勾選，連欄位都不產生）`)
   console.error(`寫出 ${join(DATA, 'products.generated.js')}`)
