@@ -25,11 +25,11 @@
 
 var SEED_IMAGES = [
   { key: "frg-ylang-main", url: "https://sandycheng0917.github.io/Velora/assets/media/frg-ylang-main-b9593ddb.webp", mime: "image/webp", alpha: false, sha256: "b9593ddb17d0bec9a0f6d76303be6c26a64cd35bd465ac8c0b4ce3c30294bfce", bytes: 32448 },
-  { key: "frg-ylang-2", url: "https://sandycheng0917.github.io/Velora/assets/media/frg-ylang-2-42caa68d.webp", mime: "image/webp", alpha: false, sha256: "42caa68d8ffbb182785b07163b6d24d06b7a9c00502c712fd7b1216c3aa5e087", bytes: 33998 },
-  { key: "frg-blackcherry-2", url: "https://sandycheng0917.github.io/Velora/assets/media/frg-blackcherry-2-42caa68d.webp", mime: "image/webp", alpha: false, sha256: "42caa68d8ffbb182785b07163b6d24d06b7a9c00502c712fd7b1216c3aa5e087", bytes: 33998 },
-  { key: "frg-aquakiss-2", url: "https://sandycheng0917.github.io/Velora/assets/media/frg-aquakiss-2-42caa68d.webp", mime: "image/webp", alpha: false, sha256: "42caa68d8ffbb182785b07163b6d24d06b7a9c00502c712fd7b1216c3aa5e087", bytes: 33998 },
-  { key: "frg-flowershop-2", url: "https://sandycheng0917.github.io/Velora/assets/media/frg-flowershop-2-42caa68d.webp", mime: "image/webp", alpha: false, sha256: "42caa68d8ffbb182785b07163b6d24d06b7a9c00502c712fd7b1216c3aa5e087", bytes: 33998 },
-  { key: "frg-aprilfresh-2", url: "https://sandycheng0917.github.io/Velora/assets/media/frg-aprilfresh-2-42caa68d.webp", mime: "image/webp", alpha: false, sha256: "42caa68d8ffbb182785b07163b6d24d06b7a9c00502c712fd7b1216c3aa5e087", bytes: 33998 },
+  { key: "frg-ylang-2", url: "https://sandycheng0917.github.io/Velora/assets/media/frg-ylang-2-42caa68d.cut.webp", mime: "image/webp", alpha: true, sha256: "42caa68d8ffbb182785b07163b6d24d06b7a9c00502c712fd7b1216c3aa5e087", bytes: 33998 },
+  { key: "frg-blackcherry-2", url: "https://sandycheng0917.github.io/Velora/assets/media/frg-blackcherry-2-42caa68d.cut.webp", mime: "image/webp", alpha: true, sha256: "42caa68d8ffbb182785b07163b6d24d06b7a9c00502c712fd7b1216c3aa5e087", bytes: 33998 },
+  { key: "frg-aquakiss-2", url: "https://sandycheng0917.github.io/Velora/assets/media/frg-aquakiss-2-42caa68d.cut.webp", mime: "image/webp", alpha: true, sha256: "42caa68d8ffbb182785b07163b6d24d06b7a9c00502c712fd7b1216c3aa5e087", bytes: 33998 },
+  { key: "frg-flowershop-2", url: "https://sandycheng0917.github.io/Velora/assets/media/frg-flowershop-2-42caa68d.cut.webp", mime: "image/webp", alpha: true, sha256: "42caa68d8ffbb182785b07163b6d24d06b7a9c00502c712fd7b1216c3aa5e087", bytes: 33998 },
+  { key: "frg-aprilfresh-2", url: "https://sandycheng0917.github.io/Velora/assets/media/frg-aprilfresh-2-42caa68d.cut.webp", mime: "image/webp", alpha: true, sha256: "42caa68d8ffbb182785b07163b6d24d06b7a9c00502c712fd7b1216c3aa5e087", bytes: 33998 },
   { key: "frg-ylang-3", url: "https://sandycheng0917.github.io/Velora/assets/media/frg-ylang-3-67ef06b3.webp", mime: "image/webp", alpha: false, sha256: "67ef06b3b91ab9cf8c8ec63c610daf7bdc9723b37de69371da925e9454fa879c", bytes: 33664 },
   { key: "frg-blackcherry-3", url: "https://sandycheng0917.github.io/Velora/assets/media/frg-blackcherry-3-67ef06b3.webp", mime: "image/webp", alpha: false, sha256: "67ef06b3b91ab9cf8c8ec63c610daf7bdc9723b37de69371da925e9454fa879c", bytes: 33664 },
   { key: "frg-aquakiss-3", url: "https://sandycheng0917.github.io/Velora/assets/media/frg-aquakiss-3-67ef06b3.webp", mime: "image/webp", alpha: false, sha256: "67ef06b3b91ab9cf8c8ec63c610daf7bdc9723b37de69371da925e9454fa879c", bytes: 33664 },
@@ -43,17 +43,17 @@ var SEED_IMAGES = [
   { key: "scarf-2-main", url: "https://sandycheng0917.github.io/Velora/assets/media/scarf-2-main-3b8f8439.webp", mime: "image/webp", alpha: false, sha256: "3b8f843987499254c44005c89c052f32c2c3debb5e1c59ebadd6704e5ece4feb", bytes: 32416 },
   { key: "scarf-3-main", url: "https://sandycheng0917.github.io/Velora/assets/media/scarf-3-main-2570d880.webp", mime: "image/webp", alpha: false, sha256: "2570d88064e07982e98280fde9f067ab101b351246c4e32e9757dd11f17c2426", bytes: 30016 },
   { key: "scarfring-1-main", url: "https://sandycheng0917.github.io/Velora/assets/media/scarfring-1-main-ebf9100f.webp", mime: "image/webp", alpha: false, sha256: "ebf9100f37ba246daa422739b5cebd086d98e6ae217385e8bed5ea3ab2a14570", bytes: 6420 },
-  { key: "earring-1-main", url: "https://sandycheng0917.github.io/Velora/assets/media/earring-1-main-4c6fd74b.webp", mime: "image/webp", alpha: false, sha256: "4c6fd74bf38a7885ef5b4bf68756ee269935589b98a5fc9a4aa93ffbfca3d6cf", bytes: 11392 },
-  { key: "necklace-1-main", url: "https://sandycheng0917.github.io/Velora/assets/media/necklace-1-main-b23f9a09.webp", mime: "image/webp", alpha: false, sha256: "b23f9a09f47454ae14bd911651835cc92c50c59c3e1b6143588db29a2fe70ce5", bytes: 12702 },
-  { key: "ring-1-main", url: "https://sandycheng0917.github.io/Velora/assets/media/ring-1-main-d980ab69.webp", mime: "image/webp", alpha: false, sha256: "d980ab6958e85bdd69f2e98f69c3f560f3429d059b161b0eedc5f4b444b464e1", bytes: 11550 },
-  { key: "bracelet-1-main", url: "https://sandycheng0917.github.io/Velora/assets/media/bracelet-1-main-56960ae6.webp", mime: "image/webp", alpha: false, sha256: "56960ae6ef4dac54c1d37f721d088cead39c7bdfb6f27bde0f8934aab4163338", bytes: 5462 }
+  { key: "earring-1-main", url: "https://sandycheng0917.github.io/Velora/assets/media/earring-1-main-4c6fd74b.cut.webp", mime: "image/webp", alpha: true, sha256: "4c6fd74bf38a7885ef5b4bf68756ee269935589b98a5fc9a4aa93ffbfca3d6cf", bytes: 11392 },
+  { key: "necklace-1-main", url: "https://sandycheng0917.github.io/Velora/assets/media/necklace-1-main-b23f9a09.cut.webp", mime: "image/webp", alpha: true, sha256: "b23f9a09f47454ae14bd911651835cc92c50c59c3e1b6143588db29a2fe70ce5", bytes: 12702 },
+  { key: "ring-1-main", url: "https://sandycheng0917.github.io/Velora/assets/media/ring-1-main-d980ab69.cut.webp", mime: "image/webp", alpha: true, sha256: "d980ab6958e85bdd69f2e98f69c3f560f3429d059b161b0eedc5f4b444b464e1", bytes: 11550 },
+  { key: "bracelet-1-main", url: "https://sandycheng0917.github.io/Velora/assets/media/bracelet-1-main-56960ae6.cut.webp", mime: "image/webp", alpha: true, sha256: "56960ae6ef4dac54c1d37f721d088cead39c7bdfb6f27bde0f8934aab4163338", bytes: 5462 }
 ];
 
 /** 一次處理幾張。抓取 + base64 + 寫入都算在 6 分鐘的執行上限裡 */
 var SEED_BATCH = 8;
 
 function seedImages() {
-  // 影像在另一份試算表（Setup.gs 的 IN_IMAGE_BOOK / openImages_）
+  // 影像在另一份試算表（見 Setup.gs 的 openImages_）
   var sh = openImages_().getSheetByName('images');
   if (!sh) return pwSay_('找不到 images 分頁，請先執行 setupSheets。');
 
@@ -68,14 +68,17 @@ function seedImages() {
     var vals = sh.getRange(2, 1, last - 1, sh.getLastColumn()).getValues();
     for (var i = 0; i < vals.length; i++) {
       var k = String(vals[i][idx.key]).trim();
-      if (k) have[k] = String(vals[i][idx.sha256]);
+      // 連 alpha 與 mime 一起記。只比 sha 的話，判定規則改了也不會重寫 ——
+      // 而 alpha 決定檔名要不要帶 .cut，錯了後台就指到 404
+      if (k) have[k] = String(vals[i][idx.sha256]) + '|' +
+        (truthyIn_(vals[i][idx.alpha]) ? '1' : '0') + '|' + String(vals[i][idx.mime]);
     }
   }
 
   var todo = [];
   for (var j = 0; j < SEED_IMAGES.length; j++) {
     var e = SEED_IMAGES[j];
-    if (have[e.key] === e.sha256) continue;
+    if (have[e.key] === e.sha256 + '|' + (e.alpha ? '1' : '0') + '|' + e.mime) continue;
     todo.push(e);
   }
   if (!todo.length) {

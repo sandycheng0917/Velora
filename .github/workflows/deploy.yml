@@ -83,6 +83,9 @@ jobs:
         env:
           VITE_BASE: /${{ github.event.repository.name }}/admin/
           VITE_EXEC_URL: ${{ secrets.EXEC_URL }}
+          # 後台用它算出前台那些烤好的圖檔網址，就不必為了縮圖
+          # 把四萬字元的 base64 從 Sheet 拉回來。算錯或還沒發布會自動退回 API
+          VITE_SITE_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}
 
       - name: 收攏 admin
         run: |

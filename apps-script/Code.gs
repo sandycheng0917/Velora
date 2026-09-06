@@ -47,7 +47,7 @@
  * 版本字串。**改了端點就要改這裡**，否則沒辦法分辨線上跑的是哪一版。
  * ping 會連同 ops 清單一起回傳，貼上不完整或忘了重新部署一眼就看得出來。
  */
-var VERSION = 'v4-imagebook';
+var VERSION = 'v5-imgindex';
 
 /** 令牌壽命。用算式寫，不要展開成 28800000 —— 十位數字面值會誤觸機密掃描 */
 var TOKEN_TTL_MS = 8 * 60 * 60 * 1000;
@@ -125,6 +125,7 @@ function routes_() {
     'delete': opDelete_,
     cost: opCost_,                   // 單筆查詢，每次都寫進 audit，不隨 list 回傳
     image: opImage_,
+    imageIndex: opImageIndex_,   // 只回中繼資料，讓後台自己算公開網址
     upload: opUpload_,
     publish: opPublish_,
     status: opStatus_

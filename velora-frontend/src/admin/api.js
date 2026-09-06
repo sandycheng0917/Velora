@@ -119,6 +119,8 @@ export const save = (token, product) => call('save', { token, product })
 export const remove = (token, id, restore = false) => call('delete', { token, id, restore })
 export const cost = (token, id) => call('cost', { token, id })
 export const getImage = (token, key) => call('image', { token, key }, { timeout: 90000 })
+/** 只回中繼資料（鍵、sha、mime、alpha、bytes），不回位元組。23 張約 2KB */
+export const imageIndex = (token) => call('imageIndex', { token })
 export const putImage = (token, payload) => call('upload', { token, ...payload }, { timeout: 120000 })
 export const publish = (token) => call('publish', { token })
 export const status = (token) => call('status', { token })

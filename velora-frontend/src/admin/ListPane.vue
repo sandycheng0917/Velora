@@ -12,6 +12,7 @@
 import { computed, ref, watch } from 'vue'
 
 import * as api from './api.js'
+import { publicUrl } from './imgurl.js'
 import * as session from './session.js'
 
 /**
@@ -66,8 +67,30 @@ const props = defineProps({
   products: { type: Array, required: true },
   categories: { type: Array, required: true },
   houses: { type: Array, required: true },
+  imgIndex: { type: Object, default: () => ({}) },
   isDirty: { type: Function, required: true },
 })
+
+/**
+ * 縮圖優先走「前台那張烤好的圖」。
+ *
+ * 檔名是內容定址的，sha 在影像索引裡，所以算得出公開網址 ——
+ * 瀏覽器直接載，還會快取，比每張打一次 API 快一個數量級。
+ *
+ * 算不出來（沒有索引、沒有站台網址）或那個網址 404（剛上傳還沒發布）
+ * 就退回逐張走 op:'image'。最壞情況只是慢回原本的速度，不會破圖。
+ */
+const fast = (key) => publicUrl(key, props.imgIndex[key])
+/** 公開網址載不到的鍵。標記之後改走 API */
+const fastFailed = ref({})
+
+function onFastError(key) {
+  fastFailed.value = { ...fastFailed.value, [key]: true }
+  if (!thumbs.value[key] && !missingInSheet.value[key] && !queue.includes(key)) {
+    queue.push(key)
+    pump()
+  }
+}
 defineEmits(['open'])
 
 const cat = ref('')
@@ -105,7 +128,10 @@ watch(
     if (!session.token.value) return
     for (const p of rows) {
       const k = p.img_main
-      if (k && !thumbs.value[k] && !missingInSheet.value[k] && !queue.includes(k)) queue.push(k)
+      if (!k) continue
+      // 有公開網址就讓 <img> 自己去載，不必排隊走 API
+      if (fast(k) && !fastFailed.value[k]) continue
+      if (!thumbs.value[k] && !missingInSheet.value[k] && !queue.includes(k)) queue.push(k)
     }
     pump()
   },
@@ -198,8 +224,15 @@ const priceText = (p) =>
           class="plate"
           :class="{
             pending: !p.img_main,
-            notyet: p.img_main && missingInSheet[p.img_main],
-            loading: p.img_main && !thumbs[p.img_main] && !missingInSheet[p.img_main],
+            notyet:
+              p.img_main &&
+              missingInSheet[p.img_main] &&
+              !(fast(p.img_main) && !fastFailed[p.img_main]),
+            loading:
+              p.img_main &&
+              !thumbs[p.img_main] &&
+              !missingInSheet[p.img_main] &&
+              !(fast(p.img_main) && !fastFailed[p.img_main]),
           }"
           :title="
             !p.img_main
@@ -209,7 +242,14 @@ const priceText = (p) =>
                 : p.img_main
           "
         >
-          <img v-if="thumbs[p.img_main]" :src="thumbs[p.img_main]" alt="" />
+          <img
+            v-if="p.img_main && fast(p.img_main) && !fastFailed[p.img_main]"
+            :src="fast(p.img_main)"
+            alt=""
+            loading="lazy"
+            @error="onFastError(p.img_main)"
+          />
+          <img v-else-if="thumbs[p.img_main]" :src="thumbs[p.img_main]" alt="" />
           <template v-else-if="!p.img_main">無圖片</template>
           <template v-else-if="missingInSheet[p.img_main]">未上傳</template>
         </span>

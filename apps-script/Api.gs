@@ -373,6 +373,53 @@ function opImage_(b) {
   };
 }
 
+
+/**
+ * 影像索引：只回中繼資料，不回位元組。
+ *
+ * ── 這支存在的理由 ──────────────────────────────────────────────────
+ *
+ * 後台清單原本每張縮圖都打一次 op:'image'，一次約兩秒、十三張要等十秒。
+ * 但那些圖在前台早就烤成實體檔案了，而且檔名是**內容定址**的：
+ *
+ *     <影像鍵>-<sha256 前 8 碼>[.cut].<副檔名>
+ *
+ * sha256 就在這張分頁裡。所以後台只要拿到「鍵 → sha / mime / alpha」，
+ * 就能自己算出公開網址，讓瀏覽器直接載 —— 而且會被瀏覽器快取。
+ *
+ * 23 張圖的索引約 2KB，一次請求就拿完。
+ *
+ * 算錯或那張圖還沒發布時，<img> 會 404，前端再退回 op:'image'。
+ * 所以這個最佳化不會有「猜錯就壞掉」的風險，只會退回原本的速度。
+ */
+function opImageIndex_() {
+  var sh = openImages_().getSheetByName('images');
+  if (!sh) return { ok: false, err: 'no-sheet' };
+
+  var last = lastIdRow_(sh);
+  if (last < 2) return { ok: true, images: [] };
+
+  var idx = headIndex_(sh);
+  var vals = sh.getRange(2, 1, last - 1, sh.getLastColumn()).getValues();
+
+  // 一張圖可能佔多列（chunk），索引只要每個鍵的第一列
+  var seen = {};
+  var out = [];
+  for (var i = 0; i < vals.length; i++) {
+    var key = String(vals[i][idx.key]).trim();
+    if (!key || seen[key]) continue;
+    seen[key] = true;
+    out.push({
+      key: key,
+      sha256: String(vals[i][idx.sha256] || ''),
+      mime: String(vals[i][idx.mime] || 'image/webp'),
+      alpha: truthyIn_(vals[i][idx.alpha]),
+      bytes: Number(vals[i][idx.bytes]) || 0
+    });
+  }
+  return { ok: true, images: out };
+}
+
 /* ══ 發布：代打 GitHub API ═════════════════════════════════════════ */
 
 /**

@@ -35,6 +35,20 @@ const MIME = {
   webp: 'image/webp', gif: 'image/gif',
 }
 
+/**
+ * WebP 容器有沒有 alpha。與 tools/build-catalog.mjs 的同名函式必須一致 ——
+ * 那邊決定檔名要不要帶 .cut，這邊決定 Sheet 裡記什麼，
+ * 而後台是拿 Sheet 的值去算檔名的。三者對不上就會 404。
+ */
+function webpHasAlpha(buf) {
+  if (buf.length < 32) return false
+  if (buf.toString('ascii', 0, 4) !== 'RIFF' || buf.toString('ascii', 8, 12) !== 'WEBP') return false
+  const tag = buf.toString('ascii', 12, 16)
+  if (tag === 'VP8X') return !!(buf[20] & 0x10)
+  if (tag === 'VP8L') return !!(buf[24] & 0x10)
+  return false
+}
+
 /** 跟 build-catalog.mjs 的 imageFileName 必須一致，否則抓不到檔案 */
 const fileName = (key, sha, alpha, ext) => `${key}-${sha.slice(0, 8)}${alpha ? '.cut' : ''}.${ext}`
 
@@ -54,9 +68,18 @@ for (const e of JSON.parse(readFileSync(legacyPath, 'utf8'))) {
   const buf = readFileSync(abs)
   const sha = createHash('sha256').update(buf).digest('hex')
   const ext = e.path.split('.').pop().toLowerCase()
-  // 沿用既有素材的判準：build-assets.py 會把沒有透明像素的圖轉存 JPEG，
-  // 所以留下來的 .png 一定有透明像素
-  const alpha = ext === 'png'
+  /*
+   * 🔴 不能用副檔名判斷 alpha。
+   *
+   * 素材壓成 WebP 之後全部是 .webp，用 ext === 'png' 會一律得到 false，
+   * 而產生器是讀 WebP 容器標頭判定的 —— 兩邊不一致，算出來的檔名就少了
+   * .cut，後台指過去直接 404。實測有 4 張這樣掉下去。
+   *
+   * 判準必須跟 build-catalog.mjs 的 webpHasAlpha 一致：
+   *   VP8X 的 flag byte 第 4 個 bit 是 ALPHA
+   *   VP8L 的第 5 個 byte 第 4 個 bit 是 has_alpha
+   */
+  const alpha = ext === 'webp' ? webpHasAlpha(buf) : ext === 'png'
   rows.push({
     key: e.key,
     url: `${BASE}/assets/media/${fileName(e.key, sha, alpha, ext)}`,
@@ -108,8 +131,8 @@ ${table}
 var SEED_BATCH = 8;
 
 function seedImages() {
-  var ss = openBook_();
-  var sh = ss.getSheetByName('images');
+  // 影像在另一份試算表（見 Setup.gs 的 openImages_）
+  var sh = openImages_().getSheetByName('images');
   if (!sh) return pwSay_('找不到 images 分頁，請先執行 setupSheets。');
 
   var idx = headIndex_(sh);
@@ -123,14 +146,17 @@ function seedImages() {
     var vals = sh.getRange(2, 1, last - 1, sh.getLastColumn()).getValues();
     for (var i = 0; i < vals.length; i++) {
       var k = String(vals[i][idx.key]).trim();
-      if (k) have[k] = String(vals[i][idx.sha256]);
+      // 連 alpha 與 mime 一起記。只比 sha 的話，判定規則改了也不會重寫 ——
+      // 而 alpha 決定檔名要不要帶 .cut，錯了後台就指到 404
+      if (k) have[k] = String(vals[i][idx.sha256]) + '|' +
+        (truthyIn_(vals[i][idx.alpha]) ? '1' : '0') + '|' + String(vals[i][idx.mime]);
     }
   }
 
   var todo = [];
   for (var j = 0; j < SEED_IMAGES.length; j++) {
     var e = SEED_IMAGES[j];
-    if (have[e.key] === e.sha256) continue;
+    if (have[e.key] === e.sha256 + '|' + (e.alpha ? '1' : '0') + '|' + e.mime) continue;
     todo.push(e);
   }
   if (!todo.length) {
@@ -226,7 +252,7 @@ function writeImage_(sh, idx, width, meta, b64) {
  * 檢查目前 Sheet 裡有幾張圖，以及跟這份清單差多少。不會寫入。
  */
 function checkImages() {
-  var sh = openBook_().getSheetByName('images');
+  var sh = openImages_().getSheetByName('images');
   if (!sh) return pwSay_('找不到 images 分頁。');
   var idx = headIndex_(sh);
   var last = lastIdRow_(sh);

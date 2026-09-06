@@ -35,6 +35,12 @@ const loginErr = ref('')
 const products = ref([])
 const categories = ref([])
 const houses = ref([])
+/**
+ * 影像索引：鍵 → { sha256, mime, alpha, bytes }。
+ * 有了它，清單與編輯頁就能直接指向前台那些烤好的圖檔，
+ * 而不必為了縮圖把四萬字元的 base64 拉回來。
+ */
+const imgIndex = ref({})
 const lastPublish = ref('')
 const buildState = ref('')
 
@@ -79,6 +85,23 @@ async function load() {
   busy.value = true
   try {
     const r = await api.list(session.token.value)
+
+    /*
+     * 影像索引要「先」拿到再放商品。
+     *
+     * 順序反過來的話，清單一渲染就開始算 fast()，那時索引還是空的 ——
+     * 十三張全部排進 API 佇列，白等十秒之後才被公開網址取代。
+     * 索引只有 2KB，多等這一次很划算。
+     *
+     * 抓不到不該擋住整個後台：縮圖會自動退回逐張走 API。
+     */
+    try {
+      const ix = await api.imageIndex(session.token.value)
+      imgIndex.value = Object.fromEntries((ix.images || []).map((m) => [m.key, m]))
+    } catch {
+      imgIndex.value = {}
+    }
+
     products.value = (r.products || []).filter((p) => !truthy(p.deleted))
     categories.value = r.categories || []
     houses.value = r.houses || []
@@ -238,6 +261,7 @@ onMounted(async () => {
           :products="products"
           :categories="categories"
           :houses="houses"
+          :img-index="imgIndex"
           :is-dirty="isDirty"
           @open="openEdit"
         />
@@ -249,6 +273,7 @@ onMounted(async () => {
         :product="editing"
         :categories="categories"
         :houses="houses"
+        :img-index="imgIndex"
         @back="pane = 'list'"
         @saved="afterSave"
         @error="(m) => say(m, true)"

@@ -12,12 +12,14 @@ import { computed, onMounted, ref, watch } from 'vue'
 
 import * as api from './api.js'
 import * as img from './image.js'
+import { publicUrl } from './imgurl.js'
 import * as session from './session.js'
 
 const props = defineProps({
   product: { type: Object, default: null },
   categories: { type: Array, required: true },
   houses: { type: Array, required: true },
+  imgIndex: { type: Object, default: () => ({}) },
 })
 const emit = defineEmits(['back', 'saved', 'error'])
 
@@ -116,6 +118,22 @@ async function loadImages() {
   for (const s of SLOTS) {
     const key = form.value[s.field]
     if (!key || preview.value[s.field]) continue
+
+    /*
+     * 先試前台那張烤好的圖。檔名內容定址，sha 在影像索引裡，所以算得出
+     * 網址 —— 瀏覽器直接載、會快取，比拉回四萬字元的 base64 快得多。
+     *
+     * 用 fetch + HEAD 之外的方式驗它在不在：直接設成預覽，
+     * <img> 載不到時的 onerror 會把它清掉並改走 API。
+     * 這樣不會為了「確認存在」多打一次網路。
+     */
+    const url = publicUrl(key, props.imgIndex[key])
+    if (url) {
+      preview.value = { ...preview.value, [s.field]: url }
+      meta.value = { ...meta.value, [s.field]: key }
+      continue
+    }
+
     try {
       const r = await api.getImage(session.token.value, key)
       if (r.found) {
@@ -130,6 +148,27 @@ async function loadImages() {
   }
 }
 onMounted(loadImages)
+
+/**
+ * 公開網址載不到 —— 剛上傳、還沒發布時，前台上本來就還沒有那個檔案。
+ * 清掉預覽並改走 API 把位元組拉回來。
+ */
+async function onPreviewError(field) {
+  const key = form.value[field]
+  preview.value = { ...preview.value, [field]: '' }
+  if (!key) return
+  try {
+    const r = await api.getImage(session.token.value, key)
+    if (r.found) {
+      preview.value = { ...preview.value, [field]: `data:${r.mime};base64,${r.data}` }
+      meta.value = { ...meta.value, [field]: `${key}　${(r.bytes / 1000).toFixed(1)} KB` }
+    } else {
+      meta.value = { ...meta.value, [field]: `${key}（Sheet 裡找不到這張圖）` }
+    }
+  } catch (e) {
+    meta.value = { ...meta.value, [field]: `${key}（讀取失敗：${e.message}）` }
+  }
+}
 
 async function pickFile(field, ev) {
   const file = ev.target.files?.[0]
@@ -316,7 +355,12 @@ async function remove() {
         <div class="sec"><b>圖片</b><hr /></div>
 
         <label class="big" style="display: block; cursor: pointer">
-          <img v-if="preview[SLOTS[0].field]" :src="preview[SLOTS[0].field]" alt="" />
+          <img
+            v-if="preview[SLOTS[0].field]"
+            :src="preview[SLOTS[0].field]"
+            alt=""
+            @error="onPreviewError(SLOTS[0].field)"
+          />
           <span
             v-else
             style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--ink-faint)"
@@ -330,7 +374,12 @@ async function remove() {
         <div class="subimgs" style="padding-top: 12px">
           <label v-for="s in SLOTS.slice(1)" :key="s.field" class="add" style="cursor: pointer">
             <template v-if="preview[s.field]">
-              <img :src="preview[s.field]" alt="" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover" />
+              <img
+                :src="preview[s.field]"
+                alt=""
+                style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover"
+                @error="onPreviewError(s.field)"
+              />
             </template>
             <template v-else>
               <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4">
