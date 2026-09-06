@@ -21,7 +21,15 @@ import * as session from './session.js'
  * 都不該重新抓一次。整份 Sheet 的圖加起來也就幾百 KB。
  */
 const thumbs = ref({})
-const failed = new Set()
+
+/**
+ * 抓過但 Sheet 裡沒有的影像鍵。
+ *
+ * 必須是響應式的 —— 用普通的 Set 的話，畫面永遠停在「載入中」的斜紋，
+ * 因為 class 只看 thumbs 有沒有值。13 列全部卡在載入中，
+ * 跟壞掉長得一模一樣。這是實際發生過的。
+ */
+const missingInSheet = ref({})
 
 /**
  * 一次抓幾張。
@@ -44,9 +52,9 @@ async function pump() {
       .getImage(session.token.value, key)
       .then((r) => {
         if (r.found) thumbs.value = { ...thumbs.value, [key]: `data:${r.mime};base64,${r.data}` }
-        else failed.add(key)
+        else missingInSheet.value = { ...missingInSheet.value, [key]: 'none' }
       })
-      .catch(() => failed.add(key))
+      .catch(() => (missingInSheet.value = { ...missingInSheet.value, [key]: 'error' }))
       .finally(() => {
         running--
         pump()
@@ -97,7 +105,7 @@ watch(
     if (!session.token.value) return
     for (const p of rows) {
       const k = p.img_main
-      if (k && !thumbs.value[k] && !failed.has(k) && !queue.includes(k)) queue.push(k)
+      if (k && !thumbs.value[k] && !missingInSheet.value[k] && !queue.includes(k)) queue.push(k)
     }
     pump()
   },
@@ -179,13 +187,31 @@ const priceText = (p) =>
           img_main 存的是「影像鍵」不是網址，位元組在 images 分頁。
           只抓當前這一頁，並行 3 條，抓到一張畫一張。
         -->
+        <!--
+          三種狀態，要分得出來：
+            無圖片   這件商品連影像鍵都沒有
+            未上傳   有影像鍵，但 Sheet 裡沒有位元組 —— 網站上顯示的是
+                     專案裡既有的素材（遷移用的退路），從後台換一次圖就會接管
+            斜紋     正在抓
+        -->
         <span
           class="plate"
-          :class="{ pending: !p.img_main, loading: p.img_main && !thumbs[p.img_main] }"
-          :title="p.img_main || '尚未上傳圖片'"
+          :class="{
+            pending: !p.img_main,
+            notyet: p.img_main && missingInSheet[p.img_main],
+            loading: p.img_main && !thumbs[p.img_main] && !missingInSheet[p.img_main],
+          }"
+          :title="
+            !p.img_main
+              ? '尚未指定圖片'
+              : missingInSheet[p.img_main]
+                ? `影像鍵 ${p.img_main} 在 Sheet 裡沒有位元組。網站目前顯示的是專案內既有的素材，從這裡上傳一次就會接管。`
+                : p.img_main
+          "
         >
           <img v-if="thumbs[p.img_main]" :src="thumbs[p.img_main]" alt="" />
           <template v-else-if="!p.img_main">無圖片</template>
+          <template v-else-if="missingInSheet[p.img_main]">未上傳</template>
         </span>
         <span class="nm">
           <b>{{ p.name_zh }}<em v-if="p.featured === true || String(p.featured).toUpperCase() === 'TRUE'" class="star">◆</em></b>

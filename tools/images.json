@@ -1,94 +1,94 @@
 [
   {
     "key": "frg-ylang-main",
-    "path": "/media/vuca/ylang.jpg"
+    "path": "/media/opt/vuca-ylang.webp"
   },
   {
     "key": "frg-ylang-2",
-    "path": "/media/vuca/set.png"
-  },
-  {
-    "key": "frg-ylang-3",
-    "path": "/media/vuca/bedroom.jpg"
-  },
-  {
-    "key": "frg-blackcherry-main",
-    "path": "/media/vuca/blackcherry.jpg"
+    "path": "/media/opt/vuca-set.webp"
   },
   {
     "key": "frg-blackcherry-2",
-    "path": "/media/vuca/set.png"
-  },
-  {
-    "key": "frg-blackcherry-3",
-    "path": "/media/vuca/bedroom.jpg"
-  },
-  {
-    "key": "frg-aquakiss-main",
-    "path": "/media/vuca/aquakiss.jpg"
+    "path": "/media/opt/vuca-set.webp"
   },
   {
     "key": "frg-aquakiss-2",
-    "path": "/media/vuca/set.png"
-  },
-  {
-    "key": "frg-aquakiss-3",
-    "path": "/media/vuca/bedroom.jpg"
-  },
-  {
-    "key": "frg-flowershop-main",
-    "path": "/media/vuca/flowershop.jpg"
+    "path": "/media/opt/vuca-set.webp"
   },
   {
     "key": "frg-flowershop-2",
-    "path": "/media/vuca/set.png"
-  },
-  {
-    "key": "frg-flowershop-3",
-    "path": "/media/vuca/bedroom.jpg"
-  },
-  {
-    "key": "frg-aprilfresh-main",
-    "path": "/media/vuca/aprilfresh.jpg"
+    "path": "/media/opt/vuca-set.webp"
   },
   {
     "key": "frg-aprilfresh-2",
-    "path": "/media/vuca/set.png"
+    "path": "/media/opt/vuca-set.webp"
+  },
+  {
+    "key": "frg-ylang-3",
+    "path": "/media/opt/vuca-bedroom.webp"
+  },
+  {
+    "key": "frg-blackcherry-3",
+    "path": "/media/opt/vuca-bedroom.webp"
+  },
+  {
+    "key": "frg-aquakiss-3",
+    "path": "/media/opt/vuca-bedroom.webp"
+  },
+  {
+    "key": "frg-flowershop-3",
+    "path": "/media/opt/vuca-bedroom.webp"
   },
   {
     "key": "frg-aprilfresh-3",
-    "path": "/media/vuca/bedroom.jpg"
+    "path": "/media/opt/vuca-bedroom.webp"
+  },
+  {
+    "key": "frg-blackcherry-main",
+    "path": "/media/opt/vuca-blackcherry.webp"
+  },
+  {
+    "key": "frg-aquakiss-main",
+    "path": "/media/opt/vuca-aquakiss.webp"
+  },
+  {
+    "key": "frg-flowershop-main",
+    "path": "/media/opt/vuca-flowershop.webp"
+  },
+  {
+    "key": "frg-aprilfresh-main",
+    "path": "/media/opt/vuca-aprilfresh.webp"
   },
   {
     "key": "scarf-1-main",
-    "path": "/media/saintmari/scarf-camel-blazer.jpg"
+    "path": "/media/opt/saintmari-scarf-camel-blazer.webp"
   },
   {
     "key": "scarf-2-main",
-    "path": "/media/saintmari/scarf-pink-bow.jpg"
+    "path": "/media/opt/saintmari-scarf-pink-bow.webp"
   },
   {
     "key": "scarf-3-main",
-    "path": "/media/saintmari/scarf-mauve-pearl.jpg"
+    "path": "/media/opt/saintmari-scarf-mauve-pearl.webp"
   },
   {
     "key": "scarfring-1-main",
-    "path": "/media/saintmari/scarfring-01.png"
+    "path": "/media/opt/saintmari-scarfring-01.webp"
   },
   {
     "key": "earring-1-main",
-    "path": "/media/saintmari/earring-01.png"
+    "path": "/media/opt/saintmari-earring-01.webp"
   },
   {
     "key": "necklace-1-main",
-    "path": "/media/saintmari/necklace-01.png"
+    "path": "/media/opt/saintmari-necklace-01.webp"
   },
   {
     "key": "ring-1-main",
-    "path": "/media/saintmari/ring-01.png"
+    "path": "/media/opt/saintmari-ring-01.webp"
   },
   {
     "key": "bracelet-1-main",
-    "path": "/media/saintmari/bracelet-01.png"
+    "path": "/media/opt/saintmari-bracelet-01.webp"
   }
 ]

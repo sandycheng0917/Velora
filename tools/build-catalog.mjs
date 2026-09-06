@@ -214,6 +214,11 @@ function webpHasAlpha(buf) {
  * 這在 GitHub Pages 上特別重要：它送 Cache-Control: max-age=600，
  * 固定檔名的圖片改版後最多要等十分鐘才會更新。
  */
+/** mime → 副檔名。Sheet 的 images 分頁有 mime 欄，那是唯一可靠的來源 */
+const MIME_EXT = {
+  'image/webp': 'webp', 'image/jpeg': 'jpg', 'image/png': 'png', 'image/gif': 'gif',
+}
+
 function imageFileName(key, sha, alpha, ext = 'webp') {
   return `${key}-${sha.slice(0, 8)}${alpha ? '.cut' : ''}.${ext}`
 }
@@ -305,9 +310,14 @@ async function main() {
       if (fileFor.has(key)) continue
 
       if (assembled.has(key)) {
-        const { buf } = assembled.get(key)
-        const alpha = webpHasAlpha(buf)
-        const name = imageFileName(key, createHash('sha256').update(buf).digest('hex'), alpha)
+        const { buf, mime } = assembled.get(key)
+        // 副檔名照 mime 走，不要假設一定是 WebP —— 後台在 Safari 16.4
+        // 以前的瀏覽器會退回 JPEG，那時存進 Sheet 的就是 JPEG 位元組。
+        // 副檔名寫 .webp 而內容是 JPEG，多數瀏覽器會嗅探後照樣顯示，
+        // 但那是「剛好能動」，不是對的
+        const ext = MIME_EXT[mime] || 'webp'
+        const alpha = ext === 'webp' ? webpHasAlpha(buf) : ext === 'png'
+        const name = imageFileName(key, createHash('sha256').update(buf).digest('hex'), alpha, ext)
         for (const d of mediaDirs) await writeFile(join(d, name), buf)
         fileFor.set(key, name)
         stats.sheet++

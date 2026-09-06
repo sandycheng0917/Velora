@@ -4,7 +4,7 @@
  * 由 tools/build-catalog.mjs 從 Google Sheet 產生，請勿手動編輯 ——
  * 下次建置就會被覆蓋。要改內容請改 Sheet。
  *
- * 產生時間：2026-09-06T16:22:42.052Z
+ * 產生時間：2026-09-06T16:34:26.775Z
  */
 
 export default [
@@ -44,9 +44,9 @@ export default [
     "notes_base_en": "Musk;Amber;Sandalwood",
     "notes_base_ko": "머스크;앰버;샌달우드",
     "files": [
-      "frg-ylang-main-49a14491.jpg",
-      "frg-ylang-2-8eba236c.cut.png",
-      "frg-ylang-3-53d11714.jpg"
+      "frg-ylang-main-b9593ddb.webp",
+      "frg-ylang-2-42caa68d.webp",
+      "frg-ylang-3-67ef06b3.webp"
     ]
   },
   {
@@ -85,9 +85,9 @@ export default [
     "notes_base_en": "Orange blossom;Strawberry;Wild berries",
     "notes_base_ko": "오렌지 블로썸;딸기;와일드베리",
     "files": [
-      "frg-blackcherry-main-ecfa6b82.jpg",
-      "frg-blackcherry-2-8eba236c.cut.png",
-      "frg-blackcherry-3-53d11714.jpg"
+      "frg-blackcherry-main-1a874089.webp",
+      "frg-blackcherry-2-42caa68d.webp",
+      "frg-blackcherry-3-67ef06b3.webp"
     ]
   },
   {
@@ -126,9 +126,9 @@ export default [
     "notes_base_en": "Musk;Cedarwood",
     "notes_base_ko": "머스크;시더우드",
     "files": [
-      "frg-aquakiss-main-cb1e4724.jpg",
-      "frg-aquakiss-2-8eba236c.cut.png",
-      "frg-aquakiss-3-53d11714.jpg"
+      "frg-aquakiss-main-16023d1a.webp",
+      "frg-aquakiss-2-42caa68d.webp",
+      "frg-aquakiss-3-67ef06b3.webp"
     ]
   },
   {
@@ -167,9 +167,9 @@ export default [
     "notes_base_en": "Jasmine;Cedarwood",
     "notes_base_ko": "자스민;시더우드",
     "files": [
-      "frg-flowershop-main-44d4f5a2.jpg",
-      "frg-flowershop-2-8eba236c.cut.png",
-      "frg-flowershop-3-53d11714.jpg"
+      "frg-flowershop-main-c94ac4cb.webp",
+      "frg-flowershop-2-42caa68d.webp",
+      "frg-flowershop-3-67ef06b3.webp"
     ]
   },
   {
@@ -208,9 +208,9 @@ export default [
     "notes_base_en": "Vanilla;Sandalwood;Cedarwood",
     "notes_base_ko": "바닐라;샌달우드;시더우드",
     "files": [
-      "frg-aprilfresh-main-536c0434.jpg",
-      "frg-aprilfresh-2-8eba236c.cut.png",
-      "frg-aprilfresh-3-53d11714.jpg"
+      "frg-aprilfresh-main-7fe365f1.webp",
+      "frg-aprilfresh-2-42caa68d.webp",
+      "frg-aprilfresh-3-67ef06b3.webp"
     ]
   },
   {
@@ -249,7 +249,7 @@ export default [
     "notes_base_en": "",
     "notes_base_ko": "",
     "files": [
-      "scarf-1-main-7d0bf266.jpg"
+      "scarf-1-main-311186c4.webp"
     ]
   },
   {
@@ -288,7 +288,7 @@ export default [
     "notes_base_en": "",
     "notes_base_ko": "",
     "files": [
-      "scarf-2-main-35cf7982.jpg"
+      "scarf-2-main-3b8f8439.webp"
     ]
   },
   {
@@ -327,7 +327,7 @@ export default [
     "notes_base_en": "",
     "notes_base_ko": "",
     "files": [
-      "scarf-3-main-841f2982.jpg"
+      "scarf-3-main-2570d880.webp"
     ]
   },
   {
@@ -366,7 +366,7 @@ export default [
     "notes_base_en": "",
     "notes_base_ko": "",
     "files": [
-      "scarfring-1-main-8274cbd5.cut.png"
+      "scarfring-1-main-ebf9100f.webp"
     ]
   },
   {
@@ -405,7 +405,7 @@ export default [
     "notes_base_en": "",
     "notes_base_ko": "",
     "files": [
-      "earring-1-main-57fc79f9.cut.png"
+      "earring-1-main-4c6fd74b.webp"
     ]
   },
   {
@@ -444,7 +444,7 @@ export default [
     "notes_base_en": "",
     "notes_base_ko": "",
     "files": [
-      "necklace-1-main-fbb5004f.cut.png"
+      "necklace-1-main-b23f9a09.webp"
     ]
   },
   {
@@ -483,7 +483,7 @@ export default [
     "notes_base_en": "",
     "notes_base_ko": "",
     "files": [
-      "ring-1-main-c9950657.cut.png"
+      "ring-1-main-d980ab69.webp"
     ]
   },
   {
@@ -522,7 +522,7 @@ export default [
     "notes_base_en": "",
     "notes_base_ko": "",
     "files": [
-      "bracelet-1-main-ea850fe0.cut.png"
+      "bracelet-1-main-56960ae6.webp"
     ]
   }
 ]

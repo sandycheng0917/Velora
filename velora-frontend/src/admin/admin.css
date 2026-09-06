@@ -318,6 +318,18 @@
     45deg, var(--surface), var(--surface) 5px, var(--paper-alt) 5px, var(--paper-alt) 10px
   );
 }
+/* 有影像鍵、但 Sheet 裡沒有位元組。跟「完全沒有圖」要分得出來 ——
+   前者是「網站上有圖，只是還沒進 Sheet」，後者是「真的沒有圖」 */
+.vadmin .plate.notyet {
+  background: var(--paper-alt);
+  border-color: var(--line-strong);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  color: var(--ink-faint);
+}
 .vadmin .plate.pending {
   background: var(--paper-alt);
   border-color: var(--gold);
