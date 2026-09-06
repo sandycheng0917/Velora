@@ -159,9 +159,21 @@ function card(p, houseName) {
 
 /* ── 主流程 ───────────────────────────────────────────────────────── */
 
+/** 品牌在版面上的一句話：這家做什麼。從它實際有哪些品類算出來 */
+const HOUSE_LINES = {
+  fragrance: { zh: '香氛', en: 'Fragrance', ko: '프래그런스' },
+  scarf: { zh: '絲巾', en: 'Scarves', ko: '스카프' },
+  jewelry: { zh: '飾品', en: 'Jewelry', ko: '주얼리' },
+  phonebag: { zh: '手機包', en: 'Phone bags', ko: '폰백' },
+}
+
+async function loadSite() {
+  return import(pathToFileURL(join(DATA, 'site.generated.js')).href)
+}
+
 async function loadProducts() {
   const rows = (await import(pathToFileURL(join(DATA, 'products.generated.js')).href)).default
-  const { houses } = await import(pathToFileURL(join(DATA, 'site.generated.js')).href)
+  const { houses } = await loadSite()
   const houseName = Object.fromEntries(houses.map((h) => [h.key, h.name]))
 
   return rows
@@ -172,6 +184,7 @@ async function loadProducts() {
       ref: r.ref,
       category: r.category,
       house: houseName[r.house] || r.house,
+      houseKey: r.house,
       file: (r.files || [])[0] || '',
       name: { zh: r.name_zh, en: r.name_en, ko: r.name_ko },
       // 卡片上那句話：有標語用標語，沒有就用描述。
@@ -182,6 +195,65 @@ async function loadProducts() {
       material: { zh: r.material_zh, en: r.material_en, ko: r.material_ko },
       spec: { zh: r.spec_zh, en: r.spec_en, ko: r.spec_ko },
     }))
+}
+
+/**
+ * 整段移除一個 <section id="key">，連同導覽列與主視覺裡指向它的連結。
+ *
+ * 用括號配對找結束標籤，不用正規表示式 —— 非貪婪匹配遇到巢狀 <section>
+ * 就會提早收尾，而且失敗是靜默的：產出語法合法但結構錯亂的 HTML。
+ */
+function dropSection(html, key) {
+  const open = new RegExp(`<section[^>]*id="${key}"[^>]*>`)
+  const m = open.exec(html)
+  if (!m) return html
+
+  let i = m.index + m[0].length
+  let depth = 1
+  while (depth > 0) {
+    const next = html.indexOf('<section', i)
+    const close = html.indexOf('</section>', i)
+    if (close === -1) throw new Error(`找不到 #${key} 的結束標籤`)
+    if (next !== -1 && next < close) { depth++; i = next + 8 } else { depth--; i = close + 10 }
+  }
+  let out = html.slice(0, m.index) + html.slice(i)
+
+  // 導覽列與主視覺的連結也要拿掉，否則點下去會捲不到任何地方。
+  //
+  // 🔴 樣板字面值裡要寫 \\s 才會產生正規表示式要的 \s ——
+  //    寫成 \s 的話 JS 會把它當成字面的 s，變成比對「s 開頭的空白」，
+  //    而那個錯誤是靜默的：連結留在畫面上，點下去捲不到任何地方。
+  out = out.replace(new RegExp(`\\s*<a href="#${key}"[^>]*>[\\s\\S]*?</a>`, 'g'), '')
+  return out
+}
+
+/** 品牌區塊。只有上架中的品牌會出現 */
+function houseBlock(h, i) {
+  const cat = h.lines || { zh: '', en: '', ko: '' }
+  return `<article>` +
+    `<p class="ref">HOUSE · ${String(i + 1).padStart(2, '0')}</p>` +
+    `<h3>${esc(one(h.name))}</h3>` +
+    tri('p', 'loc', {
+      zh: `${one(h.country.zh)}　·　${one(cat.zh)}`,
+      en: `${one(h.country.en)} · ${one(cat.en)}`,
+      ko: `${one(h.country.ko)} · ${one(cat.ko)}`,
+    }) +
+    tri('p', '', h.intro) +
+  `</article>`
+}
+
+/** 通用版的錨點替換。splice() 是品類專用的包裝 */
+function spliceNamed(html, name, block) {
+  const start = `<!-- ${name}:start`
+  const end = `<!-- ${name}:end -->`
+  const si = html.indexOf(start)
+  if (si === -1) throw new Error(`找不到錨點 ${start}`)
+  if (html.indexOf(start, si + 1) !== -1) throw new Error(`錨點 ${start} 出現不只一次`)
+  const so = html.indexOf('-->', si)
+  const ei = html.indexOf(end, so)
+  if (ei === -1) throw new Error(`找不到 ${end}，或它排在 start 前面`)
+  if (html.indexOf(end, ei + 1) !== -1) throw new Error(`錨點 ${end} 出現不只一次`)
+  return html.slice(0, so + 3) + '\n' + block + '\n    ' + html.slice(ei)
 }
 
 function splice(html, key, block) {
@@ -231,18 +303,54 @@ async function main() {
   }
 
   const counts = []
+  /** 沒有上架商品、整段被移除的品類。要報告出來，否則區塊消失了沒有人知道為什麼 */
+  const dropped = []
   for (const key of SECTIONS) {
     const list = products.filter((p) => p.category === key)
+
+    /*
+     * 一件上架商品都沒有 → 整個 <section> 拿掉。
+     *
+     * 第一版是丟例外。那在「品類永遠有商品」的假設下是對的，但暫停一個
+     * 代理品牌（houses 的 listed 取消勾選）之後，它底下的品類就會變成
+     * 0 件 —— 那是正常操作，不是錯誤。
+     *
+     * 只清掉卡片而留下標題會更糟：畫面上出現一個有標題、有導言、
+     * 卻什麼都沒有的區塊，那看起來像壞掉。
+     */
     if (!list.length) {
-      throw new Error(
-        `品類 ${key} 一件上架商品都沒有。\n` +
-        `注入會把那一區清空，畫面上會出現一個有標題卻沒有內容的區塊。\n` +
-        `如果這是刻意的，請把 ${key} 從 SECTIONS 移除並拿掉它的錨點。`)
+      html = dropSection(html, key)
+      dropped.push(key)
+      continue
     }
+
     const block = list.map((p) => '    ' + card(p, p.house)).join('\n\n')
     html = splice(html, key, block)
     counts.push(`${key} ${list.length} 件`)
   }
+
+  /*
+   * 品牌區。只有「上架中而且真的有商品」的品牌會出現。
+   *
+   * houses 的 listed 是整包代理的開關；有品牌但一件商品都沒有的情況
+   * （例如剛簽約還沒上架）也不該出現在「代理品牌」那一區 ——
+   * 那會讓人以為點得進去。
+   */
+  const { houses: allHouses } = await loadSite()
+  const withProducts = new Set(products.map((p) => p.houseKey))
+  const shown = allHouses.filter((h) => withProducts.has(h.key))
+  const houseDropped = allHouses.filter((h) => !withProducts.has(h.key)).map((h) => h.name)
+
+  const houseHtml = shown.map((h, i) => {
+    const cats = [...new Set(products.filter((p) => p.houseKey === h.key).map((p) => p.category))]
+    const lines = {
+      zh: cats.map((c) => (HOUSE_LINES[c] || {}).zh || c).join('與'),
+      en: cats.map((c) => (HOUSE_LINES[c] || {}).en || c).join(' & '),
+      ko: cats.map((c) => (HOUSE_LINES[c] || {}).ko || c).join(' · '),
+    }
+    return '      ' + houseBlock({ ...h, lines }, i)
+  }).join('\n\n')
+  html = spliceNamed(html, 'HOUSES', houseHtml)
 
   // 注入後再全檔驗一次卡片不變式。單張卡片在 card() 裡驗過了，
   // 這裡驗的是「拼接本身沒有把別人的卡片弄壞」

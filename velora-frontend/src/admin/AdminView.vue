@@ -282,11 +282,24 @@ onMounted(async () => {
           <p class="hint" style="padding-top: 14px">
             沒有商品的品類前台不會顯示 —— 導覽列點進去是空的，比沒有那一項更糟。
           </p>
+          <p class="hint">
+            要暫停一個代理品牌：到 Google Sheet 的 <b>houses</b> 分頁，
+            把那一列的 <b>listed</b> 取消勾選，然後回這裡按發布。
+            該品牌的所有商品、品類分區與品牌介紹都會從前台消失，資料完全保留。
+          </p>
 
           <div class="sec" style="padding-top: 42px"><b>品牌</b><hr /></div>
           <div style="display: flex; gap: 36px; align-items: flex-start">
-            <div v-for="h in houses" :key="h.key" style="flex: 1; border-left: 1px solid var(--gold); padding-left: 18px">
-              <p style="font-family: var(--f-disp); font-size: 21px; letter-spacing: 0.19em; margin: 0">{{ h.name }}</p>
+            <div
+              v-for="h in houses"
+              :key="h.key"
+              style="flex: 1; padding-left: 18px"
+              :style="{ borderLeft: '1px solid ' + (truthy(h.listed) ? 'var(--gold)' : 'var(--line-strong)') }"
+            >
+              <p style="display: flex; align-items: center; gap: 12px; margin: 0">
+                <span style="font-family: var(--f-disp); font-size: 21px; letter-spacing: 0.19em">{{ h.name }}</span>
+                <span class="st" :class="truthy(h.listed) ? 'live' : 'off'"><i />{{ truthy(h.listed) ? '代理中' : '已暫停' }}</span>
+              </p>
               <p class="hint" style="padding-top: 8px">
                 {{ h.name_ko }}　·　{{ h.country_zh }}　{{ h.tagline }}
               </p>

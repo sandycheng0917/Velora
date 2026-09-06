@@ -245,10 +245,27 @@ async function main() {
   // 而不是靜靜地繼續建置。
   assertNoCost(data, 'export')
 
+  /*
+   * 下架的品牌整包排除。
+   *
+   * houses 分頁的 listed 是整個品牌的開關 —— 暫停代理時要動的是一整個
+   * 品牌，不是逐件商品。舊的 Sheet 沒有這一欄，那時視同全部上架，
+   * 否則升欄位前的建置會把整個網站清空。
+   */
+  const houseOff = new Set(
+    (data.houses || [])
+      .filter((h) => 'listed' in h && !bool(h.listed))
+      .map((h) => str(h.key))
+  )
+  if (houseOff.size) {
+    console.error(`品牌已下架：${[...houseOff].join('、')}（其商品與介紹都不會進前台）`)
+  }
+
   // ── 商品：白名單 → 正規化 ───────────────────────────────────────
   const rows = (data.products || [])
     .map(pick)
     .filter((r) => str(r.id))
+    .filter((r) => !houseOff.has(str(r.house)))
     .map((r) => {
       const o = {
         id: str(r.id), ref: str(r.ref), category: str(r.category), house: str(r.house),
@@ -381,7 +398,7 @@ async function main() {
     'export default ' + JSON.stringify(rows, null, 2) + '\n', 'utf8')
 
   const site = {
-    houses: (data.houses || []).map((h) => ({
+    houses: (data.houses || []).filter((h) => !houseOff.has(str(h.key))).map((h) => ({
       key: str(h.key), name: str(h.name), nameKo: str(h.name_ko),
       country: { zh: str(h.country_zh), en: str(h.country_en), ko: str(h.country_ko) },
       tagline: str(h.tagline),

@@ -66,8 +66,16 @@ var COLS = {
    */
   images: ['key', 'chunk', 'total', 'mime', 'alpha', 'sha256', 'bytes', 'data'],
 
+  /**
+   * 品牌。listed 是**整個品牌的開關** —— 取消勾選，這個品牌的所有商品
+   * 都不會進前台，品牌介紹也不會出現。
+   *
+   * 為什麼不用「逐件把商品下架」：代理關係是整包的，暫停代理時要動的是
+   * 一整個品牌。八件商品逐一取消勾選，恢復時要記得是哪八件 ——
+   * 那種狀態沒有人記得住，最後一定會漏。
+   */
   houses: ['key', 'name', 'name_ko', 'country_zh', 'country_en', 'country_ko',
-           'tagline', 'intro_zh', 'intro_en', 'intro_ko'],
+           'tagline', 'intro_zh', 'intro_en', 'intro_ko', 'listed'],
 
   /**
    * 品類。name_* 與 short_* 是兩組刻意不同的名字：
@@ -118,11 +126,13 @@ var SEED_HOUSES = [
   ['vuca', 'VUCA', '부카', '韓國', 'Korea', '한국', 'Always be with you.',
    '首爾的居家香氛品牌，主張香氣是空間的一部分而非附加品。香精配方符合 IFRA 國際香精協會標準，基劑採用玉米萃取植物乙醇，並通過七項有害物質檢驗。',
    'A Seoul home-fragrance house that treats scent as part of a room, not an accessory to it. Formulated to IFRA standards on a base of corn-derived plant ethanol, and tested for seven key harmful substances.',
-   '향을 공간의 일부로 다루는 서울의 홈 프래그런스 브랜드. IFRA 기준에 맞춘 향료와 옥수수 유래 식물성 에탄올 베이스, 7가지 유해물질 검사를 통과했습니다.'],
+   '향을 공간의 일부로 다루는 서울의 홈 프래그런스 브랜드. IFRA 기준에 맞춘 향료와 옥수수 유래 식물성 에탄올 베이스, 7가지 유해물질 검사를 통과했습니다.',
+   true],
   ['saintmari', 'SAINTMARI', '세인트메리', '韓國', 'Korea', '한국', 'Quiet ornament for everyday.',
    '韓國時尚配件品牌，做真絲長巾與純銀首飾。設計克制，靠比例與收邊說話 —— 是每天戴的東西，不是場合才拿出來的。',
    'A Korean accessories label making silk scarves and sterling jewelry. The design is restrained and speaks through proportion and finish — things you wear daily, not only for occasions.',
-   '실크 스카프와 실버 주얼리를 만드는 한국 액세서리 브랜드. 절제된 디자인으로 비율과 마감이 말을 합니다 — 특별한 날이 아니라 매일 착용하는 물건입니다.']
+   '실크 스카프와 실버 주얼리를 만드는 한국 액세서리 브랜드. 절제된 디자인으로 비율과 마감이 말을 합니다 — 특별한 날이 아니라 매일 착용하는 물건입니다.',
+   true]
 ];
 
 /* ── 主流程 ────────────────────────────────────────────────────────── */
@@ -777,4 +787,87 @@ function splitImagesBook() {
     '  商品資料　' + main.getUrl() + '\n' +
     '  影像儲存　' + ib.getUrl() + '\n\n' +
     '影像那份你平常不需要打開。兩份都要記得備份。');
+}
+
+
+/**
+ * 把 houses 分頁升到 11 欄（多一個 listed）。
+ *
+ * listed 是整個品牌的開關：取消勾選，這個品牌的所有商品都不會進前台，
+ * 品牌介紹也不會出現。代理關係是整包的，暫停時要動的是一整個品牌 ——
+ * 逐件把商品下架，恢復時要記得是哪幾件，那種狀態沒有人記得住。
+ *
+ * 既有的品牌一律預設為已上架（true），不會因為升欄位就把網站清空。
+ * 可以重複執行。
+ */
+function patchHouses() {
+  var ss = openBook_();
+  var sh = ss.getSheetByName('houses');
+  if (!sh) return say_('✗ 找不到 houses 分頁，請先執行 setupSheets。');
+
+  var want = COLS.houses;
+  var lastCol = Math.max(sh.getLastColumn(), 1);
+  var head = sh.getRange(1, 1, 1, lastCol).getValues()[0].map(String);
+
+  var same = head.length === want.length;
+  if (same) for (var i = 0; i < want.length; i++) if (head[i] !== want[i]) same = false;
+
+  var rows = [];
+  var last = sh.getLastRow();
+  if (last >= 2) {
+    var vals = sh.getRange(2, 1, last - 1, lastCol).getValues();
+    for (var r = 0; r < vals.length; r++) {
+      if (String(vals[r][0]).trim() === '') continue;
+      var o = {};
+      for (var c = 0; c < head.length; c++) if (head[c]) o[head[c]] = vals[r][c];
+      rows.push(o);
+    }
+  }
+  if (!rows.length) return say_('✗ houses 分頁沒有資料，請先執行 setupSheets。');
+
+  if (same) {
+    var allSet = true;
+    for (var q = 0; q < rows.length; q++) if (rows[q].listed === '' || rows[q].listed === undefined) allSet = false;
+    if (allSet) return say_('不用改：houses 已經有 listed 欄，而且每一列都有值。');
+  }
+
+  var out = [];
+  for (var m = 0; m < rows.length; m++) {
+    var row = [];
+    for (var w = 0; w < want.length; w++) {
+      var name = want[w];
+      var v = rows[m][name];
+      // 新欄位沒有值就預設為 true —— 升欄位不該把既有品牌下架
+      if (name === 'listed' && (v === '' || v === undefined)) v = true;
+      row.push(v === undefined ? '' : v);
+    }
+    out.push(row);
+  }
+
+  ensureRows_(sh, out.length + 1);
+  var wide = Math.max(lastCol, want.length);
+  sh.getRange(1, 1, sh.getMaxRows(), wide).clearContent();
+  sh.getRange(1, 1, 1, want.length).setValues([want]);
+  sh.getRange(2, 1, out.length, want.length).setValues(out);
+
+  // listed 做成核取方塊，才不會有人打 "true"（字串）而不是勾選
+  sh.getRange(2, want.indexOf('listed') + 1, Math.max(out.length, 20), 1)
+    .setDataValidation(SpreadsheetApp.newDataValidation().requireCheckbox().build());
+  SpreadsheetApp.flush();
+
+  var back = sh.getRange(1, 1, 1, want.length).getValues()[0];
+  for (var x = 0; x < want.length; x++) {
+    if (String(back[x]) !== want[x]) return say_('✗ 寫入後標題對不上，請再執行一次。');
+  }
+
+  var names = [];
+  for (var y = 0; y < out.length; y++) {
+    names.push('  · ' + out[y][want.indexOf('name')] +
+               (out[y][want.indexOf('listed')] ? '（上架中）' : '（已下架）'));
+  }
+  return say_(
+    '✓ houses 已更新為 ' + want.length + ' 欄（原本 ' + head.length + ' 欄）\n\n' +
+    names.join('\n') + '\n\n' +
+    '要暫停某個品牌：把它那一列的 listed 取消勾選，然後從後台按發布。\n' +
+    '那個品牌的所有商品與品牌介紹都會從前台消失，資料完全保留。');
 }
