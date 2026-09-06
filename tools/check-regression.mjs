@@ -264,6 +264,17 @@ for (const [label, was, now_, why] of accepted) {
 console.log(line)
 if (problems.length) {
   console.log(`✗ ${problems.length} 項內容遺失。這些會讓線上的站台變空白，必須先補回 Sheet。`)
+  /*
+   * 也用 GitHub Actions 的註記格式印一份。
+   *
+   * 沒有這一段的話，摘要頁與 API 只看得到「Process completed with exit code 1」——
+   * 要知道是哪一項得點進去展開步驟往下捲。訊息寫得再清楚，看不到就等於沒寫。
+   */
+  if (process.env.GITHUB_ACTIONS) {
+    const lines = problems.slice(0, 12).map(([l, was, n]) => `${l}：${was} → ${n}`)
+    console.log('::error::內容遺失 ' + problems.length + ' 項%0A' +
+      lines.join('%0A').replace(/?\n/g, ' '))
+  }
   process.exit(1)
 }
 console.log(`✓ 沒有內容遺失。${warnings.length} 項改變、${additions.length} 項新增，請確認是刻意的。`)
