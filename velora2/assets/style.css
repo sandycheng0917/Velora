@@ -71,7 +71,9 @@
 *::before,
 *::after { box-sizing: border-box; }
 
-html { scroll-behavior: smooth; scroll-padding-top: calc(var(--hdr-h) + 16px); }
+/* 手機上頁首是兩列（字標 + 導覽），所以 --hdr-h 在小螢幕要算多一點，
+   否則錨點捲過去之後標題會被固定頁首蓋住 */
+html { scroll-behavior: smooth; scroll-padding-top: calc(var(--hdr-h) + 46px); }
 
 body {
   position: relative;          /* 書脊以此為定位基準，才能量到整份文件的高 */
@@ -79,7 +81,10 @@ body {
   background: var(--bg) var(--grain);
   color: var(--ink);
   font-family: var(--f-body);
-  font-weight: 300;
+  /* 400 而不是 300。中文筆畫密度高，Light 在 12–15px 會讓筆畫糊在一起 ——
+     2026-09-07 使用者第二次反映「字很細、看了吃力」之後改的。
+     主標維持 200：那是 36px 的簽名元素，那個尺寸細才對。 */
+  font-weight: 400;
   font-size: 17px;             /* 手機基準。客戶回報過兩次太小，這裡給足 */
   line-height: 1.85;
   -webkit-font-smoothing: antialiased;
@@ -137,7 +142,7 @@ ul, ol { padding: 0; list-style: none; }
   align-items: center;
   gap: 8px;
   font-family: var(--f-mono);
-  font-size: 12px;
+  font-size: 13.5px;
   letter-spacing: 0.24em;
   color: var(--gold-deep);
   pointer-events: none;
@@ -160,7 +165,9 @@ ul, ol { padding: 0; list-style: none; }
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  height: var(--hdr-h);
+  flex-wrap: wrap;
+  /* 高度改成自動：手機上導覽會換到第二列。min-height 維持原本的視覺節奏 */
+  min-height: var(--hdr-h);
   padding: 0 var(--gutter) 0 var(--rail);
   background: rgba(243, 237, 226, 0.95);
   backdrop-filter: blur(10px);
@@ -179,7 +186,7 @@ ul, ol { padding: 0; list-style: none; }
 .wm span {
   font-family: var(--f-cjk);
   font-weight: 300;
-  font-size: 13px;
+  font-size: 14.5px;
   letter-spacing: 0.18em;
   color: var(--ink-faint);
 }
@@ -204,7 +211,43 @@ html[lang='en'] .wm span { display: none; }
 }
 
 /* 品類導覽在手機上隱藏 —— 主視覺的品類索引已經在做這件事，不重複 */
-.nav { display: none; }
+/*
+ * 品類導覽。
+ *
+ * 🔴 原本是「1040px 以下整個隱藏」，手機上只剩主視覺裡那一組連結 ——
+ *    點下去捲到品類區之後，畫面上就再也沒有任何導覽了。使用者的說法是
+ *    「跳到最下面後沒有辦法再回到大標題」，而頁面總高有 16730px，
+ *    要捲回去等於捲過整份文件。
+ *
+ *    改成在固定頁首裡換行成第二列，可橫向捲動。桌機（1040px 以上）
+ *    仍然是同一列的排法，那段規則在下面的媒體查詢裡。
+ */
+.nav {
+  order: 3;
+  display: flex;
+  width: 100%;
+  gap: 20px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  /* 捲動條在手機上會佔掉一條可視高度，而且醜 */
+  scrollbar-width: none;
+  padding: 2px var(--gutter) 10px var(--rail);
+  margin: 0 calc(var(--gutter) * -1) 0 calc(var(--rail) * -1);
+  font-size: 15px;
+  letter-spacing: 0.08em;
+  color: var(--ink-soft);
+}
+.nav::-webkit-scrollbar { display: none; }
+.nav a {
+  white-space: nowrap;
+  padding-bottom: 3px;
+  border-bottom: 1px solid transparent;
+}
+/* 目前所在的品類。位置牌那支 app.js 已經在算了，這裡只是把它畫出來 */
+.nav a[aria-current='true'] {
+  color: var(--gold-deep);
+  border-bottom-color: var(--gold);
+}
 
 .lang { display: flex; align-items: center; gap: 2px; }
 .lang button {
@@ -214,7 +257,7 @@ html[lang='en'] .wm span { display: none; }
   background: none;
   font-family: var(--f-body);
   font-weight: 400;
-  font-size: 14px;
+  font-size: 15.5px;
   letter-spacing: 0.1em;
   color: var(--ink-faint);
   cursor: pointer;
@@ -229,7 +272,7 @@ html[lang='en'] .wm span { display: none; }
 
 .kick {
   font-family: var(--f-mono);
-  font-size: 12.5px;
+  font-size: 13.5px;
   letter-spacing: 0.26em;
   color: var(--gold-deep);
   text-transform: uppercase;
@@ -283,7 +326,7 @@ html[lang='en'] .wm span { display: none; }
 .hero-index i {
   font-family: var(--f-mono);
   font-style: normal;
-  font-size: 12px;
+  font-size: 13.5px;
   letter-spacing: 0.18em;
   color: var(--gold-deep);
 }
@@ -319,7 +362,7 @@ html[lang='en'] .wm span { display: none; }
   margin-top: 18px;
   padding-left: 14px;
   border-left: 1px solid var(--gold);
-  font-size: 14px;
+  font-size: 15.5px;
   line-height: 1.85;
   color: var(--ink-faint);
 }
@@ -336,14 +379,77 @@ html[lang='en'] .wm span { display: none; }
    距離改由卡片自己的下內距負責。 */
 .grid {
   display: grid;
-  column-gap: 0;
+  /*
+   * 手機兩欄。
+   *
+   * 一欄時 16 張卡片佔掉 9088px —— 整頁 14222px 的 64%，
+   * 而每張卡片 568px 裡有 403px 是影像板。收合文字只能省 12%，
+   * 真正的長度來自圖片，所以要從排版下手。
+   *
+   * 兩欄之後影像板寬度減半、高度跟著減半（aspect-ratio 4/5），
+   * 一列放兩張，整體大約砍掉三分之一。目錄本來就是一次看好幾件，
+   * 一次一件反而不像目錄。
+   */
+  grid-template-columns: repeat(2, 1fr);
+  column-gap: 14px;
   row-gap: 0;
 }
 .card {
   display: grid;
   grid-template-rows: subgrid;
-  grid-row: span 5;
-  padding-bottom: 48px;
+  /* 四個直接子元素：影像板、索引碼、品名、<details>。
+     桌機版把 details 攤平成兩個（見下面的 html.js 規則），那時才是五個。 */
+  grid-row: span 4;
+  padding-bottom: 34px;
+}
+/* 兩欄之後卡片只有 150px 寬，索引碼那一行要能換行才不會撐破 */
+@media (max-width: 679px) {
+  /* .ref 平常是 flex（索引碼靠左、品牌靠右）。兩欄之後寬度只剩 150px，
+     flex 會把「VL · FRG ·」和「001」拆到兩行、品牌卡在中間。
+     窄螢幕改回一般區塊排法，讓它自然折行 */
+  .card .ref { display: block; font-size: 13px; letter-spacing: 0.1em; line-height: 1.65; }
+  .card .ref em { display: block; margin-top: 3px; font-style: normal; opacity: 0.8; }
+  .card h3 { font-size: 19px; }
+  .card .more > summary { font-size: 13px; letter-spacing: 0.06em; }
+}
+
+/*
+ * 明細收合。
+ *
+ * 手機版一頁二十個螢幕高，因為每張卡片都把描述與規格攤開 ——
+ * 使用者的話是「會要不斷的往下滑」。改成點了才展開。
+ *
+ * 用 <details> 而不是 JavaScript 的理由：它是原生的，關掉 JS 一樣能點開，
+ * 鍵盤可操作，內容仍然在 DOM 裡（搜尋引擎讀得到）。
+ * velora2 承諾「關掉 JS 仍是完整的中文站」，這個做法不會破壞它。
+ */
+.card .more > summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 4px 0 2px;
+  color: var(--gold-deep);
+  font-size: 14.5px;
+  letter-spacing: 0.1em;
+}
+.card .more > summary::-webkit-details-marker { display: none; }
+/* 箭頭用 CSS 畫，不用 ▾ 這個字元 —— 它不在中文字型的字集裡，
+   實測會退成一個看起來像句點的字符 */
+.card .more > summary::after {
+  content: '';
+  display: inline-block;
+  width: 0;
+  height: 0;
+  margin-left: 8px;
+  vertical-align: 2px;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 5px solid currentColor;
+  transition: transform 0.2s;
+}
+.card .more[open] > summary::after { transform: rotate(180deg); }
+.card .more > summary:focus-visible {
+  outline: 2px solid var(--gold-deep);
+  outline-offset: 3px;
 }
 /* 不支援 subgrid 的瀏覽器退回彈性排版：材質表壓到卡片底部，
    至少同一列的規格表仍在同一條線上。 */
@@ -416,13 +522,13 @@ html[lang='en'] .wm span { display: none; }
 }
 .plate.pending .p1 {
   font-family: var(--f-mono);
-  font-size: 13px;
+  font-size: 14.5px;
   letter-spacing: 0.24em;
   color: var(--ink-faint);
 }
 .plate.pending .p2 {
   font-family: var(--f-mono);
-  font-size: 11.5px;
+  font-size: 13px;
   letter-spacing: 0.2em;
   color: var(--gold-deep);
 }
@@ -436,13 +542,13 @@ html[lang='en'] .wm span { display: none; }
   gap: 12px;
   margin: 18px 0 8px;
   font-family: var(--f-mono);
-  font-size: 12px;
+  font-size: 13.5px;
   letter-spacing: 0.22em;
   color: var(--gold-deep);
 }
 .ref em {
   font-style: normal;
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 0.16em;
   color: var(--ink-faint);
 }
@@ -458,7 +564,7 @@ html[lang='en'] .wm span { display: none; }
 .say {
   margin: 13px 0 20px;
   max-width: 40ch;
-  font-size: 15.5px;
+  font-size: 17px;
   line-height: 1.9;
   color: var(--ink-soft);
 }
@@ -472,7 +578,7 @@ html[lang='en'] .wm span { display: none; }
   padding-top: 14px;
   border-top: 1px solid var(--line);
   font-family: var(--f-mono);
-  font-size: 13px;
+  font-size: 14.5px;
   line-height: 2.1;
   letter-spacing: 0.05em;
 }
@@ -491,7 +597,7 @@ html[lang='en'] .wm span { display: none; }
 .houses .loc {
   margin-bottom: 14px;
   font-family: var(--f-mono);
-  font-size: 12.5px;
+  font-size: 13.5px;
   letter-spacing: 0.12em;
   color: var(--ink-faint);
 }
@@ -567,7 +673,7 @@ html[lang='en'] .wm span { display: none; }
 .btn em {
   font-family: var(--f-mono);
   font-style: normal;
-  font-size: 12px;
+  font-size: 13.5px;
   letter-spacing: 0.18em;
   color: var(--gold-lit);
 }
@@ -591,7 +697,7 @@ html[lang='en'] .wm span { display: none; }
 }
 .ft .sub {
   margin-top: 8px;
-  font-size: 14px;
+  font-size: 15.5px;
   color: rgba(243, 237, 226, 0.72);
 }
 .ft .lk {
@@ -600,11 +706,11 @@ html[lang='en'] .wm span { display: none; }
   gap: 10px 24px;
   margin: 24px 0 20px;
   font-family: var(--f-mono);
-  font-size: 13.5px;
+  font-size: 15px;
   letter-spacing: 0.08em;
 }
 .ft .lk a { color: var(--gold-lit); box-shadow: inset 0 -1px 0 rgba(217, 189, 143, 0.4); }
-.ft .fine { font-size: 13.5px; color: rgba(243, 237, 226, 0.7); max-width: 42ch; }
+.ft .fine { font-size: 15px; color: rgba(243, 237, 226, 0.7); max-width: 42ch; }
 
 /* ── 語域切換：拉丁與 CJK 是兩張臉，語言換了字體要跟著換 ─── */
 html[lang='en'] .hero h1,
@@ -644,6 +750,22 @@ html[lang='ko'] .card h3 {
 
 /* ════ 平板 ════════════════════════════════════════════════ */
 @media (min-width: 680px) {
+  /*
+   * 桌機不收合。
+   *
+   * display: contents 讓 <details> 自己不產生盒子，說明與規格表直接變成
+   * 卡片的格線項目 —— 逐行對齊（subgrid）才能繼續運作。少了這一段，
+   * 同一列卡片的規格表會各自漂移，那正是「修跑版：卡片逐行對齊」
+   * 那個 commit 修好的東西。
+   *
+   * 🔴 只在 html.js 下生效。沒有 JavaScript 時 details 打不開，
+   *    如果這時又把 summary 藏起來，桌機使用者會看到一張沒有內文的卡片。
+   *    app.js 會加上 .js 並把 details 設成 open。
+   */
+  html.js .card { grid-row: span 5; }
+  html.js .card .more { display: contents; }
+  html.js .card .more > summary { display: none; }
+
   :root {
     --rail: 30px;
     --gutter: 62px;
@@ -672,7 +794,7 @@ html[lang='ko'] .card h3 {
   .hero-index em { display: inline-block; margin: 8px 10px 0 0; }
   .hero-index i { text-align: left; }
 
-  .grid { grid-template-columns: repeat(2, 1fr); column-gap: 36px; }
+  .grid { column-gap: 36px; }   /* 欄數從基礎樣式繼承，這裡只放寬欄距 */
   .rules { grid-template-columns: repeat(3, 1fr); gap: 36px 32px; }
   .houses { grid-template-columns: repeat(3, 1fr); }
 
@@ -681,6 +803,10 @@ html[lang='ko'] .card h3 {
 
 /* ════ 桌機：書脊變成真正的書口，位置牌立起來 ═══════════════ */
 @media (min-width: 1040px) {
+  /* 桌機導覽在同一列，頁首回到固定高度，錨點的補償也跟著縮回來 */
+  .hdr { flex-wrap: nowrap; height: var(--hdr-h); }
+  html { scroll-padding-top: calc(var(--hdr-h) + 16px); }
+
   :root {
     --rail: clamp(40px, 4.4vw, 64px);
     --gutter: clamp(112px, 11vw, 168px);
@@ -695,15 +821,19 @@ html[lang='ko'] .card h3 {
     gap: 12px;
     padding: 12px 3px;
     background: var(--bg);
-    font-size: 12px;
+    font-size: 13.5px;
     letter-spacing: 0.3em;
   }
   .chapter-tag b { writing-mode: vertical-rl; }
 
   .nav {
-    display: flex;
+    order: 0;
+    width: auto;
     align-items: baseline;
     gap: clamp(20px, 2.2vw, 34px);
+    overflow: visible;
+    padding: 0;
+    margin: 0;
     font-size: 15px;
     letter-spacing: 0.1em;
   }

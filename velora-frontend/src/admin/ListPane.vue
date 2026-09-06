@@ -9,7 +9,50 @@
  * 這個元件不打 API，資料由外面傳進來。分頁與篩選都是純前端 ——
  * 十幾件商品沒有理由來回問伺服器。
  */
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
+
+import * as api from './api.js'
+import * as session from './session.js'
+
+/**
+ * 影像鍵 → data URI 的快取。
+ *
+ * 放在模組層級而不是元件裡：換頁、切品類、進編輯頁再回來，
+ * 都不該重新抓一次。整份 Sheet 的圖加起來也就幾百 KB。
+ */
+const thumbs = ref({})
+const failed = new Set()
+
+/**
+ * 一次抓幾張。
+ *
+ * 一開始我完全不抓縮圖，理由是「清單只要回答有沒有圖，抓十三次太慢」。
+ * 那是錯的判斷 —— 結果是一整排灰色空框，跟壞掉長得一模一樣，
+ * 使用者第一個反應就是「上傳的圖片都沒有顯示出來」。
+ *
+ * 改成只抓「當前這一頁看得到的」，並行 3 條。圖會一張一張浮現，
+ * 不會擋住任何操作。抓失敗的記在 failed 裡不再重試 ——
+ * 一直重試一個抓不到的鍵，只會把後面的排隊卡住。
+ */
+let running = 0
+const queue = []
+async function pump() {
+  while (running < 3 && queue.length) {
+    const key = queue.shift()
+    running++
+    api
+      .getImage(session.token.value, key)
+      .then((r) => {
+        if (r.found) thumbs.value = { ...thumbs.value, [key]: `data:${r.mime};base64,${r.data}` }
+        else failed.add(key)
+      })
+      .catch(() => failed.add(key))
+      .finally(() => {
+        running--
+        pump()
+      })
+  }
+}
 
 const props = defineProps({
   products: { type: Array, required: true },
@@ -47,6 +90,20 @@ const shown = computed(() => {
   const start = Math.min(page.value, pages.value - 1) * per.value
   return filtered.value.slice(start, start + per.value)
 })
+// 當頁換了就把還沒抓的縮圖排進佇列。immediate 讓第一次載入也會跑
+watch(
+  shown,
+  (rows) => {
+    if (!session.token.value) return
+    for (const p of rows) {
+      const k = p.img_main
+      if (k && !thumbs.value[k] && !failed.has(k) && !queue.includes(k)) queue.push(k)
+    }
+    pump()
+  },
+  { immediate: true }
+)
+
 const from = computed(() => (filtered.value.length ? page.value * per.value + 1 : 0))
 const to = computed(() => Math.min((page.value + 1) * per.value, filtered.value.length))
 
@@ -118,13 +175,17 @@ const priceText = (p) =>
         <span class="n">{{ String(from + i).padStart(2, '0') }}</span>
         <span class="rule" />
         <!--
-          這裡刻意不顯示縮圖。img_main 存的是「影像鍵」不是網址 ——
-          位元組在 Sheet 的 images 分頁，要另外呼叫 op:'image' 才拿得到，
-          一列一次的話光是開清單就要打十幾次請求、等上二十秒。
-          清單要回答的問題只是「這件有沒有圖」，實際的圖在編輯頁看。
+          縮圖是從 Sheet 抓回來的 data URI（op:'image'）。
+          img_main 存的是「影像鍵」不是網址，位元組在 images 分頁。
+          只抓當前這一頁，並行 3 條，抓到一張畫一張。
         -->
-        <span class="plate" :class="{ pending: !p.img_main }" :title="p.img_main || '尚未上傳圖片'">
-          <template v-if="!p.img_main">無圖片</template>
+        <span
+          class="plate"
+          :class="{ pending: !p.img_main, loading: p.img_main && !thumbs[p.img_main] }"
+          :title="p.img_main || '尚未上傳圖片'"
+        >
+          <img v-if="thumbs[p.img_main]" :src="thumbs[p.img_main]" alt="" />
+          <template v-else-if="!p.img_main">無圖片</template>
         </span>
         <span class="nm">
           <b>{{ p.name_zh }}<em v-if="p.featured === true || String(p.featured).toUpperCase() === 'TRUE'" class="star">◆</em></b>

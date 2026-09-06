@@ -10,7 +10,7 @@
  *   velora-frontend/src/data/products.generated.js   商品陣列（扁平欄位）
  *   velora-frontend/src/data/site.generated.js       company / houses / categories
  *   <out>/v1/media/*.webp                            Vue 版的圖
- *   <out>/v2/assets/media/*.webp                     velora2 的圖
+ *   <out>/assets/media/*.webp                        velora2 的圖（根目錄）
  *
  * ── 成本絕不外流：這裡是第 2 與第 3 層 ──────────────────────────────
  *
@@ -290,7 +290,10 @@ async function main() {
   // 立刻有圖可看。velora2 沒有建置流程，仍然寫到 <out>。
   const mediaDirs = [
     join(ROOT, 'velora-frontend', 'public', 'media'),
-    join(OUT, 'v2', 'assets', 'media'),
+    // velora2 從 2026-09-07 起放在網址根目錄，不再是 /v2/ ——
+    // 這一行忘了跟著改的話，圖片會寫進一個沒有人讀的目錄，
+    // 而卡片的 <img src> 全部對不到檔案（實際發生過，13 張全破）
+    join(OUT, 'assets', 'media'),
   ]
   for (const d of mediaDirs) await mkdir(d, { recursive: true })
 

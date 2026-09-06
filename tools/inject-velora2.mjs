@@ -116,27 +116,43 @@ function plate(p) {
     ` loading="lazy" decoding="async" width="800" height="1000"></span>`
 }
 
+/**
+ * 卡片的直接子元素必須剛好 **4** 個：影像板、索引碼、品名、<details>。
+ *
+ * 2026-09-07 從 5 改成 4：說明與規格表移進 <details> 收合起來 ——
+ * 手機版一頁二十個螢幕高，使用者的原話是「會要不斷的往下滑」。
+ * 桌機由 CSS 的 display:contents 把 details 攤平回格線，那時才是 5 個，
+ * 所以 grid-row 也有兩個值（見 style.css 的 html.js 規則）。
+ */
+const CARD_CHILDREN = 4
+
 function card(p, houseName) {
+  const detail =
+    `<details class="more">` +
+      `<summary data-en="Details &amp; specs" data-ko="상세 · 사양">明細與規格</summary>` +
+      tri('p', 'say', p.say) +
+      `<dl class="hall">` +
+        tri('dt', '', { zh: '材質', en: 'Material', ko: '소재' }) +
+        tri('dd', '', p.material) +
+        tri('dt', '', { zh: '規格', en: 'Spec', ko: '사양' }) +
+        tri('dd', '', p.spec) +
+      `</dl>` +
+    `</details>`
+
   const parts = [
     plate(p),
     `<p class="ref">${esc(one(p.ref))}<em>${esc(one(houseName))}</em></p>`,
     tri('h3', '', p.name),
-    tri('p', 'say', p.say),
-    `<dl class="hall">` +
-      tri('dt', '', { zh: '材質', en: 'Material', ko: '소재' }) +
-      tri('dd', '', p.material) +
-      tri('dt', '', { zh: '規格', en: 'Spec', ko: '사양' }) +
-      tri('dd', '', p.spec) +
-    `</dl>`,
+    detail,
   ]
   const inner = parts.join('\n      ')
   const html = `<article class="card">\n      ${inner}\n    </article>`
 
   const n = countDirectChildren(inner)
-  if (n !== 5) {
+  if (n !== CARD_CHILDREN) {
     throw new Error(
-      `卡片 ${p.id} 有 ${n} 個直接子元素，必須剛好 5 個。\n` +
-      `velora2 的卡片用 CSS subgrid（grid-row: span 5），多一個少一個整列都會錯位。`)
+      `卡片 ${p.id} 有 ${n} 個直接子元素，必須剛好 ${CARD_CHILDREN} 個。\n` +
+      `velora2 的卡片用 CSS subgrid，多一個少一個整列的逐行對齊都會錯位。`)
   }
   return html
 }
@@ -197,6 +213,23 @@ async function main() {
   let html = await readFile(SRC, 'utf8')
   const products = await loadProducts()
 
+  /*
+   * 主視覺那四個件數（FRG 05 / SLK 13 …）原本是寫死的，而且早就跟實際
+   * 不符 —— 線上寫著絲巾 13 件、飾品 28 件，Sheet 裡是 3 件和 5 件。
+   * 寫死的數字沒有人會記得更新，最後一定會說謊。
+   *
+   * 手機包沒有商品，維持破折號而不是 0 —— 那一區是版面示意，
+   * 標成 0 會讓人以為東西賣完了。
+   */
+  const perCat = {}
+  for (const p of products) perCat[p.category] = (perCat[p.category] || 0) + 1
+  for (const [key, n] of Object.entries(perCat).concat([['phonebag', 0]])) {
+    const re = new RegExp(`(<i data-count="${key}">)[^<]*(</i>)`, 'g')
+    if (!re.test(html)) continue
+    const shown = n > 0 ? String(n).padStart(2, '0') : '—'
+    html = html.replace(new RegExp(`(<i data-count="${key}">)[^<]*(</i>)`, 'g'), `$1${shown}$2`)
+  }
+
   const counts = []
   for (const key of SECTIONS) {
     const list = products.filter((p) => p.category === key)
@@ -214,9 +247,9 @@ async function main() {
   // 注入後再全檔驗一次卡片不變式。單張卡片在 card() 裡驗過了，
   // 這裡驗的是「拼接本身沒有把別人的卡片弄壞」
   const cards = [...html.matchAll(/<article class="card">([\s\S]*?)<\/article>/g)]
-  const broken = cards.filter((m) => countDirectChildren(m[1]) !== 5)
+  const broken = cards.filter((m) => countDirectChildren(m[1]) !== CARD_CHILDREN)
   if (broken.length) {
-    throw new Error(`注入後有 ${broken.length} 張卡片不是 5 個直接子元素`)
+    throw new Error(`注入後有 ${broken.length} 張卡片不是 ${CARD_CHILDREN} 個直接子元素`)
   }
 
   // velora2 承諾零 innerHTML、零 fetch、唯一的 script 是 assets/app.js
@@ -228,7 +261,7 @@ async function main() {
     if (pat.test(html)) throw new Error(`注入後的 HTML ${why}，違反 velora2 的 CSP 承諾`)
   }
 
-  console.error(`卡片注入：${counts.join('、')}，全站 ${cards.length} 張卡片都是 5 個子元素`)
+  console.error(`卡片注入：${counts.join('、')}，全站 ${cards.length} 張卡片都是 ${CARD_CHILDREN} 個子元素`)
 
   if (check) {
     console.error('--check：只驗證，沒有寫出檔案')

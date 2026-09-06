@@ -18,6 +18,36 @@
 (function () {
   'use strict';
 
+  /*
+   * 標記「JavaScript 有在跑」。
+   *
+   * CSS 用 html.js 決定桌機版要不要把商品明細攤開。沒有這個標記時，
+   * details 維持可點開的收合狀態 —— 關掉 JS 的桌機使用者看到的是
+   * 「點一下展開」，而不是一張沒有內文的卡片。
+   *
+   * 要在最前面做：晚一步的話畫面會先閃一下收合的樣子。
+   */
+  document.documentElement.classList.add('js');
+
+  /*
+   * 桌機把商品明細展開。
+   *
+   * 手機版一頁二十個螢幕高，因為每張卡片都攤開描述與規格；
+   * 桌機是三欄排版，攤開才看得到逐行對齊的目錄感。
+   * 同一份 HTML，兩種讀法。
+   *
+   * 用 matchMedia 監聽而不是只在載入時判斷一次 —— 轉螢幕方向或
+   * 拖動視窗寬度時要跟著變，否則會卡在載入當下的那個狀態。
+   */
+  var wide = window.matchMedia('(min-width: 680px)');
+  function syncDetails() {
+    var list = document.querySelectorAll('.card .more');
+    for (var i = 0; i < list.length; i++) list[i].open = wide.matches;
+  }
+  syncDetails();
+  if (wide.addEventListener) wide.addEventListener('change', syncDetails);
+  else if (wide.addListener) wide.addListener(syncDetails);   // Safari 13 以前
+
   var LANGS = ['zh', 'en', 'ko'];
   var HTML_LANG = { zh: 'zh-Hant-TW', en: 'en', ko: 'ko' };
   var STORE = 'velora-lang';

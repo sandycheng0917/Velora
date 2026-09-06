@@ -41,7 +41,9 @@
   background: var(--desk);
   color: var(--ink);
   font-family: var(--f-body);
-  font-weight: 300;
+  /* 400 而不是 300。中文筆畫多，Light 在小字級下筆畫會糊 ——
+     跟 velora2 同一天、同一個理由改的。 */
+  font-weight: 400;
   overflow: hidden;
 }
 
@@ -69,7 +71,7 @@
 .vadmin .wm span {
   display: block;
   margin-top: 7px;
-  font-size: 11.5px;
+  font-size: 13px;
   letter-spacing: 0.28em;
   color: var(--sidebar-ink);
 }
@@ -83,7 +85,7 @@
   background: none;
   color: var(--sidebar-ink);
   font: inherit;
-  font-size: 13.5px;
+  font-size: 15px;
   letter-spacing: 0.06em;
   text-align: left;
   cursor: pointer;
@@ -100,7 +102,7 @@
   border-top: 1px solid #4a3f2e;
   margin: 0 24px;
   font-family: var(--f-mono);
-  font-size: 10.5px;
+  font-size: 12.5px;
   line-height: 1.9;
   /* #6E6353 量出來只有 2.61:1，10.5px 需要 4.5。這個值是 4.77 */
   color: #9a8e7a;
@@ -122,7 +124,7 @@
 }
 .vadmin .sub {
   margin: 10px 0 0;
-  font-size: 13px;
+  font-size: 14.5px;
   line-height: 1.7;
   color: var(--ink-faint);
 }
@@ -140,7 +142,7 @@
 }
 .vadmin .stamp {
   font-family: var(--f-mono);
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 0.05em;
   color: var(--ink-faint);
 }
@@ -166,7 +168,7 @@
 }
 .vadmin button.go em {
   font-family: var(--f-mono);
-  font-size: 10px;
+  font-size: 12px;
   font-style: normal;
   letter-spacing: 0.04em;
   color: var(--sidebar-ink);
@@ -178,7 +180,7 @@
   background: none;
   color: var(--ink-soft);
   font: inherit;
-  font-size: 11.5px;
+  font-size: 13px;
   cursor: pointer;
 }
 .vadmin button.link {
@@ -186,7 +188,7 @@
   background: none;
   color: var(--gold-deep);
   font: inherit;
-  font-size: 12.5px;
+  font-size: 14px;
   cursor: pointer;
   padding: 0;
 }
@@ -220,7 +222,7 @@
 }
 .vadmin .tabs button b {
   font-family: var(--f-mono);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 400;
 }
 .vadmin .tabs button.on b { color: var(--gold-deep); }
@@ -242,7 +244,7 @@
   border: 0;
   background: none;
   font: inherit;
-  font-size: 12.5px;
+  font-size: 14px;
   color: var(--ink);
   outline: none;
 }
@@ -274,7 +276,7 @@
 }
 .vadmin .row.hd span {
   font-family: var(--f-mono);
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 0.2em;
   color: var(--ink-faint);
 }
@@ -282,7 +284,7 @@
 .vadmin .row.dirty { box-shadow: inset 3px 0 0 var(--gold-deep); }
 .vadmin .row .n {
   font-family: var(--f-mono);
-  font-size: 12px;
+  font-size: 13.5px;
   letter-spacing: 0.08em;
   color: var(--ink-faint);
   padding-left: 4px;
@@ -309,13 +311,20 @@
   height: 100%;
   object-fit: cover;
 }
+/* 縮圖抓回來之前的樣子。用很淡的斜紋而不是轉圈圈 ——
+   一頁十幾張各自轉圈會很吵，而且那是「壞掉」的視覺語彙 */
+.vadmin .plate.loading {
+  background: repeating-linear-gradient(
+    45deg, var(--surface), var(--surface) 5px, var(--paper-alt) 5px, var(--paper-alt) 10px
+  );
+}
 .vadmin .plate.pending {
   background: var(--paper-alt);
   border-color: var(--gold);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 8px;
+  font-size: 11px;
   letter-spacing: 0.05em;
   color: var(--gold-deep);
 }
@@ -332,23 +341,23 @@
   align-items: center;
   gap: 9px;
   margin-top: 5px;
-  font-size: 11.5px;
+  font-size: 13px;
   color: var(--ink-faint);
 }
 .vadmin .nm .alt .en { font-family: var(--f-disp); letter-spacing: 0.12em; }
 .vadmin .nm .alt i { width: 1px; height: 10px; background: var(--line-strong); }
 .vadmin .nm .alt .miss { color: var(--gold-deep); }
-.vadmin .star { font-size: 8px; color: var(--gold-deep); margin-left: 8px; }
-.vadmin .cell { font-size: 12.5px; color: var(--ink-soft); }
+.vadmin .star { font-size: 11px; color: var(--gold-deep); margin-left: 8px; }
+.vadmin .cell { font-size: 14px; color: var(--ink-soft); }
 .vadmin .cell.mono {
   font-family: var(--f-mono);
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 0.03em;
   color: var(--ink-faint);
 }
-.vadmin .cell.price { font-family: var(--f-mono); font-size: 12px; color: var(--ink-soft); }
+.vadmin .cell.price { font-family: var(--f-mono); font-size: 13.5px; color: var(--ink-soft); }
 .vadmin .cell.price.hidden { color: var(--ink-faint); }
-.vadmin .st { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+.vadmin .st { display: flex; align-items: center; gap: 8px; font-size: 13.5px; }
 .vadmin .st i { width: 6px; height: 6px; flex: none; }
 .vadmin .st.live i { background: var(--gold-deep); }
 .vadmin .st.dirty i { border: 1px solid var(--gold-deep); }
@@ -362,7 +371,7 @@
   align-items: center;
   gap: 28px;
   padding: 16px 12px 0 20px;
-  font-size: 11px;
+  font-size: 13px;
   color: var(--ink-faint);
 }
 .vadmin .sheetfoot .grow { flex: 1; }
@@ -370,7 +379,7 @@
   border: 1px solid var(--line-strong);
   background: none;
   font-family: var(--f-mono);
-  font-size: 11.5px;
+  font-size: 13px;
   padding: 4px 6px;
   color: var(--ink-soft);
 }
@@ -388,7 +397,7 @@
 }
 .vadmin .sec b {
   font-family: var(--f-mono);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 400;
   letter-spacing: 0.24em;
   color: var(--gold-deep);
@@ -401,7 +410,7 @@
 .vadmin .fld { padding-bottom: 24px; }
 .vadmin .fld > label {
   display: block;
-  font-size: 12.5px;
+  font-size: 14px;
   letter-spacing: 0.08em;
   color: var(--ink-soft);
   padding-bottom: 11px;
@@ -412,7 +421,7 @@
 .vadmin .stack label {
   display: block;
   font-family: var(--f-mono);
-  font-size: 9px;
+  font-size: 11px;
   letter-spacing: 0.18em;
   color: var(--ink-faint);
   padding-bottom: 8px;
@@ -425,8 +434,8 @@
   border-bottom: 1px solid var(--line-strong);
   background: none;
   font-family: var(--f-body);
-  font-size: 13.5px;
-  font-weight: 300;
+  font-size: 15px;
+  font-weight: 400;
   line-height: 1.7;
   color: var(--ink);
   padding: 0 0 7px;
@@ -446,11 +455,11 @@
   padding: 6px 0 7px;
   border-bottom: 1px solid var(--line);
   font-family: var(--f-mono);
-  font-size: 13px;
+  font-size: 14.5px;
   color: var(--ink-faint);
 }
 .vadmin .hint {
-  font-size: 11px;
+  font-size: 13px;
   line-height: 1.7;
   color: var(--ink-faint);
   padding-top: 7px;
@@ -458,7 +467,7 @@
 .vadmin .warn {
   border-left: 2px solid var(--gold-deep);
   padding-left: 14px;
-  font-size: 11.5px;
+  font-size: 13px;
   line-height: 1.8;
   color: var(--ink-soft);
 }
@@ -468,7 +477,7 @@
   justify-content: space-between;
   align-items: center;
   padding-bottom: 8px;
-  font-size: 13px;
+  font-size: 14.5px;
 }
 .vadmin .sw button {
   width: 34px;
@@ -516,7 +525,7 @@
   justify-content: center;
   gap: 8px;
   font: inherit;
-  font-size: 11.5px;
+  font-size: 13px;
   cursor: pointer;
 }
 
@@ -526,13 +535,27 @@
   background: var(--dark);
   align-items: center;
   justify-content: center;
+  /* 手機上左右要留白，否則輸入框會貼著螢幕邊 */
+  padding: 24px;
 }
-.vadmin .box { width: 420px; }
+/*
+ * 🔴 不能寫死 420px。
+ *
+ * 原本是 width: 420px，390px 的手機上直接超出畫面 —— 而且底下 720px 的
+ * 媒體查詢又把 .vadmin 改成 position: static，兩件事疊起來就是跑版。
+ *
+ * 我測手機版時測的是「登入之後」的清單頁，沒測登入頁本身。
+ * 那是只有未登入才看得到的畫面，很容易漏掉。
+ */
+.vadmin .box {
+  width: 100%;
+  max-width: 420px;
+}
 .vadmin .box .wm { padding: 0 0 12px; }
 .vadmin .box hr { border: 0; border-top: 1px solid #4a3f2e; margin: 0 0 46px; }
 .vadmin .box label {
   display: block;
-  font-size: 12px;
+  font-size: 13.5px;
   letter-spacing: 0.08em;
   color: var(--sidebar-ink);
   padding-bottom: 10px;
@@ -564,7 +587,7 @@
 .vadmin .box .submit:disabled { opacity: 0.5; cursor: default; }
 .vadmin .box .err {
   margin-top: 20px;
-  font-size: 12.5px;
+  font-size: 14px;
   line-height: 1.8;
   color: #d2a273;
 }
@@ -579,7 +602,7 @@
   padding: 14px 20px;
   background: var(--dark);
   color: var(--gold-lit);
-  font-size: 12.5px;
+  font-size: 14px;
   line-height: 1.7;
   z-index: 30;
 }
@@ -588,7 +611,7 @@
 .vadmin .empty {
   padding: 60px 20px;
   text-align: center;
-  font-size: 13px;
+  font-size: 14.5px;
   color: var(--ink-faint);
 }
 
@@ -602,7 +625,10 @@
   .vadmin .row .hideNarrow { display: none; }
 }
 @media (max-width: 720px) {
-  .vadmin { position: static; flex-direction: column; }
+  /* 登入頁要維持置中，所以 :not(.login)。沒有這個排除條件的話，
+     position: static 會讓登入框黏在畫面左上角 */
+  .vadmin:not(.login) { position: static; flex-direction: column; }
+  .vadmin.login { padding: 20px; }
   .vadmin .side { width: 100%; flex-direction: row; flex-wrap: wrap; padding: 14px; }
   .vadmin .side .fill, .vadmin .foot { display: none; }
   .vadmin .main { padding: 24px 16px 40px; }
