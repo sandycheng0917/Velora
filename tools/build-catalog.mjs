@@ -435,4 +435,20 @@ async function main() {
   console.error(`影像寫入 ${mediaDirs.join('  ')}`)
 }
 
-main().catch((e) => { console.error('\n✗ ' + e.message); process.exit(1) })
+/*
+ * 失敗時同時用 GitHub Actions 的 ::error:: 格式印一份。
+ *
+ * 沒有這一段的話，錯誤只留在原始日誌裡，而摘要頁與 API 只看得到
+ * 「Process completed with exit code 1」—— 要查哪裡壞掉得點進去、
+ * 展開步驟、往下捲。訊息寫得再清楚，看不到就等於沒寫。
+ *
+ * %0A 是 Actions 的換行跳脫；直接送 \n 會讓註記只剩第一行。
+ */
+main().catch((e) => {
+  const msg = String((e && e.message) || e)
+  console.error('\n✗ ' + msg)
+  if (process.env.GITHUB_ACTIONS) {
+    console.log('::error::' + msg.replace(/\r?\n/g, '%0A'))
+  }
+  process.exit(1)
+})
