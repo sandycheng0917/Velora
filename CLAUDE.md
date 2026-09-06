@@ -6,22 +6,38 @@ Velora International CO., LTD ——「韓國選品代理」形象網站與後�
 ## 專案結構
 
 ```
-velora-frontend/     Vue 3 + Vite 前端（對外展示頁）
-design/              設計交付：.ep 設計檔、規格書、素材管線
-  sample/            原始素材（唯讀、不進版控，需另外取得）
-  spec/              版面與設計系統規格書
-  exports/           頁面預覽圖（不進版控，可重生）
+velora-frontend/     Vue 3 + Vite 前端
+  src/admin/         後台（商品管理），只在 build:admin 進 bundle
+  src/data/          catalog.js 是介面層，*.generated.js 由建置產生
+velora2/             提案站（靜態，無建置流程）
+site/                三站入口的選單頁
+apps-script/         Google Apps Script 後端（路由、認證、匯出、讀寫）
+tools/               建置期工具（產生器、注入器、遷移、退化檢查）
+design/              設計交付：.pen 設計檔、規格書、素材管線
 check-public.mjs     公開前稽核：哪些會進 Git、哪些會上網站
 ```
 
-目前沒有後端。商品資料是前端的靜態檔（`src/data/catalog.js`），
-後台的改動只存在記憶體，重整就沒了 —— 這是原型階段的刻意選擇。
+**商品資料在 Google Sheet，不在程式碼裡。**
+Apps Script 以擁有者身分執行，所以整套架構裡沒有「Sheet 存取金鑰」這種東西。
+建置時由 `tools/build-catalog.mjs` 打匯出端點取回，產生
+`src/data/products.generated.js` 與 `site.generated.js`；
+`catalog.js` 只剩一層形狀轉換，前台元件不知道資料從哪來。
+
+`*.generated.js` 進版控，讓離線 `npm run dev` 有東西可看。但 **CI 讀不到 Sheet 時
+必須硬失敗中止部署**，不可靜默回退到那份種子 —— 那會讓「按了發布、跑完了、
+內容卻沒變」，是最糟的失敗模式。
 
 ## 常用指令
 
 ```bash
-cd velora-frontend && npm run dev     # 開發（5173），對外版本
-cd velora-frontend && npm run build   # 建置，必須通過
+cd velora-frontend && npm run dev        # 開發（5173），對外版本
+cd velora-frontend && npm run dev:admin  # 後台（也是 5173，但根路徑就是後台）
+cd velora-frontend && npm run build      # 公開版建置，必須通過
+
+node tools/build-catalog.mjs --from tools/fixture.json --images tools/images.json --out build/site
+node tools/check-regression.mjs       # 內容有沒有比上一版少
+node tools/inject-velora2.mjs --check # velora2 卡片注入的乾跑
+node check-public.mjs --dist build/site
 
 python design/build-assets.py         # 重建圖庫（改了 sample/ 之後）
 node design/shoot.mjs                 # 產生預覽圖（需先跑 dev）
@@ -36,7 +52,10 @@ node design/shoot.mjs                 # 產生預覽圖（需先跑 dev）
 
 ## 硬性規則
 
-1. **展示頁不出現價格、購物車或下單按鈕。** 唯一轉換是 LINE。
+1. **展示頁不出現購物車或下單按鈕。** 唯一轉換是 LINE。
+   價格則**逐件由 Sheet 的 `price_public` 決定** —— 這條在 2026-09-06 改了。
+   沒勾的商品，產生器連 `price` 欄位都不會輸出到前台檔案，不是輸出了再隱藏。
+   （成本 `cost` 是另一回事：它在 `products_private` 分頁，永遠不進任何輸出。）
 2. **`#C5A880` 不可用於文字**（對比僅 1.9:1）。金色文字一律 `#A8875C`。
 3. **不使用 Tailwind。** 設計 token 寫在 `velora-frontend/src/style.css`。
 4. **Excel 的 FOB 出口單價與供應商聯絡資訊不得進入前端。**
@@ -71,9 +90,12 @@ git ls-files                       # 會被推送的完整清單（只有這些�
 網址為 `https://<帳號>.github.io/<repo>/`；
 子路徑由 workflow 以 `VITE_BASE` 自動代入，不需手動改設定。
 
-維護用的後台不在這個版控裡，只存在維護者本機（見 `.gitignore`）。
-本機有那些檔案時跑 `npm run dev:admin` 才會掛上 `/admin`；
-預設的 `npm run dev` 與 `npm run build` 都是對外版本。
+後台程式碼在 `velora-frontend/src/admin/`，**進版控**（2026-09-06 改）。
+公開版與後台版是兩個獨立站台，各自的根路由不同：
+`npm run build` 的根是展示頁（部署在 `/v1/`），
+`npm run build:admin` 的根是後台（部署在 `/admin/`）。
+路由用 `IS_PUBLIC` 分支，Rollup 會把不需要的那一半整段移除 ——
+公開版的 bundle 裡沒有後台的任何一行。
 
 ## 三語
 

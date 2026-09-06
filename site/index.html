@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>維羅拉國際有限公司 | Velora International</title>
+<meta name="description" content="維羅拉國際代理韓國品牌：居家香氛、真絲長巾與純銀飾品。兩個版本的形象網站入口。">
+<!--
+  三個站台的入口。
+
+  這頁沒有建置流程也沒有 JavaScript —— 它只有三個連結，
+  引入任何工具鏈都是為了維護一個永遠不會改的頁面而付出成本。
+
+  /v1/  Vue 版展示站（正式）
+  /v2/  提案站（靜態）
+
+  維護用的那個路徑刻意不寫在這裡，連註解都不寫 ——
+  註解會原封不動送到瀏覽器，稽核關卡也會因此判定後台字串外洩到公開頁。
+  robots 擋掉整站索引，因為這是提案階段的暫時網址。
+-->
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Noto+Sans+TC:wght@300;400&family=Noto+Serif+TC:wght@200;300&family=DM+Mono:wght@300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #fdfbf7;
+    --ink: #1c1917;
+    --ink-soft: #3d3833;
+    --ink-faint: #5e564b;
+    --gold: #c5a880;
+    --gold-deep: #a8875c;
+    --line: #e8e0d2;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 24px;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Noto Sans TC', system-ui, sans-serif;
+    font-weight: 300;
+    -webkit-font-smoothing: antialiased;
+  }
+  main { width: 100%; max-width: 560px; }
+  .wm {
+    font-family: Marcellus, serif;
+    font-size: 26px;
+    letter-spacing: 0.4em;
+    color: var(--ink);
+  }
+  .wm span {
+    display: block;
+    margin-top: 10px;
+    font-family: 'Noto Serif TC', serif;
+    font-size: 13px;
+    font-weight: 200;
+    letter-spacing: 0.5em;
+    color: var(--ink-faint);
+  }
+  hr { border: 0; border-top: 1px solid var(--line); margin: 34px 0 8px; }
+  a.card {
+    display: block;
+    padding: 24px 4px;
+    border-bottom: 1px solid var(--line);
+    text-decoration: none;
+    color: inherit;
+  }
+  a.card:hover { background: #faf6ee; }
+  a.card:focus-visible { outline: 2px solid var(--gold-deep); outline-offset: 3px; }
+  a.card .k {
+    font-family: 'DM Mono', ui-monospace, monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.24em;
+    color: var(--gold-deep);
+  }
+  a.card h2 {
+    margin: 9px 0 0;
+    font-family: 'Noto Serif TC', serif;
+    font-size: 21px;
+    font-weight: 200;
+    letter-spacing: 0.1em;
+  }
+  a.card p {
+    margin: 8px 0 0;
+    font-size: 13px;
+    line-height: 1.8;
+    color: var(--ink-faint);
+  }
+  footer {
+    margin-top: 30px;
+    font-family: 'DM Mono', ui-monospace, monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.06em;
+    color: var(--ink-faint);
+  }
+  @media (max-width: 480px) {
+    .wm { font-size: 21px; letter-spacing: 0.32em; }
+    a.card h2 { font-size: 18px; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <p class="wm">VELORA<span>維羅拉國際</span></p>
+  <hr>
+
+  <a class="card" href="v1/">
+    <span class="k">V1 · VUE</span>
+    <h2>展示站</h2>
+    <p>四大品類、商品明細彈窗、三語切換。目前的正式版本。</p>
+  </a>
+
+  <a class="card" href="v2/">
+    <span class="k">V2 · STATIC</span>
+    <h2>提案站</h2>
+    <p>雕版目錄語彙的單頁版本，零 JavaScript 依賴也能完整閱讀。</p>
+  </a>
+
+  <footer>維羅拉國際有限公司　Velora International CO., LTD</footer>
+</main>
+</body>
+</html>

@@ -184,6 +184,25 @@ ul, ol { padding: 0; list-style: none; }
   color: var(--ink-faint);
 }
 
+/* 字標第二段（維羅拉／Velora／벨로라）在窄螢幕上放不下，分兩段收。
+
+   頁首要塞的是 VELORA + 第二段 + 三顆語言鈕，實測需要的總寬：
+     320px  中/韓 351px、英 345px   → 都不夠
+     360px  中/韓 351px、英 359px   → 中韓餘 8.6px、英只餘 0.7px
+
+   中韓是 CJK，塞不下時 flex 會把那一段壓扁，三個字被拆成直排三行（實測
+   320px 就是這樣），比不顯示還糟。英文的 Velora 是一個不能斷的單字，
+   固定 53.9px 完全壓不動，會把語言鈕的「한」直接推出畫面。
+
+   所以：預設收掉，360px 以上還原；英文因為餘裕只有 0.7px（等於隨時會破），
+   撐到 680px 才還原 —— 而且英文收掉是零損失，它只是上面 VELORA 的小寫重複。 */
+.wm span { display: none; }
+html[lang='en'] .wm span { display: none; }
+
+@media (min-width: 360px) {
+  .wm span { display: inline; }
+}
+
 /* 品類導覽在手機上隱藏 —— 主視覺的品類索引已經在做這件事，不重複 */
 .nav { display: none; }
 
@@ -216,11 +235,17 @@ ul, ol { padding: 0; list-style: none; }
   text-transform: uppercase;
 }
 
+/* 主標每行八個字（含標點）。11.5vw 在 375px 上是 43px，一行只放得下
+   六個多字，兩行的標題會斷成四行、主視覺長高一百多像素 —— 手機是這個站的
+   主要載具，多這一屏的高度換不到任何東西。9.2vw 讓每行都收在一行裡：
+   375px 時 34.5px、320px 時 29.4px，都還有半個字的餘裕。
+   下限訂 29px 是因為 320px 時 9.2vw 已經是 29.4px，訂得再高就會反過來撐破。
+   縮的是全頁最大的字，不是先前被回報過兩次的內文與規格表。 */
 .hero h1 {
   margin: 24px 0 28px;
   font-family: var(--f-cjk);
   font-weight: 200;
-  font-size: clamp(38px, 11.5vw, 66px);
+  font-size: clamp(29px, 9.2vw, 66px);
   line-height: 1.3;
   letter-spacing: 0.05em;
 }
@@ -597,6 +622,13 @@ html[lang='en'] .houses .tbd h3 {
   font-weight: 400;
   letter-spacing: 0.03em;
 }
+/* 韓文只在空格處斷行。排版引擎預設把韓文當 CJK 處理，可以在任何一個
+   音節之間斷開 —— 於是 고르고 會斷成「고르／고」、전합니다 斷成「전／합니다」，
+   讀起來像把中文的「交付」拆成「交／付」。keep-all 是韓文排版的標準做法。
+   代價是長單字不能再折，所以套用後要重新掃一次水平溢出（已掃，19 個寬度
+   × 三語全數通過）。 */
+html[lang='ko'] { word-break: keep-all; }
+
 /* 韓文沒有配襯線 display 字（不為此多載一套字重），
    改用 body 家族 + 系統韓文字，字距收緊避免鬆散 */
 html[lang='ko'] .hero h1,
@@ -618,6 +650,9 @@ html[lang='ko'] .card h3 {
     --hdr-h: 66px;
   }
   body { font-size: 17.5px; }
+
+  /* 版面夠寬了，英文字標的第二段也還原 */
+  html[lang='en'] .wm span { display: inline; }
 
   .hero { padding-top: 110px; padding-bottom: 96px; }
   .ch { padding-top: 92px; padding-bottom: 92px; }

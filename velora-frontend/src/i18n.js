@@ -94,12 +94,14 @@ const UI = {
   slideN: { zh: '第 %s 張', en: 'Slide %s', ko: '%s번째 이미지' },
 
   // ── 品類 ──────────────────────────────────────────────
+  // 數字用 %s 帶入。品類是 Sheet 驅動的，寫死「四」會在有品類還沒上架商品時
+  // 變成「四大品類」底下只有三格 —— 那種錯誤沒有人會回報，但看得出來很隨便
   catKicker: {
-    zh: '兩家韓國品牌 · 四條商品線',
-    en: 'Two Korean Houses · Four Lines',
-    ko: '두 개의 한국 브랜드 · 네 가지 라인',
+    zh: '%s家韓國品牌 · %s條商品線',
+    en: '%s Korean Houses · %s Lines',
+    ko: '%s 개의 한국 브랜드 · %s 가지 라인',
   },
-  catTitle: { zh: '四大品類', en: 'Categories', ko: '카테고리' },
+  catTitle: { zh: '%s大品類', en: 'Categories', ko: '카테고리' },
   catTitleEm: { zh: 'Curated', en: 'Curated', ko: 'Curated' },
   selected: { zh: '件選件', en: 'Selected', ko: '개 셀렉션' },
 
@@ -191,6 +193,19 @@ const UI = {
     ko: '취급 브랜드 VUCA · SAINTMARI (한국)',
   },
 }
+
+
+/**
+ * 把數字寫成當地的說法。中文的「三大品類」不能寫成「3大品類」，
+ * 韓文的「세 가지」也不是「3 가지」—— 這是排版問題不是翻譯問題。
+ * 超出範圍就回阿拉伯數字，總比空白好。
+ */
+const NUM = {
+  zh: ['零', '一', '兩', '三', '四', '五', '六', '七', '八', '九'],
+  en: ['Zero', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'],
+  ko: ['영', '한', '두', '세', '네', '다섯', '여섯', '일곱', '여덟', '아홉'],
+}
+export const num = (n) => NUM[lang.value]?.[n] ?? String(n)
 
 export function t(key, ...args) {
   const entry = UI[key]

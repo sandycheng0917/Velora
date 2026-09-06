@@ -100,7 +100,8 @@ LINE 按鈕在暗塊上滑過時翻成金底暗字（8.49:1）。
 
 | 規則 | 落實 |
 |---|---|
-| 展示頁不出現價格、購物車、下單 | 唯一轉換是 LINE；頁尾明寫價格於 LINE 洽詢 |
+| 展示頁不出現購物車、下單 | 唯一轉換是 LINE |
+| 價格逐件由 Sheet 的 `price_public` 決定 | 2026-09-06 改。沒勾就連欄位都不輸出 |
 | `#C5A880` 不承載文字 | 只做線、框、菱形飾釘 |
 | 不使用 Tailwind | 設計 token 直接寫在 `assets/style.css` |
 
@@ -170,7 +171,9 @@ CSS 預設樣式就是手機版，`min-width` 才往上加：
 | 零 npm 依賴 | 沒有供應鏈，沒有 `node_modules` |
 
 **機密紅線**：Excel 的 FOB 出口單價（欄 P/Q）、供應商業務姓名與手機（欄 G）、
-事業登記號（欄 F）**沒有進入本目錄任何一個檔案**。價格完全不落地到前端。
+事業登記號（欄 F）**沒有進入本目錄任何一個檔案**。
+FOB 出口單價（`cost`）存在 Google Sheet 的 `products_private` 分頁，
+匯出端點的程式碼路徑上根本沒有那張表的名字，因此永遠不會落到前端。
 稽核用 `node ../check-public.mjs`。
 
 字型是唯一的外部來源（`fonts.googleapis.com` / `fonts.gstatic.com`）。

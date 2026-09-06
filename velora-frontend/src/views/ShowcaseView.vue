@@ -15,7 +15,7 @@ import {
   mediaUrl,
   products,
 } from '@/data/catalog.js'
-import { pick, t } from '@/i18n.js'
+import { num, pick, t } from '@/i18n.js'
 
 /* ── 主視覺輪播 ────────────────────────────────────────── */
 const SLIDES = [
@@ -152,13 +152,13 @@ function askOnLine() {
       </div>
     </section>
 
-    <!-- ═══ 四大品類：韓系不對稱格狀 ═══ -->
+    <!-- ═══ 品類區：韓系不對稱格狀（標題與數量由 categories 長度決定） ═══ -->
     <section class="sec">
       <span class="mark" style="top: 150px" aria-hidden="true"><i /><b>Categories</b></span>
       <div class="wrap">
         <header class="sec-head">
-          <p class="k">{{ t('catKicker') }}</p>
-          <h2>{{ t('catTitle') }}<em>{{ t('catTitleEm') }}</em></h2>
+          <p class="k">{{ t('catKicker', num(Object.keys(houses).length), num(categories.length)) }}</p>
+          <h2>{{ t('catTitle', num(categories.length)) }}<em>{{ t('catTitleEm') }}</em></h2>
           <hr class="hair" />
         </header>
       </div>

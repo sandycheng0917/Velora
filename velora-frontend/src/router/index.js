@@ -18,22 +18,36 @@ import ShowcaseView from '@/views/ShowcaseView.vue'
  */
 const IS_PUBLIC = import.meta.env.VITE_PUBLIC_BUILD === '1'
 
-const routes = [
-  {
-    path: '/',
-    name: 'showcase',
-    component: ShowcaseView,
-    meta: { title: '維羅拉國際有限公司 | Velora International' },
-  },
-]
-
-if (!IS_PUBLIC) {
-  routes.push({
-    path: '/admin',
-    name: 'admin',
-    component: () => import('@/views/AdminView.vue'),
-  })
-}
+/**
+ * 兩種建置產生兩個**獨立站台**，各自的根路由不同：
+ *
+ *   公開版（npm run build）        /  → 展示頁      部署在 /v1/
+ *   後台版（npm run build:admin）  /  → 後台        部署在 /admin/
+ *
+ * 後台不是掛在展示站底下的一個子路徑。原本寫成 path: '/admin' 時，
+ * 以 VITE_BASE=/admin/ 建置會讓 /admin/ 對到根路由（也就是展示頁），
+ * 後台被推到 /admin/admin —— 打開後台會看到展示頁，而且沒有任何錯誤。
+ * base 與路由路徑重複計算了同一段，是很容易漏掉的一種錯位。
+ *
+ * 分開的好處不只是路徑：後台的 bundle 裡連展示頁都不需要有。
+ */
+const routes = IS_PUBLIC
+  ? [
+      {
+        path: '/',
+        name: 'showcase',
+        component: ShowcaseView,
+        meta: { title: '維羅拉國際有限公司 | Velora International' },
+      },
+    ]
+  : [
+      {
+        path: '/',
+        name: 'admin',
+        component: () => import('@/admin/AdminView.vue'),
+        meta: { title: '商品管理 | 維羅拉' },
+      },
+    ]
 
 routes.push({ path: '/:pathMatch(.*)*', redirect: '/' })
 

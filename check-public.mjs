@@ -20,7 +20,18 @@ import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
 import { join, relative } from 'node:path'
 
 const ROOT = import.meta.dirname
-const DIST = join(ROOT, 'velora-frontend', 'dist')
+
+/**
+ * 要稽核哪一份輸出。
+ *
+ * 預設是 velora-frontend/dist（本機 npm run build 的產物），
+ * CI 會傳 --dist build/site —— 那裡是三個站台組裝完的完整輸出，
+ * 才是真正會上傳的東西。寫死一個路徑的話，CI 稽核的是錯的目錄。
+ */
+const distIdx = process.argv.indexOf('--dist')
+const DIST = distIdx !== -1 && process.argv[distIdx + 1]
+  ? join(ROOT, process.argv[distIdx + 1])
+  : join(ROOT, 'velora-frontend', 'dist')
 const WATCH_FILE = join(ROOT, '.secret-watch.txt')
 
 /**
@@ -63,7 +74,10 @@ function sh(cmd) {
 }
 
 const line = (c = '─') => console.log(c.repeat(68))
-const CUSTOM = process.argv.slice(2).filter(Boolean)
+const CUSTOM = process.argv.slice(2).filter(Boolean).filter((a, i, all) => {
+  if (a === '--dist') return false
+  return all[i - 1] !== '--dist'
+})
 
 /* ① 會上傳到網站伺服器的 ──────────────────────────────────── */
 line('═')
@@ -157,7 +171,7 @@ if (CUSTOM.length) {
   for (const [re, why] of PATTERNS) {
     const hits = []
     for (const f of tracked) {
-      if (/\.(png|jpe?g|gif|svg|ico|ep|zip|pdf|xlsx|woff2?)$/i.test(f)) continue
+      if (/\.(png|jpe?g|webp|avif|gif|svg|ico|ep|zip|pdf|xlsx|woff2?|mp4|pen)$/i.test(f)) continue
       let text
       try {
         text = readFileSync(join(ROOT, f), 'utf8')
@@ -174,12 +188,53 @@ if (CUSTOM.length) {
 console.log(bad ? `\n  ⚠ ${bad} 項命中，公開前請逐一確認是否為誤報。`
                 : '\n  ✓ 全部 0 命中')
 
-/* ⑤ 後台是否在公開版 ──────────────────────────────────────── */
+/* ⑤ 後台只能出現在 admin/ ─────────────────────────────────── */
 line('═')
-console.log('⑤  公開版是否含後台')
+console.log('⑤  後台只能出現在 admin/')
 line()
-const adminHit = sh('git grep -lI -e "商品管理" -- velora-frontend/dist').trim()
-console.log(adminHit
-  ? '  ⚠ dist/ 內含後台字串：\n      ' + adminHit
-  : '  ✓ dist/ 不含後台，後台程式碼未被打包')
+
+/**
+ * 🔴 這一段原本是 `git grep -lI -e "商品管理" -- velora-frontend/dist`。
+ *
+ *    但 dist/ 是 gitignored，而 git grep 預設只搜「追蹤中」的檔案 ——
+ *    所以它永遠回傳空、永遠通過。那道關卡空轉了很久，
+ *    而空轉的關卡比沒有關卡更糟：它讓人以為有在檢查。
+ *
+ *    改成直接讀檔。判準也從「dist 有沒有後台」改成「後台只能在 admin/」，
+ *    因為三站合一之後，輸出裡本來就會有一份後台。
+ */
+const ADMIN_MARKS = ['商品管理', 'vadmin', '出口單價']
+const leaked = []
+let adminSeen = 0
+for (const f of dist) {
+  if (/\.(png|jpe?g|webp|avif|gif|ico|woff2?|mp4)$/i.test(f.path)) continue
+  const rel = relative(DIST, f.path).replace(/\\/g, '/')
+  let text
+  try {
+    text = readFileSync(f.path, 'utf8')
+  } catch {
+    continue
+  }
+  const hit = ADMIN_MARKS.find((m) => text.includes(m))
+  if (!hit) continue
+  if (rel.startsWith('admin/')) adminSeen++
+  else leaked.push(`${rel}  →  ${hit}`)
+}
+
+if (leaked.length) {
+  console.log('  ✗ 後台字串出現在 admin/ 以外：')
+  for (const l of leaked.slice(0, 10)) console.log('      ' + l)
+} else {
+  console.log('  ✓ 後台字串沒有出現在 admin/ 以外')
+}
+
+// 正向控制。沒有這一句的話，一個空的 admin 目錄會讓上面那個檢查無條件通過，
+// 而「後台沒建出來」跟「後台沒外洩」在畫面上長得一模一樣
+console.log(
+  existsSync(join(DIST, 'admin'))
+    ? adminSeen
+      ? `  ✓ admin/ 確實含有後台（${adminSeen} 個檔案）`
+      : '  ✗ admin/ 存在但找不到後台字串 —— 後台可能根本沒建出來'
+    : '  – 這份輸出沒有 admin/（本機跑公開版建置時就是這樣，正常）'
+)
 line('═')

@@ -1,16 +1,34 @@
-# 推到 main 就自動建置、稽核並發布到 GitHub Pages。
+# 從 Google Sheet 取資料、建三個站台、跑七道稽核，然後發布到 GitHub Pages。
 #
-# 前置設定（已完成，僅供日後參考）：
-#   repo 必須是 Public（免費方案的 Pages 不支援私有 repo），
-#   且 Settings → Pages → Source 要選 "GitHub Actions"。
+# 觸發方式有三種：
+#   push 到 main         —— 程式碼改了
+#   repository_dispatch  —— 後台按「發布」（資料改了）
+#   workflow_dispatch    —— 手動重跑
 #
-# 發布的是「公開版」：不含後台，只有展示頁。
-# build job 會先確認後台沒被打包，有命中就中止，不會發布出去。
+# 🔴 repository_dispatch 只在「預設分支」上觸發。目前的工作分支是 Velora2，
+#    合併回 main 之前，後台按發布時 GitHub 會回 204 成功、但什麼都不會發生 ——
+#    完全沒有錯誤訊號，是最難查的那種失敗。
+#
+# ── 站台配置 ────────────────────────────────────────────────────────
+#   /        選單頁（site/index.html，靜態）
+#   /v1/     Vue 版展示站（公開版建置，不含後台）
+#   /v2/     velora2（靜態，卡片由 Sheet 注入）
+#   /admin/  商品管理（後台版建置，要密碼）
+#
+# ── 需要的 Secrets ──────────────────────────────────────────────────
+#   EXEC_URL         Apps Script 的 /exec 網址
+#   CI_EXPORT_KEY    匯出端點的金鑰（initSecrets 產生）
+#   COST_CANARY      products_private 第 2 列 B 欄的誘餌字串
+#
+# 少了前兩個就無法取資料，建置會硬失敗 —— 不會靜默回退到 repo 裡的種子檔。
+# 那會讓「發布」看起來成功但內容沒變，是最糟的失敗模式。
 name: Build, Audit & Deploy
 
 on:
   push:
     branches: [main]
+  repository_dispatch:
+    types: [velora-publish]
   workflow_dispatch:
 
 permissions:
@@ -37,34 +55,156 @@ jobs:
         working-directory: velora-frontend
         run: npm ci
 
-      # Pages 把站台放在 /<repo>/ 底下，base path 必須跟著設，否則資源全部 404
-      - name: 建置公開版
+      # ── 資料 ──────────────────────────────────────────────────────
+      # 取不到 Sheet 就中止，不回退到 repo 裡的種子檔。
+      # 靜默回退會讓「按了發布、跑完了、內容卻沒變」，而且沒有任何錯誤。
+      - name: 從 Google Sheet 取商品資料
+        env:
+          EXEC_URL: ${{ secrets.EXEC_URL }}
+          CI_EXPORT_KEY: ${{ secrets.CI_EXPORT_KEY }}
+        run: |
+          if [ -z "$EXEC_URL" ] || [ -z "$CI_EXPORT_KEY" ]; then
+            echo "::error::缺少 EXEC_URL 或 CI_EXPORT_KEY，無法取得商品資料"
+            exit 1
+          fi
+          node tools/build-catalog.mjs --out build/site
+
+      - name: 確認 Sheet 的內容沒有比上一版少（放在取資料之後、建站之前）
+        run: node tools/check-regression.mjs
+
+      # ── 三次建置 ──────────────────────────────────────────────────
+      - name: 建置 v1（公開版，不含後台）
         working-directory: velora-frontend
         run: npm run build
         env:
-          VITE_BASE: /${{ github.event.repository.name }}/
+          VITE_BASE: /${{ github.event.repository.name }}/v1/
 
-      # 這一關是實質保護：後台若被誤打包進公開版，直接讓部署失敗
-      - name: 確認後台沒被打包
-        working-directory: velora-frontend
+      - name: 收攏 v1
         run: |
-          if grep -rl "商品管理" dist/ ; then
-            echo "::error::後台字串出現在公開版建置產物中，中止部署"
+          mkdir -p build/site/v1
+          cp -r velora-frontend/dist/. build/site/v1/
+          cp build/site/v1/index.html build/site/v1/404.html
+
+      - name: 建置 admin（含後台，帶端點網址）
+        working-directory: velora-frontend
+        run: npm run build:admin
+        env:
+          VITE_BASE: /${{ github.event.repository.name }}/admin/
+          VITE_EXEC_URL: ${{ secrets.EXEC_URL }}
+
+      - name: 收攏 admin
+        run: |
+          mkdir -p build/site/admin
+          cp -r velora-frontend/dist/. build/site/admin/
+          cp build/site/admin/index.html build/site/admin/404.html
+          printf 'User-agent: *\nDisallow: /\n' > build/site/admin/robots.txt
+
+      - name: 組 v2（velora2 + 從 Sheet 注入的卡片）
+        run: |
+          # 🔴 順序有陷阱：產生器已經把商品圖寫進 build/site/v2/assets/media/，
+          #    這裡只能「疊上去」，不能先清空目錄。用 rm -rf 再複製的話，
+          #    velora2 自己的圖還在、但商品圖全部不見 —— 而且不會有任何錯誤，
+          #    只有打開網頁才看得到破圖。下面那個 find 是最後的驗收。
+          mkdir -p build/site/v2
+          cp -r velora2/. build/site/v2/
+          # README 不上線。它寫著資料來源與欄位名稱（含機密欄的名字），
+          # 那是給維護者看的，不是站台的一部分 —— 稽核關卡會抓到它
+          find build/site/v2 -name '*.md' -delete
+          node tools/inject-velora2.mjs --out build/site/v2/index.html
+          # 驗每一個 <img src> 都真的有檔案。破圖不會讓建置失敗，只會讓網站難看
+          node - <<'JS'
+          const fs = require('fs')
+          const html = fs.readFileSync('build/site/v2/index.html', 'utf8')
+          const refs = [...html.matchAll(/<img src="([^"]+)"/g)].map((m) => m[1])
+          const missing = refs.filter((r) => !fs.existsSync('build/site/v2/' + r))
+          if (missing.length) {
+            console.error('::error::v2 有 ' + missing.length + ' 張圖對不到檔案：' + missing.slice(0, 5).join(', '))
+            process.exit(1)
+          }
+          console.log('v2 的 ' + refs.length + ' 張圖都對得到檔案')
+          JS
+
+      - name: 放上選單頁
+        run: cp site/index.html build/site/index.html
+
+      # ── 七道稽核關卡 ──────────────────────────────────────────────
+      # 每一關都要能失敗。只會通過的關卡等於沒有關卡 ——
+      # 你分不出它是真的在檢查，還是條件寫錯了永遠回傳空。
+
+      - name: 關卡 1／7　後台字串不得出現在 v1 與 v2
+        run: |
+          if grep -rl "商品管理\|vadmin\|出口單價" build/site/v1 build/site/v2 ; then
+            echo "::error::後台字串出現在對外站台，中止部署"
             exit 1
           fi
-          echo "確認通過：dist/ 不含後台"
+          echo "通過：v1 與 v2 不含後台"
+
+      # 反向關卡沒有這一道就沒有意義：一個空的 admin 目錄會讓關卡 1 無條件通過
+      - name: 關卡 2／7　後台字串必須出現在 admin
+        run: |
+          if ! grep -rql "商品管理" build/site/admin ; then
+            echo "::error::admin 目錄裡找不到後台字串 —— 後台可能根本沒建出來"
+            exit 1
+          fi
+          echo "通過：admin 確實含有後台"
+
+      # 最強的一關：把「成本有沒有洩漏」從啟發式猜測變成確定性測試。
+      # 只要洩漏路徑存在，誘餌必然跟著洩漏。
+      - name: 關卡 3／7　成本誘餌
+        env:
+          COST_CANARY: ${{ secrets.COST_CANARY }}
+        run: |
+          if [ -z "$COST_CANARY" ]; then
+            echo "::error::沒有設定 COST_CANARY。這是成本外洩的主要防線，不允許跳過。"
+            exit 1
+          fi
+          if grep -rl -- "$COST_CANARY" build/site ; then
+            echo "::error::誘餌字串出現在輸出裡 —— 成本資料正在外洩"
+            exit 1
+          fi
+          echo "通過：誘餌沒有出現"
+
+      - name: 關卡 4／7　試算表 ID 不得出現
+        env:
+          SHEET_ID: ${{ secrets.SHEET_ID }}
+        run: |
+          if [ -n "$SHEET_ID" ] && grep -rl -- "$SHEET_ID" build/site ; then
+            echo "::error::試算表 ID 出現在輸出裡"
+            exit 1
+          fi
+          echo "通過"
+
+      - name: 關卡 5／7　憑證形狀
+        run: |
+          if grep -rlE "AIza[0-9A-Za-z_-]{30,}|ghp_[0-9A-Za-z]{30,}|github_pat_[0-9A-Za-z_]{50,}|-----BEGIN [A-Z ]*PRIVATE KEY-----|[a-z0-9-]+@[a-z0-9-]+\.iam\.gserviceaccount\.com|cik_[0-9a-f]{32}" build/site ; then
+            echo "::error::輸出裡出現看起來像憑證的字串"
+            exit 1
+          fi
+          echo "通過"
+
+      # 關卡 3 的補網：誘餌列如果被誤刪，這一關還擋得住
+      - name: 關卡 6／7　成本欄位形狀
+        run: |
+          if grep -rlE '"(cost|cost_ccy|fob|unit_price|supplier_note)"[[:space:]]*:' build/site/v1 build/site/v2 ; then
+            echo "::error::輸出裡出現成本欄位"
+            exit 1
+          fi
+          echo "通過"
+
+      - name: 關卡 7／7　velora2 原始檔沒有被弄髒
+        run: |
+          git diff --exit-code -- velora2/ || {
+            echo "::error::注入器改到了 velora2/ 本身。它必須只寫到 build/，repo 要保持乾淨。"
+            exit 1
+          }
+          echo "通過：velora2/ 未被修改"
 
       - name: 公開內容稽核
-        run: node check-public.mjs
-
-      # SPA fallback：直接開子路徑時讓 Pages 回傳同一份 index
-      - name: 產生 404 fallback
-        working-directory: velora-frontend
-        run: cp dist/index.html dist/404.html
+        run: node check-public.mjs --dist build/site
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: velora-frontend/dist
+          path: build/site
 
   deploy:
     needs: build
