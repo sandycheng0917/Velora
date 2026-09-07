@@ -74,6 +74,53 @@
     syncLock();
   }, true);          // toggle 不冒泡，要用捕獲階段才收得到
 
+  /*
+   * 點圖片也能打開明細。
+   *
+   * 卡片上只剩圖、編號、品名，最直覺的動作就是點那張圖 —— 使用者的
+   * 原話是「點選圖片後還是沒有跳出明細頁面」。原本只有 <summary>
+   * 那幾個字可點，圖片完全沒有反應，看起來像壞掉。
+   *
+   * 🔴 只綁 article.card 的「直接子」影像板。浮層裡的圖（.peek 底下的
+   *    .gal .plate）不能綁 —— 點放大的照片應該什麼都不做，
+   *    而不是把正在看的浮層關掉。
+   *
+   * 這是漸進增強：沒有 JavaScript 時圖片不可點，但「明細與規格」
+   * 仍然打得開，velora2「關掉 JS 仍是完整的中文站」的承諾不受影響。
+   * 所以游標樣式也掛在 html.js 底下，沒有 JS 就不會假裝可以點。
+   */
+  /*
+   * 圖片載好就把「載入中」拿掉，載不到就改說載不到。
+   *
+   * 只有去背圖真的需要這一段（透明區域會讓底下的字透出來）；
+   * 不透明的圖片自己就蓋住了。但兩種都處理比較單純，也順便讓
+   * 「載不到」有話可說 —— 停在「載入中」不動比說實話更糟。
+   *
+   * 用捕獲階段：load 與 error 都不冒泡。
+   */
+  document.addEventListener('load', function (e) {
+    var img = e.target;
+    if (img.tagName !== 'IMG' || !img.closest || !img.closest('.gal')) return;
+    img.parentNode.classList.add('ok');
+  }, true);
+
+  document.addEventListener('error', function (e) {
+    var img = e.target;
+    if (img.tagName !== 'IMG' || !img.closest || !img.closest('.gal')) return;
+    var ld = img.parentNode.querySelector('.ld');
+    if (ld) ld.textContent = '圖片載不到';
+  }, true);
+
+  document.addEventListener('click', function (e) {
+    var plate = e.target.closest && e.target.closest('.card > .plate');
+    if (!plate) return;
+    var card = plate.parentNode;
+    var more = card.querySelector(':scope > .more');
+    if (!more) return;
+    more.open = !more.open;
+    syncLock();
+  });
+
   document.addEventListener('keydown', function (e) {
     if (e.key !== 'Escape') return;
     var all = openPeeks();

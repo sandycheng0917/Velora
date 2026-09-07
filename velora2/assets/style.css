@@ -606,6 +606,47 @@ html[lang='en'] .wm span { display: none; }
   gap: 10px;
 }
 .gal .plate { aspect-ratio: 1 / 1; }
+
+/*
+ * 「載入中」。
+ *
+ * 浮層裡的圖是 lazy 的，收合狀態不會下載，所以一打開的頭一兩秒是空框 ——
+ * 使用者的原話是「以為是空的」。
+ *
+ * 做法是把字墊在最底層（z-index 0），圖片自己疊在上面（z-index 1）。
+ * 圖片一載好就蓋住它，不需要任何 JavaScript，也不需要 onload 事件。
+ *
+ * 🔴 img 要給底色。去背的 PNG 有透明區域，沒有底色的話「載入中」
+ *    三個字會從圖片的透明部分透出來。
+ * 🔴 z-index 不能超過 1：.plate::after 的暗角是 2、::before 的髮絲框是 3，
+ *    圖片本來就該在那兩層底下。
+ */
+.gal .plate .ld {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--f-mono);
+  font-style: normal;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  color: var(--ink-faint);
+}
+/*
+ * 🔴 img 不能給底色。
+ *
+ * 第一版給了 background: var(--surface)，想擋住去背 PNG 的透明區域 ——
+ * 但 CSS 的背景在圖片資料抵達之前就畫出來了，等於「載入中」從頭到尾
+ * 都被蓋住，整個機制白做。
+ *
+ * 改成載好之後由 app.js 把標示移除（.gal .plate.ok）。沒有 JavaScript 時
+ * 不透明的圖片自己就會蓋掉它，只有去背圖會透出一點 —— 那是可以接受的
+ * 退化，總比「永遠看不到載入中」好。
+ */
+.gal .plate > img { z-index: 1; }
+.gal .plate.ok .ld { display: none; }
 .gal .plate:first-child { grid-column: 1 / -1; aspect-ratio: 4 / 5; }
 /* 髮絲框是照主圖尺寸調的，副圖只有一半寬要跟著收 */
 .gal .plate:not(:first-child)::before { inset: 7px; outline-offset: 2px; }
@@ -613,6 +654,9 @@ html[lang='en'] .wm span { display: none; }
 /* 浮層開著時背景不捲動。這個 class 由 app.js 掛上，沒有 JS 就只是不鎖 */
 html.peek-open,
 html.peek-open body { overflow: hidden; }
+
+/* 有 JavaScript 才假裝可以點 —— 沒有 JS 時圖片真的不可點（見 app.js） */
+html.js .card > .plate { cursor: pointer; }
 
 /* ── 商品浮層 ───────────────────────────────────────────── */
 /*

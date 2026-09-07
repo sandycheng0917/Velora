@@ -416,6 +416,169 @@ function buildIdRenamePlan_() {
   return { ok: ok, skip: skip };
 }
 
+/* ── 一次性：照品類前綴重編所有商品編號 ────────────────────────────
+ *
+ * 2026-09-08：只剩四個品類（FRG / SLK / JWL / BAG），但既有商品還帶著
+ * 舊分類的前綴 —— VL_SCR_001、VL_EAR_001、VL_NEC_001… 那是 9/6 把
+ * 絲巾扣、耳環、項鍊、戒指、手鍊併進「飾品」之前留下的，還有手機包的
+ * VL_MB_001 也對不上 BAG。
+ *
+ * 這支照「品類的 ref 前綴 + 該品類內的順序」重編：VL_<前綴>_<序號>。
+ * 順序取 order 欄，order 相同就照現在的編號排 —— 結果必須是可重現的，
+ * 不然預覽跟實際執行可能不一樣。
+ *
+ * 一樣分成兩支：先看再做。改主鍵沒有「試一下」這種事。
+ */
+
+/** 品類 key → 前綴。取自 categories 分頁的 ref 欄 */
+function categoryPrefixes_(ss) {
+  var sh = ss.getSheetByName('categories');
+  if (!sh) throw new Error('categories 分頁不存在');
+  var idx = headIndex_(sh);
+  var last = lastIdRow_(sh);
+  var out = {};
+  if (last < 2) return out;
+  var vals = sh.getRange(2, 1, last - 1, sh.getLastColumn()).getValues();
+  for (var i = 0; i < vals.length; i++) {
+    var key = String(vals[i][idx.key]).trim();
+    if (!key) continue;
+    out[key] = String(vals[i][idx.ref] || '').trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+  }
+  return out;
+}
+
+/** 重編計畫。回傳 { ok:[{from,to}], skip:[{id,why}], twoPhase:bool } */
+function buildRenumberPlan_() {
+  var ss = openBook_();
+  var sh = ss.getSheetByName('products');
+  if (!sh) throw new Error('products 分頁不存在');
+
+  var prefixes = categoryPrefixes_(ss);
+  var idx = headIndex_(sh);
+  var last = lastIdRow_(sh);
+  var ok = [], skip = [];
+  if (last < 2) return { ok: ok, skip: skip, twoPhase: false };
+
+  var vals = sh.getRange(2, 1, last - 1, sh.getLastColumn()).getValues();
+  var rows = [];
+  for (var i = 0; i < vals.length; i++) {
+    var id = String(vals[i][idx.id]).trim();
+    if (!id) continue;
+    if (truthyIn_(vals[i][idx.deleted])) { skip.push({ id: id, why: '已刪除的商品不重編' }); continue; }
+    rows.push({
+      id: id,
+      cat: String(vals[i][idx.category] || '').trim(),
+      order: Number(vals[i][idx.order]) || 0
+    });
+  }
+
+  /* 同一品類內排序：order 小的在前，order 相同就照現在的編號 ——
+     結果必須可重現，否則預覽跟執行會不一樣 */
+  rows.sort(function (a, z) {
+    if (a.cat !== z.cat) return a.cat < z.cat ? -1 : 1;
+    if (a.order !== z.order) return a.order - z.order;
+    return a.id < z.id ? -1 : 1;
+  });
+
+  var seq = {};
+  for (var r = 0; r < rows.length; r++) {
+    var cat = rows[r].cat;
+    var prefix = prefixes[cat];
+    if (!prefix) {
+      skip.push({ id: rows[r].id, why: '品類「' + cat + '」沒有前綴（categories 的 ref 欄是空的）' });
+      continue;
+    }
+    seq[prefix] = (seq[prefix] || 0) + 1;
+    var to = 'VL_' + prefix + '_' + String(seq[prefix]).padStart(3, '0');
+    if (to === rows[r].id) { skip.push({ id: rows[r].id, why: '已經是這個編號了' }); continue; }
+    ok.push({ from: rows[r].id, to: to });
+  }
+
+  /* 目標編號是不是被這一輪的另一件「現在」佔著？
+     是的話不能一步到位 —— 中途會撞名。那就先全部改成暫時編號再改回來。 */
+  var sources = {};
+  for (var a = 0; a < ok.length; a++) sources[ok[a].from.toUpperCase()] = true;
+  var twoPhase = false;
+  for (var b = 0; b < ok.length; b++) if (sources[ok[b].to.toUpperCase()]) twoPhase = true;
+
+  return { ok: ok, skip: skip, twoPhase: twoPhase };
+}
+
+/** 只印計畫，不動任何資料 */
+function previewRenumber() {
+  var plan = buildRenumberPlan_();
+  var lines = ['重編計畫（這一支不會動任何資料）', ''];
+  for (var i = 0; i < plan.ok.length; i++) {
+    lines.push('  ' + plan.ok[i].from + '  →  ' + plan.ok[i].to);
+  }
+  if (!plan.ok.length) lines.push('  （沒有需要改的）');
+  if (plan.skip.length) {
+    lines.push('', '跳過：');
+    for (var j = 0; j < plan.skip.length; j++) {
+      lines.push('  ' + plan.skip[j].id + ' —— ' + plan.skip[j].why);
+    }
+  }
+  lines.push('', '共 ' + plan.ok.length + ' 件要改、' + plan.skip.length + ' 件跳過。');
+  if (plan.twoPhase) {
+    lines.push('偵測到編號互相佔用，會先改成暫時編號再改回來（兩階段，時間加倍）。');
+  }
+  lines.push('確認無誤後執行 applyRenumber()。');
+  return say_(lines.join(String.fromCharCode(10)));
+}
+
+/** 真的改。影像鍵、成本列都會跟著搬 */
+function applyRenumber() {
+  var lock = LockService.getScriptLock();
+  try { lock.waitLock(60000); } catch (e) { return say_('伺服器忙碌中，請稍後再試。'); }
+
+  try {
+    var ss = openBook_();
+    var plan = buildRenumberPlan_();
+    if (!plan.ok.length) return say_('沒有需要改的編號。');
+
+    var done = [], failed = [];
+
+    function run(from, to) {
+      var r = renameIdCore_(ss, from, to);
+      if (r.ok) return true;
+      failed.push(from + ' → ' + to + '：' + (r.detail || r.err));
+      return false;
+    }
+
+    if (plan.twoPhase) {
+      /* 目標被別人佔著，一步到位會撞名。先全部搬到暫時編號，
+         再從暫時編號搬到目標 —— 中間狀態不好看，但不會撞。 */
+      var stamp = String(Date.now()).slice(-6);
+      var mid = [];
+      for (var i = 0; i < plan.ok.length; i++) {
+        var tmp = 'TMP_' + stamp + '_' + String(i + 1).padStart(3, '0');
+        if (run(plan.ok[i].from, tmp)) mid.push({ from: tmp, to: plan.ok[i].to, orig: plan.ok[i].from });
+      }
+      for (var j = 0; j < mid.length; j++) {
+        if (run(mid[j].from, mid[j].to)) done.push(mid[j].orig + ' → ' + mid[j].to);
+      }
+    } else {
+      for (var k = 0; k < plan.ok.length; k++) {
+        if (run(plan.ok[k].from, plan.ok[k].to)) done.push(plan.ok[k].from + ' → ' + plan.ok[k].to);
+      }
+    }
+
+    audit_('renumber', failed.length === 0,
+           '成功 ' + done.length + ' 件、失敗 ' + failed.length + ' 件');
+
+    var lines = ['重編完成。', ''];
+    for (var d = 0; d < done.length; d++) lines.push('  ✓ ' + done[d]);
+    for (var f = 0; f < failed.length; f++) lines.push('  ✗ ' + failed[f]);
+    lines.push('', '圖檔網址會跟著編號變，所以要到後台按一次「發布」才會反映到網站上。');
+    if (failed.length) {
+      lines.push('有失敗的項目 —— 再執行一次 previewRenumber() 看看剩下什麼。');
+    }
+    return say_(lines.join(String.fromCharCode(10)));
+  } finally {
+    lock.releaseLock();
+  }
+}
+
 function setupSheets() {
   var ss = openBook_();
   var report = [];

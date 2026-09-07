@@ -4,7 +4,7 @@
  * 由 tools/build-catalog.mjs 從 Google Sheet 產生，請勿手動編輯 ——
  * 下次建置就會被覆蓋。要改內容請改 Sheet。
  *
- * 產生時間：2026-09-07T15:39:44.957Z
+ * 產生時間：2026-09-07T16:55:24.631Z
  */
 
 export const houses = [

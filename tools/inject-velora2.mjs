@@ -27,6 +27,7 @@
  * 一律寫到別的地方，**永遠不改 velora2/index.html 本身** ——
  * CI 會跑 git diff --exit-code -- velora2/ 確認 repo 沒被弄髒。
  */
+import { createHash } from 'node:crypto'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
@@ -179,6 +180,14 @@ function gallery(p) {
   const cells = files.map((f) => {
     const cut = f.endsWith('.png') || f.endsWith('.cut.webp')
     return `<span class="plate${cut ? ' is-cutout' : ''}">` +
+      /*
+       * 「載入中」墊在圖片底下。
+       *
+       * 這些圖是 lazy 的，收合狀態不會下載 —— 所以浮層一打開的頭一兩秒
+       * 是空框，使用者的原話是「以為是空的」。墊一層字在底下，
+       * 圖片載好之後自己蓋掉它，不需要任何 JavaScript。
+       */
+      `<i class="ld" aria-hidden="true" data-en="Loading" data-ko="불러오는 중">載入中</i>` +
       `<img src="assets/media/${att(f)}" alt="${att(one(p.name.zh))}"` +
       ` loading="lazy" decoding="async" width="800" height="1000"></span>`
   })
@@ -512,6 +521,26 @@ async function main() {
    * 鬆散的 regex 悄悄比不到，而那種失敗是靜默的 —— 產出的 HTML 合法，
    * 只是永遠停在三欄。這裡比不到就直接拋。
    */
+  /*
+   * 樣式表與腳本加上內容雜湊。
+   *
+   * 🔴 這不是裝飾，是修一個實際發生過的問題：assets/style.css 與
+   *    assets/app.js 的網址從來不變，瀏覽器就一直用舊的。發布之後
+   *    使用者連續回報「浮層點不出來」「沒有 footer」「看不到 header」，
+   *    三件事全部都是同一個原因 —— 他跑的是幾個版本以前的檔案，
+   *    而網站上明明已經更新了。
+   *
+   *    改成內容雜湊之後，檔案一變網址就變，瀏覽器沒有舊的可以用。
+   *    內容沒變時雜湊不變，快取照樣生效。
+   */
+  for (const asset of ['assets/style.css', 'assets/app.js']) {
+    const body = await readFile(join(ROOT, 'velora2', asset), 'utf8')
+    const v = createHash('sha256').update(body).digest('hex').slice(0, 8)
+    const before = html.split(asset).length - 1
+    if (before !== 1) throw new Error(`${asset} 在 HTML 裡出現 ${before} 次，應該剛好一次`)
+    html = html.replace(asset, `${asset}?v=${v}`)
+  }
+
   const housesTag = '<div class="houses">'
   if (html.split(housesTag).length - 1 !== 1) {
     throw new Error(`找不到唯一的 ${housesTag}，velora2/index.html 被改過了？`)
@@ -530,7 +559,9 @@ async function main() {
   for (const [pat, why] of [
     [/\binnerHTML\b/, '出現 innerHTML'],
     [/\bfetch\s*\(/, '出現 fetch('],
-    [/<script(?![^>]*src="assets\/app\.js")/, '出現非 assets/app.js 的 script'],
+    // 允許 ?v=<內容雜湊>。這道關卡擋的是第三方腳本，不是版本參數 ——
+    // 但也只放行雜湊那一種形狀，不是任何查詢字串都算數
+    [/<script(?![^>]*src="assets\/app\.js(\?v=[a-f0-9]{8})?")/, '出現非 assets/app.js 的 script'],
   ]) {
     if (pat.test(html)) throw new Error(`注入後的 HTML ${why}，違反 velora2 的 CSP 承諾`)
   }
