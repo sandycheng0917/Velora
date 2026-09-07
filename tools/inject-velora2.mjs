@@ -163,35 +163,42 @@ const row = (label, value) => (value ? tri('dt', '', label) + tri('dd', '', valu
 /** 三語有任何一個填了東西就算有 */
 const hasText = (v) => !!(v && (String(v.zh || '').trim() || String(v.en || '').trim() || String(v.ko || '').trim()))
 
+/** 一格影像板。cut 判準是副檔名，跟 catalog.js 的 isCutout() 同一條規則 */
+function plateCell(p, f) {
+  const cut = f.endsWith('.png') || f.endsWith('.cut.webp')
+  return `<span class="plate${cut ? ' is-cutout' : ''}">` +
+    /*
+     * 「載入中」墊在圖片底下。這些圖是 lazy 的，收合狀態不會下載 ——
+     * 浮層一打開的頭一兩秒是空框，使用者的原話是「以為是空的」。
+     * 圖片載好之後自己蓋掉它（去背圖靠 app.js 補一手）。
+     */
+    `<i class="ld" aria-hidden="true" data-en="Loading" data-ko="불러오는 중">載入中</i>` +
+    `<img src="assets/media/${att(f)}" alt="${att(one(p.name.zh))}"` +
+    ` loading="lazy" decoding="async" width="800" height="1000"></span>`
+}
+
 /**
- * 展開後的圖庫：主圖（完整比例）＋副圖。
+ * 浮層裡的主圖，完整 4/5。
  *
- * 卡片上那張是正方形縮圖，上下被裁掉了；這裡放的是完整的 4/5 ——
- * 「想看完整的圖」本身就是展開的理由之一。同一個網址，瀏覽器不會重抓。
- *
- * loading="lazy"：收合狀態的 <details> 內容不會被渲染，所以展開之前
- * 這些圖都不會被下載。一頁十幾件商品，這是最大的一筆流量。
- *
- * 一張圖都沒有就整個容器不輸出 —— 空的圖庫只會留下一段內距。
+ * 卡片上那張是正方形縮圖，上下被裁掉了 —— 「想看完整的圖」本身就是
+ * 展開的理由之一。同一個網址，瀏覽器不會重抓。
  */
-function gallery(p) {
-  const files = [p.file, ...(p.shots || [])].filter(Boolean)
-  if (!files.length) return ''
-  const cells = files.map((f) => {
-    const cut = f.endsWith('.png') || f.endsWith('.cut.webp')
-    return `<span class="plate${cut ? ' is-cutout' : ''}">` +
-      /*
-       * 「載入中」墊在圖片底下。
-       *
-       * 這些圖是 lazy 的，收合狀態不會下載 —— 所以浮層一打開的頭一兩秒
-       * 是空框，使用者的原話是「以為是空的」。墊一層字在底下，
-       * 圖片載好之後自己蓋掉它，不需要任何 JavaScript。
-       */
-      `<i class="ld" aria-hidden="true" data-en="Loading" data-ko="불러오는 중">載入中</i>` +
-      `<img src="assets/media/${att(f)}" alt="${att(one(p.name.zh))}"` +
-      ` loading="lazy" decoding="async" width="800" height="1000"></span>`
-  })
-  return `<div class="gal">${cells.join('')}</div>`
+function heroPlate(p) {
+  return p.file ? `<div class="gal">${plateCell(p, p.file)}</div>` : ''
+}
+
+/**
+ * 副圖，兩張並排。
+ *
+ * 🔴 排在說明與規格「之後」，不是緊跟著主圖。
+ *    緊跟著主圖時，一打開就是三張照片連在一起，文字被推到摺線以下 ——
+ *    使用者的原話是「附圖應該要在文字的下面，不要在主要的圖上」。
+ *    先給眼睛一張大圖，再給要讀的字，最後才是更多角度。
+ */
+function shots(p) {
+  const list = p.shots || []
+  if (!list.length) return ''
+  return `<div class="shots">${list.map((f) => plateCell(p, f)).join('')}</div>`
 }
 
 function card(p, houseName, labels) {
@@ -219,7 +226,7 @@ function card(p, houseName, labels) {
           (one(houseName) ? `<em>${esc(one(houseName))}</em>` : '') + `</p>` +
         tri('h3', '', p.name) +
       `</div>` +
-      gallery(p) +
+      heroPlate(p) +
       `<div class="peek-txt">` +
         tri('p', 'say', p.say) +
         `<dl class="hall">` +
@@ -235,6 +242,7 @@ function card(p, houseName, labels) {
           row({ zh: '售價', en: 'Price', ko: '가격' }, priceRow(p.price)) +
         `</dl>` +
       `</div>` +
+      shots(p) +
       /*
        * 唯一的轉換點，就放在使用者最有興趣的那一刻眼前。這是做成浮層
        * 而不是就地展開的主要理由 —— 就地展開時 LINE 按鈕在頁尾。

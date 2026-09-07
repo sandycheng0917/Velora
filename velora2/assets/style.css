@@ -600,12 +600,19 @@ html[lang='en'] .wm span { display: none; }
  * 裁掉了上下。想看完整構圖就是展開的理由之一。
  * 同一個網址，瀏覽器不會重抓。
  */
-.gal {
+/* 主圖：完整 4/5，獨佔一塊 */
+.gal .plate { aspect-ratio: 4 / 5; }
+
+/* 副圖：兩張並排，排在說明與規格之後 */
+.shots {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 10px;
+  padding-top: 18px;
 }
-.gal .plate { aspect-ratio: 1 / 1; }
+.shots .plate { aspect-ratio: 1 / 1; }
+/* 髮絲框是照主圖尺寸調的，副圖只有一半寬要跟著收 */
+.shots .plate::before { inset: 7px; outline-offset: 2px; }
 
 /*
  * 「載入中」。
@@ -621,7 +628,8 @@ html[lang='en'] .wm span { display: none; }
  * 🔴 z-index 不能超過 1：.plate::after 的暗角是 2、::before 的髮絲框是 3，
  *    圖片本來就該在那兩層底下。
  */
-.gal .plate .ld {
+.gal .plate .ld,
+.shots .plate .ld {
   position: absolute;
   inset: 0;
   z-index: 0;
@@ -645,11 +653,11 @@ html[lang='en'] .wm span { display: none; }
  * 不透明的圖片自己就會蓋掉它，只有去背圖會透出一點 —— 那是可以接受的
  * 退化，總比「永遠看不到載入中」好。
  */
-.gal .plate > img { z-index: 1; }
-.gal .plate.ok .ld { display: none; }
-.gal .plate:first-child { grid-column: 1 / -1; aspect-ratio: 4 / 5; }
-/* 髮絲框是照主圖尺寸調的，副圖只有一半寬要跟著收 */
-.gal .plate:not(:first-child)::before { inset: 7px; outline-offset: 2px; }
+.gal .plate > img,
+.shots .plate > img { z-index: 1; }
+.gal .plate.ok .ld,
+.shots .plate.ok .ld { display: none; }
+
 
 /* 浮層開著時背景不捲動。這個 class 由 app.js 掛上，沒有 JS 就只是不鎖 */
 html.peek-open,
@@ -947,10 +955,11 @@ html[lang='ko'] .card h3 {
     grid-template-areas:
       'gal id'
       'gal txt'
+      'gal shots'
       'gal cta';
-    /* 前兩列貼齊內容，剩下的高度全給最後一列 —— 不指定的話三列會平分
-       圖庫撐出來的高度，品名與標語之間就空一大段 */
-    grid-template-rows: auto auto 1fr;
+    /* 前三列貼齊內容，剩下的高度全給最後一列 —— 不指定的話幾列會平分
+       主圖撐出來的高度，品名與標語之間就空一大段 */
+    grid-template-rows: auto auto auto 1fr;
     align-content: start;
     column-gap: 28px;
     padding: 30px 30px 34px;
@@ -958,6 +967,7 @@ html[lang='ko'] .card h3 {
   .peek .peek-id { grid-area: id; }
   .peek .gal { grid-area: gal; }
   .peek .peek-txt { grid-area: txt; }
+  .peek .shots { grid-area: shots; }
   .peek .ask { grid-area: cta; align-self: end; }
 
   /*

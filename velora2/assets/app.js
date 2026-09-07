@@ -98,16 +98,19 @@
    *
    * 用捕獲階段：load 與 error 都不冒泡。
    */
+  // 主圖在 .gal、副圖在 .shots —— 兩邊都要認，不然副圖的「載入中」不會消失
+  var inPeek = function (img) {
+    return img.tagName === 'IMG' && img.closest && !!img.closest('.gal, .shots');
+  };
+
   document.addEventListener('load', function (e) {
-    var img = e.target;
-    if (img.tagName !== 'IMG' || !img.closest || !img.closest('.gal')) return;
-    img.parentNode.classList.add('ok');
+    if (!inPeek(e.target)) return;
+    e.target.parentNode.classList.add('ok');
   }, true);
 
   document.addEventListener('error', function (e) {
-    var img = e.target;
-    if (img.tagName !== 'IMG' || !img.closest || !img.closest('.gal')) return;
-    var ld = img.parentNode.querySelector('.ld');
+    if (!inPeek(e.target)) return;
+    var ld = e.target.parentNode.querySelector('.ld');
     if (ld) ld.textContent = '圖片載不到';
   }, true);
 
