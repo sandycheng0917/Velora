@@ -585,6 +585,23 @@ html[lang='en'] .wm span { display: none; }
 .hall dt { color: var(--gold-deep); }
 .hall dd { color: var(--ink-soft); }
 
+/*
+ * 副圖。主圖以外的照片，收在「明細與規格」裡。
+ *
+ * 🔴 空的時候不能 display: none。桌機版把 <details> 攤平成格線項目，
+ *    同一列的卡片必須有一樣多的項目，subgrid 的逐行對齊才成立 ——
+ *    display: none 的元素不是格線項目，於是有副圖的卡片六項、
+ *    沒副圖的五項，整列錯位。所以空的只是把內距歸零，高度自然是 0。
+ *
+ * 用正方形而不是沿用主圖的 4/5：兩張並排時 4/5 會讓這一列比品名區還高，
+ * 副圖就變成主角了。
+ */
+.shots { display: flex; gap: 10px; padding-top: 14px; }
+.shots:empty { padding: 0; }
+.shots .plate { flex: 1 1 0; min-width: 0; aspect-ratio: 1 / 1; }
+/* 髮絲框是照著主圖的尺寸調的，縮到一半寬要跟著收，否則內圖只剩一小塊 */
+.shots .plate::before { inset: 7px; outline-offset: 2px; }
+
 /* ── 代理品牌 ───────────────────────────────────────────── */
 .houses { display: grid; gap: 1px; background: var(--line); border: 1px solid var(--line); }
 .houses article { padding: 30px 26px; background: var(--bg); }
@@ -762,7 +779,9 @@ html[lang='ko'] .card h3 {
    *    如果這時又把 summary 藏起來，桌機使用者會看到一張沒有內文的卡片。
    *    app.js 會加上 .js 並把 details 設成 open。
    */
-  html.js .card { grid-row: span 5; }
+  /* 五 → 六：<details> 攤平之後是說明、規格表、副圖三個項目，
+     加上影像板、索引碼、品名共六個。改過 card() 的輸出就要改這裡 */
+  html.js .card { grid-row: span 6; }
   html.js .card .more { display: contents; }
   html.js .card .more > summary { display: none; }
 

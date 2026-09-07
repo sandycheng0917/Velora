@@ -116,6 +116,33 @@ function plate(p) {
     ` loading="lazy" decoding="async" width="800" height="1000"></span>`
 }
 
+/** 香調欄是分號分隔的（水蜜桃;綠意;葡萄柚）。中點比頓號更貼目錄的語氣 */
+const notesText = (v) =>
+  String(v || '').split(';').map((x) => x.trim()).filter(Boolean).join(' · ')
+
+/** 三語都拆一次。整組都空的話回 null，呼叫端就整列不輸出 */
+function notesRow(v) {
+  const out = { zh: notesText(v.zh), en: notesText(v.en), ko: notesText(v.ko) }
+  return (out.zh || out.en || out.ko) ? out : null
+}
+
+/**
+ * 售價。
+ *
+ * 🔴 只有勾了 price_public 的商品才有這個欄位 —— 產生器連欄位都不輸出
+ * （見 build-catalog.mjs）。所以這裡不必再判斷一次「要不要公開」，
+ * 判斷「有沒有值」就等於判斷「有沒有勾」。多加一層自己的判斷反而危險：
+ * 兩處規則遲早會不一致，而不一致的那一次就是把不該公開的價格印出去。
+ *
+ * 數字不隨語言變，三語給同一個字串。
+ */
+function priceRow(price) {
+  const n = Number(price)
+  if (price === undefined || price === null || String(price).trim() === '' || !isFinite(n)) return null
+  const t = `NT$ ${n.toLocaleString('en-US')}`
+  return { zh: t, en: t, ko: t }
+}
+
 /**
  * 卡片的直接子元素必須剛好 **4** 個：影像板、索引碼、品名、<details>。
  *
@@ -126,16 +153,60 @@ function plate(p) {
  */
 const CARD_CHILDREN = 4
 
+/** <dl> 的一列。值是 null 就整列不輸出 —— 空的 dt/dd 會留下一行空白 */
+const row = (label, value) => (value ? tri('dt', '', label) + tri('dd', '', value) : '')
+
+/**
+ * 副圖。
+ *
+ * 🔴 就算一張都沒有也要輸出這個容器。桌機版把 <details> 攤平成格線項目
+ *    （style.css 的 html.js .card .more { display: contents }），
+ *    同一列的卡片必須有**一樣多**的項目，subgrid 的逐行對齊才成立。
+ *    有副圖才輸出的話，一列裡混著五項與六項的卡片，整列會錯位。
+ *    空的容器高度是 0，不佔位置。
+ *
+ * loading="lazy"：收合狀態下的 <details> 內容不會被渲染，所以這些圖
+ * 在展開之前不會被下載。桌機版是展開的，但仍在視窗外才載。
+ */
+function shots(p) {
+  const list = (p.shots || []).map((f) => {
+    const cut = f.endsWith('.png') || f.endsWith('.cut.webp')
+    return `<span class="plate${cut ? ' is-cutout' : ''}">` +
+      `<img src="assets/media/${att(f)}" alt="${att(one(p.name.zh))}"` +
+      ` loading="lazy" decoding="async" width="800" height="1000"></span>`
+  })
+  return `<div class="shots">${list.join('')}</div>`
+}
+
 function card(p, houseName) {
   const detail =
     `<details class="more">` +
       `<summary data-en="Details &amp; specs" data-ko="상세 · 사양">明細與規格</summary>` +
       tri('p', 'say', p.say) +
+      /*
+       * 🔴 副圖排在規格表「前面」，不是後面。
+       *
+       * 規格表（.hall）的高度會因商品而異（香氛多三列香調、勾了公開的
+       * 多一列售價），而它在 subgrid 裡沒有被拉伸到同列最高 ——
+       * 那是既有行為，以前看不出來，因為它是卡片的最後一項，後面沒有
+       * 東西會被它推歪。把副圖排在它後面就會露餡：同一列三張卡的照片
+       * 各自對齊到自己的規格表底部，高低差幾十像素。
+       *
+       * 所以把「高度會變的那一項」放回最後。順序上也更順：
+       * 說明 → 照片 → 材質／香調／規格／售價。
+       */
+      shots(p) +
       `<dl class="hall">` +
         tri('dt', '', { zh: '材質', en: 'Material', ko: '소재' }) +
         tri('dd', '', p.material) +
+        // 香調只有香氛填得出來，其餘品類整列不輸出（不是輸出空的）。
+        // <dl> 是一個格線項目，多幾列不影響卡片的子元素數量
+        row({ zh: '前調', en: 'Top', ko: '탑' }, notesRow(p.notes.top)) +
+        row({ zh: '中調', en: 'Heart', ko: '미들' }, notesRow(p.notes.mid)) +
+        row({ zh: '後調', en: 'Base', ko: '베이스' }, notesRow(p.notes.base)) +
         tri('dt', '', { zh: '規格', en: 'Spec', ko: '사양' }) +
         tri('dd', '', p.spec) +
+        row({ zh: '售價', en: 'Price', ko: '가격' }, priceRow(p.price)) +
       `</dl>` +
     `</details>`
 
@@ -190,6 +261,16 @@ async function loadProducts() {
       house: houseName[r.house] || r.house,
       houseKey: r.house,
       file: (r.files || [])[0] || '',
+      // 主圖之外的圖。之前只取 [0]，副圖上傳了卻沒有任何地方引用
+      shots: (r.files || []).slice(1),
+      // 產生器只在勾了 price_public 時才輸出 price 欄位 ——
+      // 沒勾的商品這裡就是 undefined，不是「有值但要藏起來」
+      price: r.price,
+      notes: {
+        top: { zh: r.notes_top_zh, en: r.notes_top_en, ko: r.notes_top_ko },
+        mid: { zh: r.notes_mid_zh, en: r.notes_mid_en, ko: r.notes_mid_ko },
+        base: { zh: r.notes_base_zh, en: r.notes_base_en, ko: r.notes_base_ko },
+      },
       name: { zh: r.name_zh, en: r.name_en, ko: r.name_ko },
       // 卡片上那句話：有標語用標語，沒有就用描述。
       // 不自動截斷描述 —— 截在半句話比整段長更難看，而且會截掉語意

@@ -51,7 +51,7 @@ const truthy = (v) => v === true || String(v).toUpperCase() === 'TRUE'
  * 影像鍵是用編號組的（`<編號>-main`），所以編號不合法時，
  * 上傳會被 opUpload_ 以 bad-key 擋下來，而那個錯誤看起來跟編號無關。
  */
-const ID_RE = /^[a-z0-9-]{3,40}$/
+const ID_RE = /^[A-Za-z0-9_-]{3,40}$/
 
 function blank() {
   const o = {
@@ -179,7 +179,7 @@ async function pickFile(field, ev) {
   const id = String(form.value.id || '').trim()
   if (!id) { emit('error', '先填好商品編號再上傳圖片 —— 影像鍵是用它組的。'); bad.value = { ...bad.value, id: true }; return }
   if (!ID_RE.test(id)) {
-    emit('error', `商品編號「${id}」不能拿來組影像鍵：只接受 3–40 個小寫英數與連字號（不能有大寫、空白或底線）。先把編號改好再上傳。`)
+    emit('error', `商品編號「${id}」不能拿來組影像鍵：只接受 3–40 個英數、連字號與底線，不能有空格或間隔點。先把編號改好再上傳。`)
     bad.value = { ...bad.value, id: true }
     return
   }
@@ -243,7 +243,7 @@ function validate() {
 
   const id = String(f.id || '').trim()
   if (!ID_RE.test(id)) {
-    errs.push('商品編號要 3–40 個小寫英數或連字號' + (id ? `，收到「${id}」` : '（必填）'))
+    errs.push('商品編號要 3–40 個英數、連字號或底線' + (id ? `，收到「${id}」` : '（必填）'))
     marks.id = true
   }
   if (!String(f.name_zh || '').trim()) {
@@ -345,7 +345,7 @@ async function remove() {
             </div>
             <p class="hint">
               {{ creating
-                ? '小寫英數與連字號，3–40 字。圖片的影像鍵也是用它組的，所以不能有大寫或空白。建立後不可更改。'
+                ? '英數、連字號與底線，3–40 字。圖片的影像鍵也是用它組的，所以不能有空格或間隔點。'
                 : '建立後不可更改' }}
             </p>
           </div>

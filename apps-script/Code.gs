@@ -130,6 +130,7 @@ function routes_() {
     imageIndex: opImageIndex_,   // 中繼資料 + 96px 縮圖，後台清單一次畫完
     saveThumb: opSaveThumb_,     // 回填既有影像的縮圖，不動位元組
     upload: opUpload_,
+    renameId: opRenameId_,       // 改商品編號，連影像鍵一起搬
     saveHouse: opSaveHouse_,
     deleteHouse: opDeleteHouse_,
     publish: opPublish_,

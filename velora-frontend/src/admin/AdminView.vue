@@ -44,6 +44,16 @@ const houses = ref([])
 const imgIndex = ref({})
 const lastPublish = ref('')
 const buildState = ref('')
+/**
+ * status 回來了沒有。
+ *
+ * 🔴 不能用 lastPublish 是不是空的來判斷。status 改成不擋畫面之後，
+ *    清單會先畫出來、發布時間才到 —— 而 isDirty() 的規則是
+ *    「沒有發布時間就全部算改過」，於是 13 列會先全部亮起金色的
+ *    「已修改」再跳掉。那個閃爍看起來像資料錯了。
+ *    「還不知道」與「從來沒發布過」是兩件事，要分開。
+ */
+const statusKnown = ref(false)
 
 const toast = ref(null)
 let toastTimer = null
@@ -61,6 +71,8 @@ const dirtyCount = computed(() => products.value.filter(isDirty).length)
  * 兩邊都可能沒有值 —— 沒發布過就全部算改過，那是對的：確實都還沒上線。
  */
 function isDirty(p) {
+  // 還不知道上次發布時間時一律當成沒改過 —— 寧可少標，不要先亮一片再收回
+  if (!statusKnown.value) return false
   if (!lastPublish.value) return true
   return String(p.updated || '') > String(lastPublish.value).slice(0, 10)
 }
@@ -106,36 +118,44 @@ async function afterHouseSave(msg) {
 async function load() {
   busy.value = true
   try {
-    const r = await api.list(session.token.value)
-
     /*
-     * 影像索引要「先」拿到再放商品。
+     * 🔴 三支端點的先後關係，決定了畫面要空白多久。
      *
-     * 順序反過來的話，清單一渲染就開始算 fast()，那時索引還是空的 ——
-     * 十三張全部排進 API 佇列，白等十秒之後才被公開網址取代。
-     * 索引只有 2KB，多等這一次很划算。
+     * Apps Script 的 /exec 一定會 302 轉到 script.googleusercontent.com，
+     * 所以每一次呼叫實際上是兩個來回。串著等三次 = 六個來回的空白畫面，
+     * 而這還在任何一張圖開始載之前 —— 這是後台「感覺很慢」的主因，
+     * 不是縮圖。
      *
-     * 抓不到不該擋住整個後台：縮圖會自動退回逐張走 API。
+     * 現在的規矩：
+     *   list + imageIndex   彼此不相依，同時發。
+     *                       影像索引仍然「先於商品渲染」拿到 ——
+     *                       Promise.all 一起完成，那個限制照樣成立。
+     *                       （沒有它的話，清單一渲染就算 fast()，
+     *                         索引還是空的，十幾張全部排進 API 佇列。）
+     *   status              只餵標頭那行「上次發布」，不擋畫面。
+     *                       發出去就不等了，回來再自己填上。
      */
-    try {
-      const ix = await api.imageIndex(session.token.value)
-      imgIndex.value = Object.fromEntries((ix.images || []).map((m) => [m.key, m]))
-    } catch {
-      imgIndex.value = {}
-    }
+    const [r, ix] = await Promise.all([
+      api.list(session.token.value),
+      // 索引抓不到不該擋住整個後台：縮圖會自動退回公開網址或逐張 API
+      api.imageIndex(session.token.value).catch(() => ({ images: [] })),
+    ])
+    imgIndex.value = Object.fromEntries((ix.images || []).map((m) => [m.key, m]))
 
     products.value = (r.products || []).filter((p) => !truthy(p.deleted))
     categories.value = r.categories || []
     houses.value = r.houses || []
-    try {
-      const s = await api.status(session.token.value)
-      lastPublish.value = s.last_publish || ''
-      buildState.value = s.state || ''
-    } catch {
-      // GitHub 沒設定不該擋住整個後台 —— 商品照樣能編，只是不知道發布狀態
-      buildState.value = 'unknown'
-    }
     ready.value = true
+
+    api
+      .status(session.token.value)
+      .then((st) => {
+        lastPublish.value = st.last_publish || ''
+        buildState.value = st.state || ''
+      })
+      // GitHub 沒設定不該擋住整個後台 —— 商品照樣能編，只是不知道發布狀態
+      .catch(() => (buildState.value = 'unknown'))
+      .finally(() => (statusKnown.value = true))
   } catch (e) {
     if (e.code === 'auth') {
       session.clear()

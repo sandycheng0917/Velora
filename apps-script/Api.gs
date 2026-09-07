@@ -58,6 +58,33 @@ function truthyIn_(v) {
 }
 
 /**
+ * 這個 id 被佔用了嗎？**不分大小寫**，而且含已軟刪除的列。
+ *
+ * 🔴 為什麼要不分大小寫：id 會變成影像檔名的一部分
+ * （`<id>-main-<sha8>.webp`）。Sheet 與 Linux 上 VL_FRG_001 和 vl_frg_001
+ * 是兩件事，但在 Windows / macOS 的檔案系統上是同一個檔案 ——
+ * 產生器在本機寫檔時後者會蓋掉前者，而且不會有任何錯誤。
+ *
+ * 含已刪除的列：軟刪除承諾 id 永不回收。放行一個刪過的 id，
+ * 舊的影像鍵就會接到新商品身上。
+ *
+ * @param {string} except 這一列自己的 id 不算佔用（改名時用）
+ */
+function idTaken_(sh, id, except) {
+  var last = lastIdRow_(sh);
+  if (last < 2) return false;
+  var want = String(id).toUpperCase();
+  var skip = except === undefined ? null : String(except).toUpperCase();
+  var ids = sh.getRange(2, 1, last - 1, 1).getValues();
+  for (var i = 0; i < ids.length; i++) {
+    var got = String(ids[i][0]).trim().toUpperCase();
+    if (!got || got === skip) continue;
+    if (got === want) return true;
+  }
+  return false;
+}
+
+/**
  * 驗商品。回傳錯誤訊息陣列，空陣列代表通過。
  *
  * 分開寫是為了能單獨測（見 testValidate）。一道從來沒失敗過的驗證
@@ -67,8 +94,8 @@ function validateProduct_(p, cats, houses) {
   var errs = [];
   var id = String(p.id || '').trim();
 
-  if (!/^[a-z0-9-]{3,40}$/.test(id)) {
-    errs.push('id 必須是 3–40 個小寫英數或連字號，收到「' + id + '」');
+  if (!/^[A-Za-z0-9_-]{3,40}$/.test(id)) {
+    errs.push('id 必須是 3–40 個英數、連字號或底線，收到「' + id + '」');
   }
   if (!p.name_zh || !String(p.name_zh).trim()) {
     errs.push('中文品名不能空白 —— 前台缺其他語言會回退中文，中文缺了就沒有東西可退');
@@ -153,6 +180,11 @@ function opSave_(b) {
     var merged = {};
     for (var m = 0; m < COLS.products.length; m++) merged[COLS.products[m]] = values[m];
     var errs = validateProduct_(merged, readKeys_(ss, 'categories'), readKeys_(ss, 'houses'));
+    // 大小寫撞名只在「新增」時擋 —— 更新既有商品時它當然會撞到自己
+    if (creating && !errs.length && idTaken_(sh, id)) {
+      errs.push('商品編號「' + id + '」已經有人用了（不分大小寫，也包含已刪除的商品）。' +
+                '編號會變成圖片檔名的一部分，只差大小寫的兩個編號在 Windows 上是同一個檔案。');
+    }
     if (errs.length) return { ok: false, err: 'invalid', detail: errs };
 
     values[idx.updated] = today_();
@@ -225,6 +257,136 @@ function opDelete_(b) {
 
 /* ══ 成本：單筆查詢，而且會留下紀錄 ═══════════════════════════════ */
 
+/* ══ 改商品編號 ════════════════════════════════════════════════════ */
+
+/**
+ * 改一件商品的編號，連影像鍵一起搬。
+ *
+ * ── 為什麼影像鍵一定要跟著改 ─────────────────────────────────────────
+ *
+ * 影像鍵是 `<id>-main`。只改 id 不改鍵的話，舊編號就被釋放出來了 ——
+ * 日後有人建一件同名的商品並上傳圖片，opUpload_ 會先刪掉同鍵的舊列
+ * 再寫新的，於是**前一件商品的圖片會被悄悄換成新商品的**。
+ * 沒有錯誤訊息，要到打開網站才看得到，而那時已經很難回推是哪一步。
+ *
+ * 所以這支要嘛整組搬完（商品列、三個影像欄、images 分頁、成本列），
+ * 要嘛一開始就拒絕。中間狀態不可接受。
+ *
+ * ── 這支不做的事 ────────────────────────────────────────────────────
+ *
+ * 不改前台的圖檔網址。檔名是內容定址的（`<鍵>-<sha8>.webp`），鍵變了
+ * 檔名就變了 —— 但那是下一次建置的事，改完要重新發布一次。
+ *
+ * @param {{from:string, to:string}} b
+ */
+function opRenameId_(b) {
+  var from = String(b.from || '').trim();
+  var to = String(b.to || '').trim();
+  if (!from) return { ok: false, err: 'no-id' };
+  if (!/^[A-Za-z0-9_-]{3,40}$/.test(to)) {
+    return { ok: false, err: 'invalid',
+             detail: ['新的商品編號要 3–40 個英數、連字號或底線，收到「' + to + '」'] };
+  }
+  if (from === to) return { ok: true, from: from, to: to, changed: false };
+
+  var lock = LockService.getScriptLock();
+  try { lock.waitLock(30000); } catch (e) { return { ok: false, err: 'busy' }; }
+
+  try {
+    var ss = openBook_();
+    var r = renameIdCore_(ss, from, to);
+    if (!r.ok) return r;
+    audit_('renameId', true, from + ' → ' + to + '（影像鍵 ' + r.keys.length + ' 個）');
+    return r;
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+/**
+ * 改名的實作。opRenameId_ 與批次工具 applyIdRename() 共用同一份 ——
+ * 兩條路走不同的程式碼，遲早會有一條漏掉影像鍵。
+ *
+ * 呼叫端負責取鎖。
+ */
+function renameIdCore_(ss, from, to) {
+  var sh = ss.getSheetByName('products');
+  if (!sh) return { ok: false, err: 'no-sheet' };
+
+  var row = rowOfId_(sh, from);
+  if (!row) return { ok: false, err: 'not-found', detail: '找不到商品編號「' + from + '」' };
+
+  // 目標不能被佔用（不分大小寫、含已刪除的），但自己不算
+  if (idTaken_(sh, to, from)) {
+    return { ok: false, err: 'id-taken',
+             detail: '商品編號「' + to + '」已經有人用了（不分大小寫，也包含已刪除的商品）' };
+  }
+
+  var idx = headIndex_(sh);
+  var im = openImages_().getSheetByName('images');
+  var imIdx = im ? headIndex_(im) : null;
+  var imLast = im ? lastIdRow_(im) : 0;
+  var imKeys = (im && imLast >= 2)
+    ? im.getRange(2, imIdx.key + 1, imLast - 1, 1).getValues()
+    : [];
+
+  /* 先算出「要改哪些影像鍵」並全部檢查完，再開始寫。
+     邊檢查邊寫的話，第三個鍵撞名時前兩個已經改掉了。 */
+  var plan = [];
+  var slots = ['img_main', 'img_2', 'img_3'];
+  for (var i = 0; i < slots.length; i++) {
+    var cell = String(sh.getRange(row, idx[slots[i]] + 1).getValue() || '').trim();
+    if (!cell) continue;
+    // 只搬「確實是用舊編號組出來的」鍵。手動填過別的值就原樣留著
+    if (cell.indexOf(from + '-') !== 0) continue;
+    var newKey = to + cell.substring(from.length);
+    if (!/^[A-Za-z0-9_-]{3,60}$/.test(newKey)) {
+      return { ok: false, err: 'bad-key',
+               detail: '改名後的影像鍵「' + newKey + '」不合法' };
+    }
+    for (var j = 0; j < imKeys.length; j++) {
+      if (String(imKeys[j][0]).trim() === newKey) {
+        return { ok: false, err: 'key-taken',
+                 detail: 'images 分頁已經有影像鍵「' + newKey + '」，改名會蓋掉別人的圖' };
+      }
+    }
+    plan.push({ slot: slots[i], from: cell, to: newKey });
+  }
+
+  /* ── 開始寫。順序：images 分頁 → 商品的影像欄 → 商品 id → 成本列 ──
+     先搬 images：中途失敗的話，商品仍指著舊鍵，而舊鍵還在，圖還看得到。
+     反過來先改 id 的話，中途失敗會留下一件指向不存在影像的商品。 */
+  for (var k = 0; k < plan.length; k++) {
+    for (var m = 0; m < imKeys.length; m++) {
+      if (String(imKeys[m][0]).trim() === plan[k].from) {
+        im.getRange(m + 2, imIdx.key + 1).setValue(plan[k].to);
+      }
+    }
+    sh.getRange(row, idx[plan[k].slot] + 1).setValue(plan[k].to);
+  }
+  if (plan.length) SpreadsheetApp.flush();
+
+  sh.getRange(row, idx.id + 1).setValue(to);
+  sh.getRange(row, idx.updated + 1).setValue(today_());
+  SpreadsheetApp.flush();
+
+  var back = String(sh.getRange(row, idx.id + 1).getValue()).trim();
+  if (back !== to) {
+    return { ok: false, err: 'write-failed',
+             detail: '寫入第 ' + row + ' 列後讀回的編號是「' + back + '」' };
+  }
+
+  // 成本列跟著搬。這張分頁也以 id 當鍵，不搬就變成孤兒
+  var pv = ss.getSheetByName('products_private');
+  if (pv) {
+    var pvRow = rowOfId_(pv, from);
+    if (pvRow) pv.getRange(pvRow, 1).setValue(to);
+  }
+
+  return { ok: true, from: from, to: to, changed: true, row: row,
+           keys: plan.map(function (x) { return x.from + ' → ' + x.to; }) };
+}
+
 /* ══ 影像 ══════════════════════════════════════════════════════════ */
 
 /** 一格的字元上限是 50000，留餘裕。前端照這個數字切 chunk */
@@ -242,7 +404,10 @@ var CHUNK_CHARS = 40000;
  */
 function opUpload_(b) {
   var key = String(b.key || '').trim();
-  if (!/^[a-z0-9-]{3,60}$/.test(key)) return { ok: false, err: 'bad-key' };
+  // 🔴 這條要跟 validateProduct_ 的 id 規則一致（多 20 字給 -main 這類後綴）。
+  // 影像鍵是 <id>-main，所以 id 放行、這裡不放行的字元會變成
+  // 「存得起來但傳不了圖」——2026-09-07 底線就是這樣被擋掉的
+  if (!/^[A-Za-z0-9_-]{3,60}$/.test(key)) return { ok: false, err: 'bad-key' };
   var chunks = b.chunks;
   if (!chunks || !chunks.length) return { ok: false, err: 'no-data' };
 
