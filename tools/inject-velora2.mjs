@@ -37,7 +37,7 @@ const DATA = join(ROOT, 'velora-frontend', 'src', 'data')
 
 /** 有錨點的品類。手機包刻意沒有 —— Sheet 裡沒有 BAG 商品，
  *  加了錨點會把那一區清空，示意版面就消失了。 */
-const SECTIONS = ['fragrance', 'scarf', 'jewelry']
+const SECTIONS = ['fragrance', 'scarf', 'jewelry', 'phonebag']
 
 /* ── 跳脫 ─────────────────────────────────────────────────────────── */
 
@@ -294,12 +294,17 @@ async function main() {
    * 不符 —— 線上寫著絲巾 13 件、飾品 28 件，Sheet 裡是 3 件和 5 件。
    * 寫死的數字沒有人會記得更新，最後一定會說謊。
    *
-   * 手機包沒有商品，維持破折號而不是 0 —— 那一區是版面示意，
-   * 標成 0 會讓人以為東西賣完了。
+   * 🔴 這裡曾經多接一筆寫死的 ['phonebag', 0]，理由是「那一區是版面示意，
+   *    標成 0 會讓人以為東西賣完了」。它排在 perCat 後面，所以手機包
+   *    真的有商品之後，第一圈寫上的 01 會被第二圈的 0 蓋回破折號 ——
+   *    導覽列從此鎖死在「—」，不管 Sheet 裡有幾件。2026-09-07 移除。
+   *
+   *    現在不必特例：沒有商品時 perCat 根本沒有那個鍵，迴圈不會碰它，
+   *    原始檔裡的破折號就留著。有商品才會被換成數字。
    */
   const perCat = {}
   for (const p of products) perCat[p.category] = (perCat[p.category] || 0) + 1
-  for (const [key, n] of Object.entries(perCat).concat([['phonebag', 0]])) {
+  for (const [key, n] of Object.entries(perCat)) {
     const re = new RegExp(`(<i data-count="${key}">)[^<]*(</i>)`, 'g')
     if (!re.test(html)) continue
     const shown = n > 0 ? String(n).padStart(2, '0') : '—'
