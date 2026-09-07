@@ -930,8 +930,9 @@
   .vadmin .brand { padding: 0 0 12px; }
   .vadmin .brand b { font-size: 17px; letter-spacing: 0.3em; }
   /* 「商品管理」在窄螢幕收起 —— 右邊的 h1 一直寫著現在在哪一頁，
-     這一行在手機上只是把公司名往下推 */
-  .vadmin .brand span:not(.co) { display: none; }
+     這一行在手機上只是把公司名往下推。
+     只收側欄那一份：登入頁沒有 h1，那一行是唯一說明「這裡是什麼」的字 */
+  .vadmin .side .brand span:not(.co) { display: none; }
   .vadmin .brand .co { margin-top: 6px; }
   .vadmin .nav { display: flex; flex-wrap: wrap; gap: 6px; }
   .vadmin .nav button { width: auto; padding: 9px 13px; gap: 9px; font-size: 14px; }
