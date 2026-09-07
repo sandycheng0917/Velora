@@ -304,7 +304,7 @@ function opRenameId_(b) {
 }
 
 /**
- * 改名的實作。opRenameId_ 與批次工具 applyIdRename() 共用同一份 ——
+ * 改名的實作。opRenameId_ 與批次工具 applyRenumber() 共用同一份 ——
  * 兩條路走不同的程式碼，遲早會有一條漏掉影像鍵。
  *
  * 呼叫端負責取鎖。
