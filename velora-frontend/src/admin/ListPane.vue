@@ -263,7 +263,7 @@ const priceText = (p) =>
         <svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4">
           <circle cx="9" cy="9" r="6" /><path d="M13.5 13.5 17 17" />
         </svg>
-        <input v-model="q" type="text" placeholder="搜尋品名或索引碼" @input="page = 0" />
+        <input v-model="q" type="text" placeholder="搜尋品名或商品編號" @input="page = 0" />
       </label>
     </div>
 

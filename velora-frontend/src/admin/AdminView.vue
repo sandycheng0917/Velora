@@ -328,7 +328,7 @@ onMounted(async () => {
           <div>
             <h1>品類與品牌</h1>
             <p class="sub">
-              品類決定前台的分區與索引碼前綴，要新增或改名請直接編輯 Google Sheet 的 categories 分頁。
+              品類決定前台的分區與商品編號的前綴（VL_<strong>FRG</strong>_001），要新增或改名請直接編輯 Google Sheet 的 categories 分頁。
               品牌可以在這一頁直接維護。
             </p>
           </div>
@@ -336,7 +336,7 @@ onMounted(async () => {
         <div style="padding-top: 30px">
           <div class="sec"><b>品類</b><hr /></div>
           <div class="row hd">
-            <span>索引前綴</span><i /><span /><span>中文</span><span>件數</span><span class="hideNarrow" /><span class="hideNarrow" /><span class="hideNarrow" /><span />
+            <span>編號前綴</span><i /><span /><span>中文</span><span>件數</span><span class="hideNarrow" /><span class="hideNarrow" /><span class="hideNarrow" /><span />
           </div>
           <div v-for="c in categories" :key="c.key" class="row" style="cursor: default">
             <span class="n">{{ c.ref }}</span>
