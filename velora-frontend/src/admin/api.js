@@ -70,6 +70,9 @@ const MESSAGES = {
   'bad-house': '品牌資料的格式不對。',
   'too-many': '品牌數量已達上限。',
   'house-in-use': '還有商品掛著這個品牌，不能刪。',
+  'id-taken': '這個商品編號已經有人用了（不分大小寫，也包含已刪除的商品）。',
+  'key-taken': '改名後的影像鍵已經存在，會蓋掉別人的圖，所以停下來了。',
+  'not-found': '找不到這件商品。',
   server: '伺服器發生未預期的錯誤。',
 }
 
@@ -142,5 +145,8 @@ export const publish = (token) => call('publish', { token })
 export const status = (token) => call('status', { token })
 
 /* 品牌。上限四家由伺服器擋，前端只是先攔一次讓錯誤來得早一點 */
+/** 改商品編號。伺服器會連影像鍵一起搬，所以圖片不會失聯 */
+export const renameId = (token, from, to) => call('renameId', { token, from, to }, { timeout: 90000 })
+
 export const saveHouse = (token, house) => call('saveHouse', { token, house })
 export const deleteHouse = (token, key) => call('deleteHouse', { token, key })

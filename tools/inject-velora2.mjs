@@ -108,7 +108,7 @@ function plate(p) {
     return `<span class="plate pending" role="img" aria-label="圖片製版中">` +
       `<b aria-hidden="true"></b>` +
       `<span class="p1" data-en="Plate pending" data-ko="제작 중">圖片製版中</span>` +
-      `<span class="p2">${esc(one(p.ref))}</span></span>`
+      `<span class="p2">${esc(one(p.code))}</span></span>`
   }
   const cut = p.file.endsWith('.png') || p.file.endsWith('.cut.webp')
   return `<span class="plate${cut ? ' is-cutout' : ''}">` +
@@ -156,46 +156,40 @@ const CARD_CHILDREN = 4
 /** <dl> 的一列。值是 null 就整列不輸出 —— 空的 dt/dd 會留下一行空白 */
 const row = (label, value) => (value ? tri('dt', '', label) + tri('dd', '', value) : '')
 
+/** 三語有任何一個填了東西就算有 */
+const hasText = (v) => !!(v && (String(v.zh || '').trim() || String(v.en || '').trim() || String(v.ko || '').trim()))
+
 /**
- * 副圖。
+ * 展開後的圖庫：主圖（完整比例）＋副圖。
  *
- * 🔴 就算一張都沒有也要輸出這個容器。桌機版把 <details> 攤平成格線項目
- *    （style.css 的 html.js .card .more { display: contents }），
- *    同一列的卡片必須有**一樣多**的項目，subgrid 的逐行對齊才成立。
- *    有副圖才輸出的話，一列裡混著五項與六項的卡片，整列會錯位。
- *    空的容器高度是 0，不佔位置。
+ * 卡片上那張是正方形縮圖，上下被裁掉了；這裡放的是完整的 4/5 ——
+ * 「想看完整的圖」本身就是展開的理由之一。同一個網址，瀏覽器不會重抓。
  *
- * loading="lazy"：收合狀態下的 <details> 內容不會被渲染，所以這些圖
- * 在展開之前不會被下載。桌機版是展開的，但仍在視窗外才載。
+ * loading="lazy"：收合狀態的 <details> 內容不會被渲染，所以展開之前
+ * 這些圖都不會被下載。一頁十幾件商品，這是最大的一筆流量。
+ *
+ * 一張圖都沒有就整個容器不輸出 —— 空的圖庫只會留下一段內距。
  */
-function shots(p) {
-  const list = (p.shots || []).map((f) => {
+function gallery(p) {
+  const files = [p.file, ...(p.shots || [])].filter(Boolean)
+  if (!files.length) return ''
+  const cells = files.map((f) => {
     const cut = f.endsWith('.png') || f.endsWith('.cut.webp')
     return `<span class="plate${cut ? ' is-cutout' : ''}">` +
       `<img src="assets/media/${att(f)}" alt="${att(one(p.name.zh))}"` +
       ` loading="lazy" decoding="async" width="800" height="1000"></span>`
   })
-  return `<div class="shots">${list.join('')}</div>`
+  return `<div class="gal">${cells.join('')}</div>`
 }
 
-function card(p, houseName) {
+function card(p, houseName, labels) {
   const detail =
     `<details class="more">` +
       `<summary data-en="Details &amp; specs" data-ko="상세 · 사양">明細與規格</summary>` +
       tri('p', 'say', p.say) +
-      /*
-       * 🔴 副圖排在規格表「前面」，不是後面。
-       *
-       * 規格表（.hall）的高度會因商品而異（香氛多三列香調、勾了公開的
-       * 多一列售價），而它在 subgrid 裡沒有被拉伸到同列最高 ——
-       * 那是既有行為，以前看不出來，因為它是卡片的最後一項，後面沒有
-       * 東西會被它推歪。把副圖排在它後面就會露餡：同一列三張卡的照片
-       * 各自對齊到自己的規格表底部，高低差幾十像素。
-       *
-       * 所以把「高度會變的那一項」放回最後。順序上也更順：
-       * 說明 → 照片 → 材質／香調／規格／售價。
-       */
-      shots(p) +
+      // 順序：說明 → 照片 → 材質／香調／規格／專屬欄／售價。
+      // 先給眼睛看的，再給要查的
+      gallery(p) +
       `<dl class="hall">` +
         tri('dt', '', { zh: '材質', en: 'Material', ko: '소재' }) +
         tri('dd', '', p.material) +
@@ -204,8 +198,11 @@ function card(p, houseName) {
         row({ zh: '前調', en: 'Top', ko: '탑' }, notesRow(p.notes.top)) +
         row({ zh: '中調', en: 'Heart', ko: '미들' }, notesRow(p.notes.mid)) +
         row({ zh: '後調', en: 'Base', ko: '베이스' }, notesRow(p.notes.base)) +
-        tri('dt', '', { zh: '規格', en: 'Spec', ko: '사양' }) +
-        tri('dd', '', p.spec) +
+        // 規格那一列的標籤逐品類不同：香氛是「容量」、絲巾是「尺寸」。
+        // 同一格資料，換一個說得通的名字（labels 由 categories 分頁提供）
+        row(labels.spec, hasText(p.spec) ? p.spec : null) +
+        // 品類專屬的那一格。標籤留空就整列不輸出 —— 沒有名字的資料沒有意義
+        row(labels.detail, hasText(labels.detail) && hasText(p.detail) ? p.detail : null) +
         row({ zh: '售價', en: 'Price', ko: '가격' }, priceRow(p.price)) +
       `</dl>` +
     `</details>`
@@ -215,7 +212,7 @@ function card(p, houseName) {
     // 沒掛品牌（或品牌設成不露出）就整個 <em> 不輸出。空的 <em> 在手機版
     // 是 display:block 還帶 margin-top，會留下一段沒有內容的空白。
     // <em> 在 <p class="ref"> 裡面，不是 .card 的直接子元素，卡片不變式不受影響。
-    `<p class="ref">${esc(one(p.ref))}` +
+    `<p class="ref">${esc(one(p.code))}` +
       (one(houseName) ? `<em>${esc(one(houseName))}</em>` : '') + `</p>`,
     tri('h3', '', p.name),
     detail,
@@ -256,7 +253,15 @@ async function loadProducts() {
     .sort((a, b) => (a.order || 0) - (b.order || 0))
     .map((r) => ({
       id: r.id,
-      ref: r.ref,
+      /*
+       * 卡片上印的編號就是商品編號本身。
+       *
+       * 2026-09-07 以前另有一個 ref（索引碼）欄位，跟 id 並存 ——
+       * 一個給機器、一個給人看。兩個編號的結果是沒有人知道該報哪一個，
+       * 所以合併成一個：id 改成 VL_FRG_001 這種看得懂的格式，
+       * 前台直接印它。ref 欄位還在 Sheet 上，只是不再輸出。
+       */
+      code: r.id,
       category: r.category,
       house: houseName[r.house] || r.house,
       houseKey: r.house,
@@ -279,6 +284,7 @@ async function loadProducts() {
         : { zh: r.desc_zh, en: r.desc_en, ko: r.desc_ko },
       material: { zh: r.material_zh, en: r.material_en, ko: r.material_ko },
       spec: { zh: r.spec_zh, en: r.spec_en, ko: r.spec_ko },
+      detail: { zh: r.detail_zh, en: r.detail_en, ko: r.detail_ko },
     }))
 }
 
@@ -392,6 +398,21 @@ async function main() {
     html = html.replace(new RegExp(`(<i data-count="${key}">)[^<]*(</i>)`, 'g'), `$1${shown}$2`)
   }
 
+  /*
+   * 明細表兩列的標籤，由 categories 分頁提供（產生器已經補過預設值）。
+   * 舊的 site.generated.js 沒有這兩個欄位 —— 那時退回「規格」，
+   * 專屬那一列則整列不輸出。這樣舊資料不會產生沒有名字的欄。
+   */
+  const { categories: allCats } = await loadSite()
+  const labelMap = Object.fromEntries((allCats || []).map((c) => [c.key, c]))
+  const labelsFor = (key) => {
+    const c = labelMap[key] || {}
+    return {
+      spec: c.specLabel || { zh: '規格', en: 'Spec', ko: '사양' },
+      detail: c.detailLabel || { zh: '', en: '', ko: '' },
+    }
+  }
+
   const counts = []
   /** 沒有上架商品、整段被移除的品類。要報告出來，否則區塊消失了沒有人知道為什麼 */
   const dropped = []
@@ -414,7 +435,7 @@ async function main() {
       continue
     }
 
-    const block = list.map((p) => '    ' + card(p, p.house)).join('\n\n')
+    const block = list.map((p) => '    ' + card(p, p.house, labelsFor(key))).join('\n\n')
     html = splice(html, key, block)
     counts.push(`${key} ${list.length} 件`)
   }

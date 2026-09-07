@@ -159,7 +159,9 @@ for (const p of old.products) {
   cmp(w, 'desc', p.desc, { zh: n.desc_zh, en: n.desc_en, ko: n.desc_ko })
   cmp(w, 'material', p.material, { zh: n.material_zh, en: n.material_en, ko: n.material_ko })
   cmp(w, 'spec', p.spec, { zh: n.spec_zh, en: n.spec_en, ko: n.spec_ko })
-  cmp(w, 'ref', p.ref, n.ref)
+  // ref（索引碼）2026-09-07 起不再輸出到前台 —— 前台改印商品編號本身。
+  // 這裡不能再比：欄位是刻意移除的，比下去 13 件都會報「內容遺失」而擋住部署。
+  // 基準線本身不動（那是規矩），只是不再拿一個已經不存在的欄位去比。
   // 品牌不露出時 house 會留白，那是刻意的；變成**別的**品牌仍然要報
   if (pausedHouses.includes(p.house) && !n.house) {
     accepted.push([`${w} · house`, p.house, '(空)', '品牌不露出，商品仍在架上'])

@@ -95,7 +95,6 @@ export const products = PRODUCTS.map((r) => {
   const gallery = files.map((f) => url('/media/' + f))
   return {
     id: r.id,
-    ref: r.ref,
     category: r.category,
     house: r.house,
     name: tri(r, 'name'),
@@ -103,6 +102,7 @@ export const products = PRODUCTS.map((r) => {
     desc: tri(r, 'desc'),
     material: tri(r, 'material'),
     spec: tri(r, 'spec'),
+    detail: tri(r, 'detail'),
     notes: notesOf(r),
     origin: origin(r.origin),
     // 沒有圖的商品 image 是 undefined，版面會走 .plate.pending 的空版樣式

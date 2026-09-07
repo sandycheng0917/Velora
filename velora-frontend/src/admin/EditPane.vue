@@ -27,12 +27,41 @@ const emit = defineEmits(['back', 'saved', 'error'])
 
 const creating = computed(() => !props.product)
 
-const TEXT_FIELDS = [
-  { key: 'name', label: '品名', rows: 1 },
-  { key: 'tagline', label: '標語', rows: 1 },
-  { key: 'material', label: '材質', rows: 2 },
-  { key: 'spec', label: '規格', rows: 1 },
-]
+/**
+ * 文字欄位。前兩個固定，後兩個的標籤隨品類變。
+ *
+ * spec   「規格」對香氛其實是容量、對絲巾是尺寸。同一格資料，換個說得通的名字。
+ * detail  品類專屬的那一格：香氛「用法」、絲巾「收邊」、飾品「保養」、手機包「背帶」。
+ *
+ * 標籤來自 categories 分頁（specLabel / detailLabel），不是寫死在這裡 ——
+ * 要改名或新增一條商品線，在 Sheet 上改完就好。
+ * 沒有 detailLabel 的品類就不顯示那一格：沒有名字的欄位只會被亂填。
+ */
+const catRow = computed(() => props.categories.find((c) => c.key === form.value.category) || {})
+const specLabel = computed(() => catRow.value.spec_label_zh || '規格')
+const detailLabel = computed(() => catRow.value.detail_label_zh || '')
+
+/** 各品類該填什麼的提示。空白的表單最難下手的就是「這格要寫什麼」 */
+const HINTS = {
+  fragrance: { spec: 'Classic Diffuser 260ml × 2', detail: '搖晃後靜置，藤枝每兩週翻面一次' },
+  scarf: { spec: '90 × 90 cm', detail: '邊緣以手工捲縫收口，垂墜時不會翻捲' },
+  jewelry: { spec: '鍊長約 40 + 5 cm', detail: '不戴時收進夾鏈袋，避免接觸香水' },
+  phonebag: { spec: '17 × 11 × 3 cm', detail: '可拆、可調長度' },
+}
+const hint = computed(() => HINTS[form.value.category] || { spec: '', detail: '' })
+
+const TEXT_FIELDS = computed(() => {
+  const out = [
+    { key: 'name', label: '品名', rows: 1, ph: '' },
+    { key: 'tagline', label: '標語', rows: 1, ph: '' },
+    { key: 'material', label: '材質', rows: 2, ph: '' },
+    { key: 'spec', label: specLabel.value, rows: 1, ph: hint.value.spec },
+  ]
+  if (detailLabel.value) {
+    out.push({ key: 'detail', label: detailLabel.value, rows: 2, ph: hint.value.detail })
+  }
+  return out
+})
 const NOTE_FIELDS = [
   { key: 'notes_top', label: '前調' },
   { key: 'notes_mid', label: '中調' },
@@ -55,12 +84,13 @@ const ID_RE = /^[A-Za-z0-9_-]{3,40}$/
 
 function blank() {
   const o = {
-    id: '', ref: '', category: props.categories[0]?.key || '', house: '',
+    id: '', category: props.categories[0]?.key || '', house: '',
     origin: 'KR', price: '', price_public: false,
     listed: true, featured: false, order: 0,
     img_main: '', img_2: '', img_3: '',
   }
-  for (const f of [...TEXT_FIELDS, { key: 'desc' }, ...NOTE_FIELDS]) {
+  for (const f of [{ key: 'name' }, { key: 'tagline' }, { key: 'material' },
+                   { key: 'spec' }, { key: 'detail' }, { key: 'desc' }, ...NOTE_FIELDS]) {
     for (const l of LANGS) o[`${f.key}_${l.k}`] = ''
   }
   return o
@@ -282,6 +312,57 @@ async function save() {
   }
 }
 
+/* ── 改商品編號 ───────────────────────────────────────────────── */
+
+/**
+ * 編號改得動，但要走專用端點。
+ *
+ * 不能靠一般的儲存：opSave_ 是用 id 找那一列的，送一個新 id 進去它會
+ * 找不到舊列、當成新增，於是多一件商品而舊的還在。而且影像鍵是
+ * `<編號>-main`，不跟著搬的話舊編號會被釋放出來，日後同名的新商品
+ * 上傳圖片就會蓋掉這一件的圖 —— 沒有錯誤訊息，要到打開網站才看得到。
+ * renameId 端點把這些一次做完，或者一開始就拒絕。
+ */
+const renaming = ref(false)
+const newId = ref('')
+const renameOpen = ref(false)
+
+function openRename() {
+  newId.value = form.value.id
+  renameOpen.value = true
+}
+
+async function doRename() {
+  const to = String(newId.value || '').trim()
+  if (to === form.value.id) { renameOpen.value = false; return }
+  if (!ID_RE.test(to)) {
+    emit('error', `新編號「${to}」不合法：要 3–40 個英數、連字號或底線，不能有空格或間隔點。`)
+    return
+  }
+  if (!confirm(
+    `確定把商品編號從「${form.value.id}」改成「${to}」？
+
+` +
+    `圖片的影像鍵會一起搬（${form.value.id}-main → ${to}-main），` +
+    `所以圖片不會失聯。
+改完要按一次「發布」，網站上的圖檔網址才會跟著更新。`
+  )) return
+  if (!(await session.keepAlive())) { emit('error', '登入已失效，請重新登入。'); return }
+
+  renaming.value = true
+  try {
+    const r = await api.renameId(session.token.value, form.value.id, to)
+    renameOpen.value = false
+    emit('saved', `商品編號已改成 ${r.to}` +
+      (r.keys && r.keys.length ? `（影像鍵搬了 ${r.keys.length} 個）` : '') +
+      '。要讓網站更新，回清單按「發布」。')
+  } catch (e) {
+    emit('error', e.message + (e.detail ? '　' + e.detail : ''))
+  } finally {
+    renaming.value = false
+  }
+}
+
 const removing = ref(false)
 async function remove() {
   if (!confirm(`確定要刪除「${form.value.name_zh}」？\n\n這是軟刪除：資料還在 Sheet 上，商品編號永遠不會被重複使用，但前台會看不到它。`)) return
@@ -311,7 +392,7 @@ async function remove() {
       <div>
         <h1>{{ form.name_zh || (creating ? '新增商品' : '（未命名）') }}</h1>
         <p class="sub" style="display: flex; align-items: center; gap: 16px">
-          <span class="cell mono">{{ form.ref || '尚未填索引碼' }}</span>
+          <span class="cell mono">{{ form.id || '尚未填商品編號' }}</span>
         </p>
       </div>
       <div style="display: flex; align-items: center; gap: 24px">
@@ -337,21 +418,31 @@ async function remove() {
           <div>
             <label>商品編號 <em class="req">*</em></label>
             <input v-if="creating" v-model.trim="form.id" type="text" placeholder="frg-ylang" :class="{ bad: bad.id }" />
-            <div v-else class="ro">
-              <svg width="11" height="11" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
-                <rect x="4" y="9" width="12" height="8" /><path d="M7 9V6a3 3 0 0 1 6 0v3" />
-              </svg>
-              {{ form.id }}
-            </div>
+            <template v-else>
+              <div v-if="!renameOpen" class="ro" style="justify-content: space-between">
+                <span style="display: flex; align-items: center; gap: 8px">
+                  <svg width="11" height="11" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <rect x="4" y="9" width="12" height="8" /><path d="M7 9V6a3 3 0 0 1 6 0v3" />
+                  </svg>
+                  {{ form.id }}
+                </span>
+                <button class="link" style="font-size: 13px" @click="openRename">改編號</button>
+              </div>
+              <div v-else style="display: flex; align-items: center; gap: 12px">
+                <input v-model.trim="newId" type="text" placeholder="VL_FRG_001" style="flex: 1" />
+                <button class="link" :disabled="renaming" @click="doRename">
+                  {{ renaming ? '搬移中…' : '確定' }}
+                </button>
+                <button class="link quiet" :disabled="renaming" @click="renameOpen = false">取消</button>
+              </div>
+            </template>
             <p class="hint">
               {{ creating
-                ? '英數、連字號與底線，3–40 字。圖片的影像鍵也是用它組的，所以不能有空格或間隔點。'
-                : '建立後不可更改' }}
+                ? '英數、連字號與底線，3–40 字。前台的卡片會直接印它，圖片的影像鍵也是用它組的。'
+                : renameOpen
+                  ? '改完圖片的影像鍵會一起搬，圖不會失聯。之後要按一次「發布」。'
+                  : '前台卡片上印的就是它。要改按右邊的「改編號」' }}
             </p>
-          </div>
-          <div>
-            <label>索引碼（選填）</label>
-            <input v-model="form.ref" type="text" placeholder="VL · FRG · 001" />
           </div>
           <div>
             <label>品類 <em class="req">*</em></label>
@@ -386,6 +477,7 @@ async function remove() {
               <textarea
                 v-model="form[`${f.key}_${l.k}`]"
                 :rows="f.rows"
+                :placeholder="l.k === 'zh' ? f.ph : ''"
                 :class="{ bad: f.key === 'name' && l.k === 'zh' && bad.name_zh }"
               />
             </div>

@@ -160,7 +160,7 @@ const filtered = computed(() => {
     .filter((p) => !cat.value || p.category === cat.value)
     .filter((p) => {
       if (!needle) return true
-      return [p.name_zh, p.name_en, p.name_ko, p.ref, p.id]
+      return [p.name_zh, p.name_en, p.name_ko, p.id]
         .some((s) => String(s || '').toLowerCase().includes(needle))
     })
     .slice()
@@ -270,7 +270,7 @@ const priceText = (p) =>
     <div class="sheet">
       <div class="row hd">
         <span>序</span><i /><span>圖片</span><span>品名</span>
-        <span class="hideNarrow">品類</span><span class="hideNarrow">索引碼</span>
+        <span class="hideNarrow">品類</span><span class="hideNarrow">商品編號</span>
         <span class="hideNarrow">價格</span><span>狀態</span><span />
       </div>
 
@@ -328,7 +328,7 @@ const priceText = (p) =>
           </span>
         </span>
         <span class="cell hideNarrow">{{ (categories.find((c) => c.key === p.category) || {}).short_zh || p.category }}</span>
-        <span class="cell mono hideNarrow">{{ p.ref }}</span>
+        <span class="cell mono hideNarrow">{{ p.id }}</span>
         <span class="cell price hideNarrow" :class="{ hidden: priceText(p) === '未公開' }">{{ priceText(p) }}</span>
         <span class="st" :class="state(p).cls"><i />{{ state(p).text }}</span>
         <svg class="chev" width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3">

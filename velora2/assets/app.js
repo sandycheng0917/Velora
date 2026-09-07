@@ -30,23 +30,17 @@
   document.documentElement.classList.add('js');
 
   /*
-   * 桌機把商品明細展開。
+   * 商品明細一律收合，點了才展開 —— 手機與桌機都一樣。
    *
-   * 手機版一頁二十個螢幕高，因為每張卡片都攤開描述與規格；
-   * 桌機是三欄排版，攤開才看得到逐行對齊的目錄感。
-   * 同一份 HTML，兩種讀法。
+   * 2026-09-07 以前桌機是自動攤開的，理由是「三欄排版攤開才看得到
+   * 逐行對齊的目錄感」。但明細後來多了香調三列、品類專屬那一列、
+   * 售價與副圖，攤開之後整頁長到要一直往下捲 —— 目錄感換來的是
+   * 沒有人看得完。收合之後卡片上只剩圖、編號、品名，一眼掃得完，
+   * 想看細節再點。
    *
-   * 用 matchMedia 監聽而不是只在載入時判斷一次 —— 轉螢幕方向或
-   * 拖動視窗寬度時要跟著變，否則會卡在載入當下的那個狀態。
+   * 因為不再自動展開，這裡也就不需要 matchMedia 監聽了：
+   * 展開與否從此是使用者的選擇，不是視窗寬度的函數。
    */
-  var wide = window.matchMedia('(min-width: 680px)');
-  function syncDetails() {
-    var list = document.querySelectorAll('.card .more');
-    for (var i = 0; i < list.length; i++) list[i].open = wide.matches;
-  }
-  syncDetails();
-  if (wide.addEventListener) wide.addEventListener('change', syncDetails);
-  else if (wide.addListener) wide.addListener(syncDetails);   // Safari 13 以前
 
   var LANGS = ['zh', 'en', 'ko'];
   var HTML_LANG = { zh: 'zh-Hant-TW', en: 'en', ko: 'ko' };

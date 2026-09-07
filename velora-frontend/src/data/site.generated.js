@@ -4,7 +4,7 @@
  * 由 tools/build-catalog.mjs 從 Google Sheet 產生，請勿手動編輯 ——
  * 下次建置就會被覆蓋。要改內容請改 Sheet。
  *
- * 產生時間：2026-09-07T06:28:16.512Z
+ * 產生時間：2026-09-07T15:39:44.957Z
  */
 
 export const houses = [
@@ -58,7 +58,17 @@ export const categories = [
       "ko": "프래그런스"
     },
     "cover": "/media/vuca/bedroom.jpg",
-    "order": 1
+    "order": 1,
+    "specLabel": {
+      "zh": "規格",
+      "en": "Spec",
+      "ko": "사양"
+    },
+    "detailLabel": {
+      "zh": "",
+      "en": "",
+      "ko": ""
+    }
   },
   {
     "key": "scarf",
@@ -75,7 +85,17 @@ export const categories = [
       "ko": "스카프"
     },
     "cover": "/media/saintmari/scarf-camel-blazer.jpg",
-    "order": 2
+    "order": 2,
+    "specLabel": {
+      "zh": "規格",
+      "en": "Spec",
+      "ko": "사양"
+    },
+    "detailLabel": {
+      "zh": "",
+      "en": "",
+      "ko": ""
+    }
   },
   {
     "key": "jewelry",
@@ -92,7 +112,17 @@ export const categories = [
       "ko": "주얼리"
     },
     "cover": "/media/saintmari/necklace-01.png",
-    "order": 3
+    "order": 3,
+    "specLabel": {
+      "zh": "規格",
+      "en": "Spec",
+      "ko": "사양"
+    },
+    "detailLabel": {
+      "zh": "",
+      "en": "",
+      "ko": ""
+    }
   },
   {
     "key": "phonebag",
@@ -109,6 +139,16 @@ export const categories = [
       "ko": "폰백"
     },
     "cover": "",
-    "order": 4
+    "order": 4,
+    "specLabel": {
+      "zh": "規格",
+      "en": "Spec",
+      "ko": "사양"
+    },
+    "detailLabel": {
+      "zh": "",
+      "en": "",
+      "ko": ""
+    }
   }
 ]

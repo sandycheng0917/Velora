@@ -45,6 +45,7 @@ const PUBLIC_FIELDS = [
   'desc_zh', 'desc_en', 'desc_ko',
   'material_zh', 'material_en', 'material_ko',
   'spec_zh', 'spec_en', 'spec_ko',
+  'detail_zh', 'detail_en', 'detail_ko',
   'notes_top_zh', 'notes_top_en', 'notes_top_ko',
   'notes_mid_zh', 'notes_mid_en', 'notes_mid_ko',
   'notes_base_zh', 'notes_base_en', 'notes_base_ko',
@@ -277,16 +278,18 @@ async function main() {
       // 指向一個不存在品牌的斷鏈（site.generated.js 只含要露出的品牌）。
       const house = houseOff.has(str(r.house)) ? '' : str(r.house)
       const o = {
-        id: str(r.id), ref: str(r.ref), category: str(r.category), house,
-        // hs（報關用的商品分類號）2026-09-07 起不輸出到前台。
-        // 它仍在 Sheet 的 products 分頁上，只是不再進任何前端檔案。
+        // ref（索引碼）2026-09-07 起不輸出。前台改印商品編號 id ——
+        // 一個編號就夠了，兩個只會讓人不知道該報哪一個。
+        // hs（報關用的商品分類號）同日起也不輸出。
+        // 兩者都還在 Sheet 的 products 分頁上，只是不再進任何前端檔案。
+        id: str(r.id), category: str(r.category), house,
         origin: str(r.origin) || 'KR',
         listed: bool(r.listed), featured: bool(r.featured),
         order: Number(r.order) || 0,
         updated: str(r.updated),
         images: [str(r.img_main), str(r.img_2), str(r.img_3)].filter(Boolean),
       }
-      for (const base of ['name', 'tagline', 'desc', 'material', 'spec']) {
+      for (const base of ['name', 'tagline', 'desc', 'material', 'spec', 'detail']) {
         for (const lang of ['zh', 'en', 'ko']) o[`${base}_${lang}`] = str(r[`${base}_${lang}`])
       }
       for (const part of ['top', 'mid', 'base']) {
@@ -428,6 +431,24 @@ async function main() {
       // 相對路徑存在 Sheet 裡，站台前綴由 catalog.js 的 url() 補
       cover: str(c.cover),
       order: Number(c.order) || 0,
+      /*
+       * 明細表兩列的標籤，逐品類不同。
+       *
+       * specLabel 留空就退回「規格」—— 舊的 Sheet 沒有這幾欄，
+       * 不給預設值的話明細表會出現一列沒有名字的資料。
+       * detailLabel 留空則整列不輸出：沒有名字的那一格沒有意義，
+       * 而硬給一個「其他」之類的通用名等於什麼都沒說。
+       */
+      specLabel: {
+        zh: str(c.spec_label_zh) || '規格',
+        en: str(c.spec_label_en) || 'Spec',
+        ko: str(c.spec_label_ko) || '사양',
+      },
+      detailLabel: {
+        zh: str(c.detail_label_zh),
+        en: str(c.detail_label_en),
+        ko: str(c.detail_label_ko),
+      },
     })).sort((a, b) => a.order - b.order),
   }
   assertNoCost(site, 'site.generated')

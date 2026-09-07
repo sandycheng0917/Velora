@@ -49,7 +49,20 @@ var COLS = {
     'order',         // 整數，同品類內的排序
     'img_main', 'img_2', 'img_3',   // 影像鍵，對應 images 分頁的 key
     'updated',       // YYYY-MM-DD，由程式寫入
-    'deleted'        // 軟刪除。id 永不回收，避免舊圖與舊連結對到別件商品
+    'deleted',       // 軟刪除。id 永不回收，避免舊圖與舊連結對到別件商品
+
+    /*
+     * 品類專屬的那一格。標籤由 categories 分頁的 detail_label_* 決定：
+     * 香氛是「使用方式」、絲巾是「收邊」、飾品是「鍍層・扣具」、手機包是「背帶」。
+     *
+     * 為什麼是一組共用欄位而不是每個品類各給一組：14 件商品的規模下，
+     * 四組欄位有三組永遠是空的，而空欄位會讓人以為漏填。標籤是資料
+     * （放在 categories 分頁），所以要改名或新增一條商品線都不必動程式。
+     *
+     * 🔴 新欄位一律加在最後。writeHeader_ 會照這個陣列的順序重寫標題列，
+     *    插在中間會讓標題跟既有資料整排錯位，而且不會有任何錯誤訊息。
+     */
+    'detail_zh', 'detail_en', 'detail_ko'
   ],
 
   /**
@@ -89,7 +102,17 @@ var COLS = {
    * cover 是品類格的封面圖路徑，相對路徑（不含站台前綴），由產生器補上前綴。
    */
   categories: ['key', 'code', 'ref', 'name_zh', 'name_en', 'name_ko',
-               'short_zh', 'short_en', 'short_ko', 'cover', 'order'],
+               'short_zh', 'short_en', 'short_ko', 'cover', 'order',
+               /*
+                * 明細表裡兩列的標籤，逐品類不同。
+                *
+                * spec_label_*   「規格」對香氛其實是容量、對絲巾是尺寸。
+                *                同一格資料，換個說得通的名字。留空就用「規格」。
+                * detail_label_* 品類專屬那一格的名字。留空的話那一列
+                *                整列不輸出 —— 沒有名字的資料沒有意義。
+                */
+               'spec_label_zh', 'spec_label_en', 'spec_label_ko',
+               'detail_label_zh', 'detail_label_en', 'detail_label_ko'],
 
   /** 操作日誌。事後要查「誰在什麼時候動了什麼」只有這裡有依據 */
   audit: ['at', 'op', 'ok', 'note']
@@ -166,6 +189,90 @@ function addThumbColumn() {
             + ' 接著到後台的商品清單按「回填縮圖」，把既有的圖各產一張。');
 }
 
+
+/* ── 一次性：品類專屬的說明欄位 ────────────────────────────────────
+ *
+ * products 加 detail_*，categories 加兩組標籤欄，並把四個既有品類的
+ * 標籤灌進去。只補空白的格子，已經填過的一律不動。
+ */
+
+/** 品類 → [規格標籤三語, 專屬欄標籤三語]。只在欄位是空的時候寫進去 */
+/*
+ * 🔴 中文標籤一律兩個字。
+ *
+ * 明細表是 `grid-template-columns: auto 1fr`，第一欄寬度取該卡片最長的
+ * 標籤。既有的材質／前調／中調／後調／規格／售價全是兩個字，
+ * 混進一個四字的「使用方式」，同一張卡的值欄就整個變窄 ——
+ * 手機兩欄時卡片只有 150px，材質會被折成四行。
+ * 英韓不受影響（它們自己會折行），但中文這一欄要守住。
+ */
+var CATEGORY_LABELS = {
+  fragrance: [['容量', 'Volume', '용량'], ['用法', 'How to use', '사용법']],
+  scarf:     [['尺寸', 'Size', '사이즈'], ['收邊', 'Edge finish', '마감']],
+  jewelry:   [['尺寸', 'Size', '사이즈'], ['保養', 'Care', '관리']],
+  phonebag:  [['尺寸', 'Size', '사이즈'], ['背帶', 'Strap', '스트랩']]
+};
+
+function addCategoryFieldColumns() {
+  var ss = openBook_();
+  var out = [];
+
+  // ── products 的 detail_* ────────────────────────────────────────
+  var ph = ss.getSheetByName('products');
+  if (!ph) throw new Error('products 分頁不存在，請先跑 setupSheets()');
+  var phHead = ph.getRange(1, 1, 1, Math.max(ph.getLastColumn(), COLS.products.length)).getValues()[0];
+  var hasDetail = false;
+  for (var i = 0; i < phHead.length; i++) if (String(phHead[i]) === 'detail_zh') hasDetail = true;
+  if (hasDetail) {
+    out.push('products 已經有 detail_* 欄，沒有動作。');
+  } else {
+    writeHeader_(ph, COLS.products);
+    out.push('products 補上 detail_zh / detail_en / detail_ko（第 ' +
+             (COLS.products.length - 2) + '–' + COLS.products.length + ' 欄）。');
+  }
+
+  // ── categories 的標籤欄 ─────────────────────────────────────────
+  var ch = ss.getSheetByName('categories');
+  if (!ch) throw new Error('categories 分頁不存在');
+  var chHead = ch.getRange(1, 1, 1, Math.max(ch.getLastColumn(), COLS.categories.length)).getValues()[0];
+  var hasLabel = false;
+  for (var j = 0; j < chHead.length; j++) if (String(chHead[j]) === 'spec_label_zh') hasLabel = true;
+  if (hasLabel) {
+    out.push('categories 已經有標籤欄，沒有動作。');
+  } else {
+    writeHeader_(ch, COLS.categories);
+    out.push('categories 補上 spec_label_* 與 detail_label_*（6 欄）。');
+  }
+
+  // ── 灌預設標籤。只填空白的格子 ──────────────────────────────────
+  var idx = headIndex_(ch);
+  var last = lastIdRow_(ch);
+  var filled = 0, skipped = [];
+  if (last >= 2) {
+    var rows = ch.getRange(2, 1, last - 1, ch.getLastColumn()).getValues();
+    var cols = ['spec_label_zh', 'spec_label_en', 'spec_label_ko',
+                'detail_label_zh', 'detail_label_en', 'detail_label_ko'];
+    for (var r = 0; r < rows.length; r++) {
+      var key = String(rows[r][idx.key]).trim();
+      var def = CATEGORY_LABELS[key];
+      if (!def) { if (key) skipped.push(key); continue; }
+      var vals = [def[0][0], def[0][1], def[0][2], def[1][0], def[1][1], def[1][2]];
+      for (var c = 0; c < cols.length; c++) {
+        if (idx[cols[c]] === undefined) continue;
+        if (String(rows[r][idx[cols[c]]] || '').trim() !== '') continue;   // 已經填過就不碰
+        ch.getRange(r + 2, idx[cols[c]] + 1).setValue(vals[c]);
+        filled++;
+      }
+    }
+  }
+  SpreadsheetApp.flush();
+  out.push('灌入 ' + filled + ' 格預設標籤。');
+  if (skipped.length) {
+    out.push('沒有預設值的品類：' + skipped.join('、') + ' —— 請自己填標籤，' +
+             '留空的話明細表就不會出現那一列。');
+  }
+  return say_(out.join(String.fromCharCode(10)));
+}
 
 /* ── 一次性：把商品編號改成目錄編號的樣子 ──────────────────────────
  *
