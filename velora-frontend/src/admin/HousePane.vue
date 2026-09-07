@@ -174,7 +174,7 @@ async function remove(h) {
     <!-- ── 編輯／新增 ────────────────────────────────────────── -->
     <template v-if="form">
       <div v-if="errs.length" class="warn" style="margin-bottom: 22px">
-        <b style="color: var(--gold-deep)">沒有儲存，以下欄位要修：</b>
+        <b>沒有儲存，以下欄位要修：</b>
         <ul style="margin: 8px 0 0; padding-left: 18px">
           <li v-for="(e, i) in errs" :key="i">{{ e }}</li>
         </ul>

@@ -28,6 +28,11 @@
   --ink-faint: #5e564b;
   --line: #ded5c6;
   --line-strong: #cdc2ae;
+  /* 被擋下的欄位與訊息。不是新引進的紅 —— 跟 .toast.bad 的
+     #4A2F22／#F0C9A5 同一族赭紅，只是搬到淺底上重新配對比 */
+  --flag: #8f3a18;
+  --flag-bg: #f4ded1;
+  --flag-line: #d9b49c;
   --sidebar-ink: #b5aa98;
 
   --f-disp: 'Marcellus', 'Noto Serif TC', serif;
@@ -621,8 +626,14 @@
  * 必填記號與沒過檢查的欄位。
  *
  * 星號用 gold-deep（4.6:1）而不是 --gold —— 一個看不清楚的必填記號
- * 等於沒有標。沒過的欄位加粗底線而不是換成紅色：整份後台沒有第二個
- * 紅色，臨時引進一個只為了報錯，會跟金色的語彙打架。
+ * 等於沒有標。
+ *
+ * 🔴 沒過的欄位原本是「金色底線加粗一像素」，顏色跟 :focus 完全一樣。
+ *    所以被擋下來的那一格，長得跟「游標剛好在這裡」一模一樣 ——
+ *    實際回報過：「顏色太接近，根本看不出來為什麼被擋。」
+ *    改成赭紅底線加淡赭紅底色。這不是為了報錯而臨時引進一個紅色：
+ *    .toast.bad 早就用同一族（#4A2F22 底／#F0C9A5 字），這裡是把它
+ *    搬到淺底上。欄位與上方訊息用同一個顏色，才看得出「擋的是這幾格」。
  */
 .vadmin .req {
   font-family: var(--f-mono);
@@ -633,7 +644,11 @@
 .vadmin textarea.bad,
 .vadmin select.bad {
   border-bottom-width: 2px;
-  border-bottom-color: var(--gold-deep);
+  border-bottom-color: var(--flag);
+  /* 🔴 底色才是真正分得出來的那一半：#8F3A18 與 :focus 的 #70542C
+     亮度比只有 1.07:1，光靠底線換色，被擋的欄位跟「游標剛好在這裡」
+     還是長得一樣。:focus 沒有底色，有底色的就是沒過檢查的那幾格。 */
+  background: linear-gradient(var(--flag-bg), var(--flag-bg));
 }
 .vadmin .ko input,
 .vadmin .ko textarea { font-family: 'Noto Sans KR', var(--f-body); word-break: keep-all; }
@@ -654,12 +669,30 @@
   color: var(--ink-faint);
   padding-top: 7px;
 }
+/*
+ * 「沒有儲存」的訊息。
+ *
+ * 原本只有一條 2px 的金色左框配一般內文色，在米色紙上看起來像一段
+ * 補充說明，不像「你按了儲存但沒存成功」。錯誤訊息的工作是被看到，
+ * 所以給它自己的底色與 4px 的赭紅左框 —— 跟被擋下的欄位同色。
+ *
+ * 量過的對比（底色 #F4DED1）：標題 #8F3A18 = 5.8:1、內文 #3D3833 = 9.0:1。
+ */
 .vadmin .warn {
-  border-left: 2px solid var(--gold-deep);
-  padding-left: 14px;
-  font-size: 13px;
-  line-height: 1.8;
+  border: 1px solid var(--flag-line);
+  border-left: 4px solid var(--flag);
+  padding: 13px 16px 14px;
+  background: var(--flag-bg);
+  font-size: 13.5px;
+  line-height: 1.85;
   color: var(--ink-soft);
+}
+.vadmin .warn b {
+  display: block;
+  padding-bottom: 2px;
+  font-size: 14px;
+  letter-spacing: 0.04em;
+  color: var(--flag);
 }
 
 /*
@@ -861,8 +894,24 @@
      position: static 會讓登入框黏在畫面左上角 */
   .vadmin:not(.login) { position: static; flex-direction: column; }
   .vadmin.login { padding: 20px; }
-  .vadmin .side { width: 100%; flex-direction: row; flex-wrap: wrap; padding: 14px; }
+  /*
+   * 🔴 側欄原本在窄螢幕改成 flex-direction: row，想讓它變成一條頁首。
+   *    但 .nav 的按鈕是 width: 100%，所以 nav 整塊變成右邊那一「欄」，
+   *    四顆按鈕還是直的疊著 —— 結果「商品清單」那顆（開啟態有底色）
+   *    就緊貼在「維羅拉國際有限公司」右邊。那顆是側欄裡唯一有底色的
+   *    按鈕，貼著公司名看起來就是蓋住了它。實際回報過。
+   *    改回直的：字標自己一列，頁籤在下面橫排並換行。
+   */
+  .vadmin .side { width: 100%; flex-direction: column; padding: 15px 16px 12px; }
   .vadmin .side .fill, .vadmin .foot { display: none; }
+  .vadmin .wm { padding: 0 0 12px; }
+  .vadmin .wm b { font-size: 17px; letter-spacing: 0.3em; }
+  /* 「商品管理」在窄螢幕收起 —— 右邊的 h1 一直寫著現在在哪一頁，
+     這一行在手機上只是把公司名往下推 */
+  .vadmin .wm span:not(.co) { display: none; }
+  .vadmin .wm .co { margin-top: 6px; }
+  .vadmin .nav { display: flex; flex-wrap: wrap; gap: 6px; }
+  .vadmin .nav button { width: auto; padding: 9px 13px; gap: 9px; font-size: 14px; }
   .vadmin .main { padding: 24px 16px 40px; }
   .vadmin .tri { flex-direction: column; gap: 14px; }
 }

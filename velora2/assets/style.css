@@ -747,7 +747,8 @@ html.js .card > .plate { cursor: pointer; }
   max-height: min(84vh, 880px);
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding: 26px 22px 30px;
+  /* 底部沒有內距：LINE 那一列自己貼齊面板底邊，見 .peek .ask */
+  padding: 26px 22px 0;
   background: var(--bg);
   border: 1px solid var(--line);
   box-shadow: 0 24px 60px rgba(28, 25, 23, 0.28);
@@ -763,20 +764,28 @@ html.js .card > .plate { cursor: pointer; }
  *    加上副圖與規格表之後這顆按鈕落在摺線下方兩百多像素 ——
  *    使用者得先捲過所有照片才看得到「用 LINE 詢問」，而那是做這個
  *    浮層的唯一理由。釘在面板底部，打開的當下就在眼前。
- *    底色是不透明的，捲動時內容不會從按鈕後面透出來。
+ *
+ * 🔴 但釘住的東西一定會壓過捲動中的內容。原本它左右各內縮 22px、
+ *    沒有上緣也沒有陰影，於是捲到副圖那一段時，看起來就是一塊金色方塊
+ *    躺在照片上 —— 香氛那頁實際回報過。三件事一起改才成立：
+ *      · 負的左右邊界抵銷面板內距，讓它滿寬貼齊底邊，讀成「面板的底列」
+ *      · 上緣加一條線與一層陰影，明確說明它浮在內容前面
+ *      · 上方留 30px 邊界，捲到底時副圖整張都在它上面，不被切到
+ *    面板的 padding-bottom 因此設成 0，否則底列下方會多出一條空隙。
  */
 .peek .ask {
   display: block;
   position: sticky;
   bottom: 0;
   z-index: 1;
-  margin-top: 24px;
-  padding: 15px 0;
+  margin: 30px -22px 0;
+  padding: 16px 22px;
   background: var(--gold);
   color: var(--ink);
   text-align: center;
   font-size: 15.5px;
   letter-spacing: 0.14em;
+  box-shadow: 0 -1px 0 rgba(28, 25, 23, 0.16), 0 -14px 22px -10px rgba(28, 25, 23, 0.26);
 }
 
 /* ── 代理品牌 ───────────────────────────────────────────── */
@@ -968,7 +977,9 @@ html[lang='ko'] .card h3 {
   .peek .gal { grid-area: gal; }
   .peek .peek-txt { grid-area: txt; }
   .peek .shots { grid-area: shots; }
-  .peek .ask { grid-area: cta; align-self: end; }
+  /* 桌機的 LINE 在右欄自己的格子裡，本來就在副圖下面，
+     不需要滿寬的底列 —— 把手機那組負邊界與陰影還原 */
+  .peek .ask { grid-area: cta; align-self: end; margin: 24px 0 0; padding: 15px 0; box-shadow: none; }
 
   /*
    * 🔴 桌機以前會把 <details> 攤平成格線項目（display: contents）並

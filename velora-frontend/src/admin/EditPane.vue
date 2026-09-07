@@ -431,7 +431,7 @@ async function remove() {
     </header>
 
     <div v-if="fieldErrs.length" class="warn" style="margin-bottom: 26px">
-      <b style="color: var(--gold-deep)">沒有儲存，以下欄位要修：</b>
+      <b>沒有儲存，以下欄位要修：</b>
       <ul style="margin: 8px 0 0; padding-left: 18px">
         <li v-for="(e, i) in fieldErrs" :key="i">{{ e }}</li>
       </ul>
