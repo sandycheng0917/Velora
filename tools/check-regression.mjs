@@ -105,12 +105,16 @@ const RENAMED = {
   'scarf-1': 'VL_SLK_001',
   'scarf-2': 'VL_SLK_002',
   'scarf-3': 'VL_SLK_003',
-  'scarfring-1': 'VL_SCR_001',
-  'earring-1': 'VL_EAR_001',
-  'necklace-1': 'VL_NEC_001',
-  'ring-1': 'VL_RNG_001',
-  'bracelet-1': 'VL_BRC_001',
-  vlmb001: 'VL_MB_001',
+  /*
+   * 2026-09-08 又改了一次：絲巾扣、耳環、項鍊、戒指、手鍊在 9/6 併進
+   * 「飾品」，但編號還帶著舊分類的前綴，applyRenumber() 把它們統一成
+   * JWL。這裡對到的一律是「基準線的 id → 現在的 id」，不是中間那一站。
+   */
+  'scarfring-1': 'VL_JWL_001',
+  'earring-1': 'VL_JWL_002',
+  'necklace-1': 'VL_JWL_003',
+  'ring-1': 'VL_JWL_004',
+  'bracelet-1': 'VL_JWL_005',
 }
 
 const problems = []
@@ -192,7 +196,13 @@ const findNew = (oldId) => newById.get(RENAMED[oldId]) || newById.get(oldId)
 for (const p of old.products) {
   const n = findNew(p.id)
   if (!n) {
-    fail(`商品 ${p.id}`, '存在', '整件不見了')
+    /*
+     * 訊息要說得出「可能是改名」。2026-09-08 批次重編編號之後，
+     * 這裡一次噴出 13 筆「整件不見了」而建置被擋 —— 當下看不出來
+     * 那其實是改名，只是對照表沒更新。錯誤訊息應該自己講出這件事。
+     */
+    fail(`商品 ${p.id}`, '存在',
+      '整件不見了（如果是改過編號，把新舊對照加進 check-regression.mjs 的 RENAMED）')
     continue
   }
   const w = `商品 ${p.id}`
