@@ -267,6 +267,37 @@ function addCategoryFieldColumns() {
   }
   SpreadsheetApp.flush();
   out.push('灌入 ' + filled + ' 格預設標籤。');
+
+  /*
+   * 🔴 清掉 detail_* 裡的布林值。
+   *
+   * 這三個欄名是寫到 products 分頁「已經存在」的欄位上的，而那些格子
+   * 原本殘留著未勾選的核取方塊 —— 值是 false。產生器把它當文字輸出，
+   * 結果 14 件商品的「用法」全部印著 false（2026-09-07 實際發生）。
+   * 只清布林值，不動任何字串：真的填過內容的格子不會被碰到。
+   */
+  var cleared = 0;
+  var pidx = headIndex_(ph);
+  var plast = lastIdRow_(ph);
+  if (plast >= 2) {
+    var dcols = ['detail_zh', 'detail_en', 'detail_ko'];
+    for (var d = 0; d < dcols.length; d++) {
+      if (pidx[dcols[d]] === undefined) continue;
+      var rng = ph.getRange(2, pidx[dcols[d]] + 1, plast - 1, 1);
+      var col = rng.getValues();
+      var touched = false;
+      for (var r2 = 0; r2 < col.length; r2++) {
+        if (typeof col[r2][0] === 'boolean') { col[r2][0] = ''; cleared++; touched = true; }
+      }
+      if (touched) {
+        rng.removeCheckboxes();      // 不移除的話清空之後又會被畫回 false
+        rng.setValues(col);
+      }
+    }
+  }
+  SpreadsheetApp.flush();
+  out.push(cleared ? ('清掉 ' + cleared + ' 格殘留的核取方塊值（那會在商品頁上印出 false）。')
+                   : 'detail_* 沒有殘留的核取方塊值。');
   if (skipped.length) {
     out.push('沒有預設值的品類：' + skipped.join('、') + ' —— 請自己填標籤，' +
              '留空的話明細表就不會出現那一列。');
