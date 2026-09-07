@@ -81,6 +81,38 @@ const ACCEPTED = {
     '前台導覽列因此少一個品類，手機包目前 0 件所以也不會出現，等於三個品類。',
 }
 
+/**
+ * 改過名的商品編號：舊 → 新。
+ *
+ * 這支工具是用 id 比對的，看到舊 id 不見了就判定「整件不見了」——
+ * 它分不出改名和刪除。2026-09-07 把 14 件的編號從語意代稱
+ * （frg-ylang）改成目錄編號（VL_FRG_001），如果不告訴它，
+ * 每一件都會報成遺失而擋住部署。
+ *
+ * 🔴 這裡不是 ACCEPTED。ACCEPTED 是「這個差異可以接受，不用再看」，
+ *    而改名要的是「換個 id 繼續比對內容」—— 品名、描述、材質、圖片
+ *    數量全部照樣逐欄檢查。用 ACCEPTED 放行的話，改名的同時掉了
+ *    一段描述也不會有人發現。
+ *
+ * 之後如果再改名，加在這裡；基準線本身不動。
+ */
+const RENAMED = {
+  'frg-ylang': 'VL_FRG_001',
+  'frg-blackcherry': 'VL_FRG_002',
+  'frg-aquakiss': 'VL_FRG_003',
+  'frg-flowershop': 'VL_FRG_004',
+  'frg-aprilfresh': 'VL_FRG_005',
+  'scarf-1': 'VL_SLK_001',
+  'scarf-2': 'VL_SLK_002',
+  'scarf-3': 'VL_SLK_003',
+  'scarfring-1': 'VL_SCR_001',
+  'earring-1': 'VL_EAR_001',
+  'necklace-1': 'VL_NEC_001',
+  'ring-1': 'VL_RNG_001',
+  'bracelet-1': 'VL_BRC_001',
+  vlmb001: 'VL_MB_001',
+}
+
 const problems = []
 const warnings = []
 const additions = []
@@ -147,8 +179,18 @@ const pausedHouses = Object.keys(old.houses).filter((k) => !activeHouses.has(k))
 
 /* 商品：逐件逐欄 */
 const newById = new Map(now.products.map((p) => [p.id, p]))
+/**
+ * 舊 id → 新資料。先用改名後的找，找不到再用原本的。
+ *
+ * 🔴 兩段都需要，不能只留一段：
+ *   CI 讀的是 Sheet，編號已經改過 → 要用新 id 才找得到。
+ *   本機讀的是 fixture.json 產出的種子，編號還是舊的（改名只發生在
+ *   Sheet 上，種子沒有跟著動）→ 只查新 id 的話 13 件全部報成遺失。
+ * 退回原 id 這一段就是給本機用的。
+ */
+const findNew = (oldId) => newById.get(RENAMED[oldId]) || newById.get(oldId)
 for (const p of old.products) {
-  const n = newById.get(p.id)
+  const n = findNew(p.id)
   if (!n) {
     fail(`商品 ${p.id}`, '存在', '整件不見了')
     continue
@@ -179,7 +221,10 @@ for (const p of old.products) {
   const newImgs = (n.files || []).length
   if (oldImgs > newImgs) fail(`${w} · 圖片`, `${oldImgs} 張`, `${newImgs} 張`)
 }
+// 改過名的不算新增 —— 它在上面已經跟舊資料逐欄比對過了
+const renamedTo = new Set(Object.values(RENAMED))
 for (const n of now.products) {
+  if (renamedTo.has(n.id)) continue
   if (!old.products.some((p) => p.id === n.id)) additions.push([`商品 ${n.id}`, '(無)', '新增'])
 }
 
