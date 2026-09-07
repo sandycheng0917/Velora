@@ -158,7 +158,7 @@ async function remove(h) {
 
 <template>
   <div>
-    <div class="sec" style="padding-top: 42px">
+    <div class="secline" style="padding-top: 42px">
       <b>品牌</b><hr />
       <button v-if="!form" class="ghost" :disabled="full" @click="openNew">
         {{ full ? `已達 ${MAX} 家上限` : '新增品牌' }}

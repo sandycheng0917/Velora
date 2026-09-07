@@ -299,7 +299,7 @@ const priceText = (p) =>
             斜紋     正在抓
         -->
         <span
-          class="plate"
+          class="thumb"
           :class="plateState(p)"
           :title="
             !p.img_main

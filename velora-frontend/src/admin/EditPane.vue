@@ -440,7 +440,7 @@ async function remove() {
     <div class="cols">
       <!-- 左欄 -->
       <div class="colL">
-        <div class="sec"><b>基本　標 <em class="req">*</em> 的是必填，其餘都可以留空</b><hr /></div>
+        <div class="secline"><b>基本　標 <em class="req">*</em> 的是必填，其餘都可以留空</b><hr /></div>
         <div class="tri" style="padding-bottom: 24px">
           <div>
             <label>商品編號 <em class="req">*</em></label>
@@ -492,7 +492,7 @@ async function remove() {
           <div />
         </div>
 
-        <div class="sec" style="padding-top: 16px">
+        <div class="secline" style="padding-top: 16px">
           <b>文字內容　只有中文品名必填，缺的語言前台會自動回退中文</b><hr />
         </div>
 
@@ -520,7 +520,7 @@ async function remove() {
         </div>
 
         <template v-if="isFragrance">
-          <div class="sec" style="padding-top: 10px"><b>香調　僅香氛品類　以分號分隔</b><hr /></div>
+          <div class="secline" style="padding-top: 10px"><b>香調　僅香氛品類　以分號分隔</b><hr /></div>
           <div v-for="f in NOTE_FIELDS" :key="f.key" class="fld">
             <label>{{ f.label }}</label>
             <div class="tri">
@@ -535,7 +535,7 @@ async function remove() {
 
       <!-- 右欄 -->
       <div class="colR">
-        <div class="sec"><b>圖片</b><hr /></div>
+        <div class="secline"><b>圖片</b><hr /></div>
 
         <label class="big" style="display: block; cursor: pointer">
           <img
@@ -585,7 +585,7 @@ async function remove() {
           </span>
         </div>
 
-        <div class="sec" style="padding-top: 34px"><b>上架設定</b><hr /></div>
+        <div class="secline" style="padding-top: 34px"><b>上架設定</b><hr /></div>
         <div class="sw">
           <span>顯示在前台</span>
           <span class="tog" :class="{ on: form.listed }">
@@ -606,7 +606,7 @@ async function remove() {
           <input v-model="form.order" type="text" style="width: 70px; text-align: right" :class="{ bad: bad.order }" />
         </div>
 
-        <div class="sec" style="padding-top: 34px"><b>價格</b><hr /></div>
+        <div class="secline" style="padding-top: 34px"><b>價格</b><hr /></div>
         <div class="sw">
           <span>售價<template v-if="form.price_public"> <em class="req">*</em></template><template v-else>（選填）</template></span>
           <input

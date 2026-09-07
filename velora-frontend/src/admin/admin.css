@@ -62,10 +62,20 @@
   flex-direction: column;
   padding: 26px 0 22px;
 }
-.vadmin .wm {
+/*
+ * 側欄的字標。
+ *
+ * 🔴 這個類別以前叫 .wm，跟公開版 style.css 裡的浮水印
+ *    .wm { position: absolute; opacity: 0.06; line-height: 0.72 } 撞名。
+ *    style.css 是兩個站共用的全域樣式，所以後台整塊字標一直是
+ *    6% 不透明度、行高 0.72 —— 公司名看不見，三行還互相疊在一起，
+ *    後面的頁籤也跟著往上擠。使用者兩次回報「看不到公司名稱」
+ *    與「商品清單蓋到公司名稱」，都是這一條。改名解決。
+ */
+.vadmin .brand {
   padding: 0 24px 26px;
 }
-.vadmin .wm b {
+.vadmin .brand b {
   display: block;
   font-family: var(--f-disp);
   font-size: 20px;
@@ -73,7 +83,7 @@
   letter-spacing: 0.36em;
   color: var(--gold-lit);
 }
-.vadmin .wm span {
+.vadmin .brand span {
   display: block;
   margin-top: 7px;
   font-size: 13px;
@@ -85,7 +95,7 @@
  * 它是身分不是標題，說明「這是誰的工具」就夠了，不該跟字標搶。
  * 側欄只有 232px 寬，0.28em 的字距會讓九個中文字撐破，所以用 0.1em。
  */
-.vadmin .wm .co {
+.vadmin .brand .co {
   margin-top: 9px;
   font-size: 12px;
   letter-spacing: 0.1em;
@@ -357,7 +367,7 @@
   height: 100%;
   background: var(--gold);
 }
-.vadmin .plate {
+.vadmin .thumb {
   display: block;              /* 🔴 inline 的 aspect-ratio 無效，會塌成 0 */
   position: relative;
   width: 40px;
@@ -366,7 +376,7 @@
   border: 1px solid var(--line-strong);
   overflow: hidden;
 }
-.vadmin .plate img {
+.vadmin .thumb img {
   position: absolute;          /* 🔴 否則圖片原生高度會反過來撐開容器 */
   inset: 0;
   width: 100%;
@@ -382,7 +392,7 @@
  * 一格 40 × 52，三個中文字放不下一行，所以字級收到 9px 並允許折行；
  * 這裡的目標不是讀，是讓人知道「它在動，不是壞了」。
  */
-.vadmin .plate.loading {
+.vadmin .thumb.loading {
   background: repeating-linear-gradient(
     45deg, var(--surface), var(--surface) 5px, var(--paper-alt) 5px, var(--paper-alt) 10px
   );
@@ -398,7 +408,7 @@
 }
 /* 有影像鍵、但 Sheet 裡沒有位元組。跟「完全沒有圖」要分得出來 ——
    前者是「網站上有圖，只是還沒進 Sheet」，後者是「真的沒有圖」 */
-.vadmin .plate.notyet {
+.vadmin .thumb.notyet {
   background: var(--paper-alt);
   border-color: var(--line-strong);
   display: flex;
@@ -408,7 +418,7 @@
   letter-spacing: 0.05em;
   color: var(--ink-faint);
 }
-.vadmin .plate.pending {
+.vadmin .thumb.pending {
   background: var(--paper-alt);
   border-color: var(--gold);
   display: flex;
@@ -565,20 +575,30 @@
 .vadmin .cols { display: flex; gap: 40px; align-items: flex-start; }
 .vadmin .colL { width: 700px; flex: none; }
 .vadmin .colR { flex: 1; min-width: 0; }
-.vadmin .sec {
+/*
+ * 區段標題（一行小字 + 一條橫線）。
+ *
+ * 🔴 這個類別以前叫 .sec。公開版的 style.css 是全域載入的，裡面有一條
+ *    裸的 .sec { padding: clamp(64px, 9vw, 130px) 0 } —— 它會套到後台來，
+ *    而 .vadmin .sec 只覆蓋了 padding-bottom，於是沒有寫 inline
+ *    padding-top 的區段全部多出 64–130px 的空白。改名以後那條規則
+ *    再也咬不到，padding-top 才由這裡說了算。
+ *    模板裡那幾個 style="padding-top: …" 是刻意的個別調整，保留。
+ */
+.vadmin .secline {
   display: flex;
   align-items: center;
   gap: 16px;
-  padding-bottom: 18px;
+  padding: 34px 0 18px;
 }
-.vadmin .sec b {
+.vadmin .secline b {
   font-family: var(--f-mono);
   font-size: 12px;
   font-weight: 400;
   letter-spacing: 0.24em;
   color: var(--gold-deep);
 }
-.vadmin .sec hr {
+.vadmin .secline hr {
   flex: 1;
   border: 0;
   border-top: 1px solid var(--line);
@@ -694,6 +714,9 @@
   letter-spacing: 0.04em;
   color: var(--flag);
 }
+/* 公開版的 reset 把 ul 的項目符號拿掉了，這裡要把它要回來 ——
+   沒有符號的話，那幾行只是縮排，看不出是一條一條的待修項目 */
+.vadmin .warn ul { list-style: disc; }
 
 /*
  * 開關。
@@ -816,7 +839,7 @@
   width: 100%;
   max-width: 420px;
 }
-.vadmin .box .wm { padding: 0 0 12px; }
+.vadmin .box .brand { padding: 0 0 12px; }
 .vadmin .box hr { border: 0; border-top: 1px solid #4a3f2e; margin: 0 0 46px; }
 .vadmin .box label {
   display: block;
@@ -904,12 +927,12 @@
    */
   .vadmin .side { width: 100%; flex-direction: column; padding: 15px 16px 12px; }
   .vadmin .side .fill, .vadmin .foot { display: none; }
-  .vadmin .wm { padding: 0 0 12px; }
-  .vadmin .wm b { font-size: 17px; letter-spacing: 0.3em; }
+  .vadmin .brand { padding: 0 0 12px; }
+  .vadmin .brand b { font-size: 17px; letter-spacing: 0.3em; }
   /* 「商品管理」在窄螢幕收起 —— 右邊的 h1 一直寫著現在在哪一頁，
      這一行在手機上只是把公司名往下推 */
-  .vadmin .wm span:not(.co) { display: none; }
-  .vadmin .wm .co { margin-top: 6px; }
+  .vadmin .brand span:not(.co) { display: none; }
+  .vadmin .brand .co { margin-top: 6px; }
   .vadmin .nav { display: flex; flex-wrap: wrap; gap: 6px; }
   .vadmin .nav button { width: auto; padding: 9px 13px; gap: 9px; font-size: 14px; }
   .vadmin .main { padding: 24px 16px 40px; }

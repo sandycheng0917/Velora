@@ -72,6 +72,12 @@ jobs:
       - name: 確認 Sheet 的內容沒有比上一版少（放在取資料之後、建站之前）
         run: node tools/check-regression.mjs
 
+      # style.css 是公開版與後台版共用的全域樣式，裡面有裸的 .wm / .sec /
+      # .plate 之類的選擇器。後台一旦用到同名 class 就會被靜悄悄套上，
+      # 而且從畫面上看起來像是後台自己的 CSS 寫壞了。擋在建置之前。
+      - name: 確認後台沒有跟公開版的全域樣式撞 class 名
+        run: node tools/check-admin-css.mjs
+
       # ── 建置 ──────────────────────────────────────────────────────
       #
       # 2026-09-07 起不再建 v1（Vue 版展示站），選單頁也移除 ——

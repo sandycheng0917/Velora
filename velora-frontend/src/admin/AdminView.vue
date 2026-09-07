@@ -283,7 +283,7 @@ onMounted(async () => {
   <!-- 登入 -->
   <div v-if="!signedIn" class="vadmin login">
     <form class="box" @submit.prevent="doLogin">
-      <div class="wm">
+      <div class="brand">
         <b>VELORA</b>
         <span class="co">維羅拉國際有限公司</span>
         <span>商品管理</span>
@@ -301,7 +301,7 @@ onMounted(async () => {
   <!-- 後台 -->
   <div v-else class="vadmin">
     <aside class="side">
-      <div class="wm">
+      <div class="brand">
         <b>VELORA</b>
         <span class="co">維羅拉國際有限公司</span>
         <span>商品管理</span>
@@ -355,7 +355,7 @@ onMounted(async () => {
         <div v-for="i in 5" :key="i" class="row" style="cursor: default">
           <span class="n">{{ String(i).padStart(2, '0') }}</span>
           <span class="rule" />
-          <span class="plate loading">載入中</span>
+          <span class="thumb loading">載入中</span>
           <span class="nm"><b class="sk sk-a" /><span class="sk sk-b" /></span>
           <span class="cell hideNarrow"><span class="sk sk-c" /></span>
           <span class="cell hideNarrow"><span class="sk sk-c" /></span>
@@ -423,7 +423,7 @@ onMounted(async () => {
           </div>
         </header>
         <div style="padding-top: 30px">
-          <div class="sec"><b>品類</b><hr /></div>
+          <div class="secline"><b>品類</b><hr /></div>
           <div class="row hd">
             <span>編號前綴</span><i /><span /><span>中文</span><span>件數</span><span class="hideNarrow" /><span class="hideNarrow" /><span class="hideNarrow" /><span />
           </div>
