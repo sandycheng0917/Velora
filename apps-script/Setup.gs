@@ -305,116 +305,17 @@ function addCategoryFieldColumns() {
   return say_(out.join(String.fromCharCode(10)));
 }
 
-/* ── 一次性：把商品編號改成目錄編號的樣子 ──────────────────────────
+/* ── 已移除：previewIdRename / applyIdRename ────────────────────────
  *
- * 2026-09-07 決定前台卡片改印商品編號、不再有獨立的索引碼欄位。
- * 但現有的 id 是當初取的語意代稱（frg-ylang、scarf-1），印在卡片上
- * 看起來是網址片段而不是目錄編號。所以照既有的索引碼把它們改一輪：
+ * 那兩支是 2026-09-07 的一次性遷移，把商品編號從語意代稱
+ * （frg-ylang、scarf-1）照當時的索引碼改成 VL_FRG_001 這種格式。
+ * 任務完成了，而且它們對每一件都會回報「已經是這個編號了」。
  *
- *     VL · FRG · 001   →   VL_FRG_001
- *
- * 兩支分開是刻意的：先 previewIdRename() 看清楚要改什麼，
- * 確認無誤再 applyIdRename()。改主鍵沒有「試一下」這種事。
+ * 之所以整組刪掉而不是留著：它跟下面的 previewRenumber / applyRenumber
+ * 名字太像，實際上做的是不同的事（一個依索引碼、一個依品類前綴）。
+ * 使用者實際跑錯過一次 —— 跑完看到「共 0 件要改」，以為工具壞了。
+ * 一支只會讓人跑錯的死程式碼，留著的成本比刪掉高。要復活翻 git 記錄。
  */
-
-/** 索引碼 → 新編號。「VL · FRG · 001」→「VL_FRG_001」 */
-function idFromRef_(ref) {
-  var t = String(ref || '').trim();
-  if (!t) return '';
-  // 間隔點、空白、連字號一律收斂成單一底線，其餘非英數字元丟掉
-  t = t.replace(/[·•\s-]+/g, '_').replace(/[^A-Za-z0-9_]/g, '');
-  t = t.replace(/_+/g, '_').replace(/^_|_$/g, '').toUpperCase();
-  return t;
-}
-
-/** 只印計畫，不動任何資料 */
-function previewIdRename() {
-  var plan = buildIdRenamePlan_();
-  var lines = ['改名計畫（這一支不會動任何資料）', ''];
-  for (var i = 0; i < plan.ok.length; i++) {
-    lines.push('  ' + plan.ok[i].from + '  →  ' + plan.ok[i].to);
-  }
-  if (plan.skip.length) {
-    lines.push('', '跳過：');
-    for (var j = 0; j < plan.skip.length; j++) {
-      lines.push('  ' + plan.skip[j].id + ' —— ' + plan.skip[j].why);
-    }
-  }
-  lines.push('', '共 ' + plan.ok.length + ' 件要改、' + plan.skip.length + ' 件跳過。');
-  lines.push('確認無誤後執行 applyIdRename()。');
-  return say_(lines.join('\n'));
-}
-
-/** 真的改。影像鍵、成本列都會跟著搬 */
-function applyIdRename() {
-  var lock = LockService.getScriptLock();
-  try { lock.waitLock(60000); } catch (e) { return say_('伺服器忙碌中，請稍後再試。'); }
-
-  try {
-    var ss = openBook_();
-    var plan = buildIdRenamePlan_();
-    var done = [], failed = [];
-
-    for (var i = 0; i < plan.ok.length; i++) {
-      var r = renameIdCore_(ss, plan.ok[i].from, plan.ok[i].to);
-      if (r.ok) {
-        done.push(plan.ok[i].from + ' → ' + plan.ok[i].to +
-                  (r.keys.length ? '（影像鍵 ' + r.keys.length + ' 個）' : ''));
-      } else {
-        failed.push(plan.ok[i].from + ' → ' + plan.ok[i].to + '：' + (r.detail || r.err));
-      }
-    }
-
-    audit_('renameIdBatch', failed.length === 0,
-           '成功 ' + done.length + ' 件、失敗 ' + failed.length + ' 件');
-
-    var lines = ['改名完成。', ''];
-    for (var d = 0; d < done.length; d++) lines.push('  ✓ ' + done[d]);
-    for (var f = 0; f < failed.length; f++) lines.push('  ✗ ' + failed[f]);
-    for (var k = 0; k < plan.skip.length; k++) lines.push('  – 跳過 ' + plan.skip[k].id + '：' + plan.skip[k].why);
-    lines.push('', '圖檔網址會跟著編號變，所以要到後台按一次「發布」才會反映到網站上。');
-    return say_(lines.join('\n'));
-  } finally {
-    lock.releaseLock();
-  }
-}
-
-/** 兩支共用的計畫。沒有索引碼、算出來不合法、或會撞名的都跳過 */
-function buildIdRenamePlan_() {
-  var ss = openBook_();
-  var sh = ss.getSheetByName('products');
-  if (!sh) throw new Error('products 分頁不存在');
-
-  var idx = headIndex_(sh);
-  var last = lastIdRow_(sh);
-  var ok = [], skip = [];
-  if (last < 2) return { ok: ok, skip: skip };
-
-  var vals = sh.getRange(2, 1, last - 1, sh.getLastColumn()).getValues();
-  var claimed = {};      // 這一輪已經打算用掉的新編號，避免兩件商品算出同一個
-
-  for (var i = 0; i < vals.length; i++) {
-    var id = String(vals[i][idx.id]).trim();
-    if (!id) continue;
-    var ref = String(vals[i][idx.ref] === undefined ? '' : vals[i][idx.ref]).trim();
-    var to = idFromRef_(ref);
-
-    if (!to) { skip.push({ id: id, why: '沒有索引碼可以依據' }); continue; }
-    if (to === id) { skip.push({ id: id, why: '已經是這個編號了' }); continue; }
-    if (!/^[A-Za-z0-9_-]{3,40}$/.test(to)) {
-      skip.push({ id: id, why: '從「' + ref + '」算出的「' + to + '」不合法' }); continue;
-    }
-    if (claimed[to.toUpperCase()]) {
-      skip.push({ id: id, why: '「' + to + '」跟這一輪的另一件撞名，請先改掉其中一個的索引碼' }); continue;
-    }
-    if (idTaken_(sh, to, id)) {
-      skip.push({ id: id, why: '「' + to + '」已經有人用了' }); continue;
-    }
-    claimed[to.toUpperCase()] = true;
-    ok.push({ from: id, to: to });
-  }
-  return { ok: ok, skip: skip };
-}
 
 /* ── 一次性：照品類前綴重編所有商品編號 ────────────────────────────
  *
