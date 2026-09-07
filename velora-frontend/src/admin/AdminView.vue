@@ -55,6 +55,42 @@ const buildState = ref('')
  */
 const statusKnown = ref(false)
 
+/**
+ * 發布時間轉成台北時間。
+ *
+ * 伺服器存的是 UTC 的 ISO 字串（nowIso_()），那是對的 —— 沒有時區的
+ * 時間戳遲早會被讀錯。要換的是「顯示」，不是「儲存」。
+ *
+ * 🔴 日期那一半也要用台北的。isDirty() 拿它去比 p.updated，
+ *    而 updated 是 Apps Script 用 Asia/Taipei 產生的（today_()）。
+ *    直接切 ISO 的前十碼是 UTC 日期，台灣時間早上八點前會差一天 ——
+ *    症狀是剛發布完，清單上一批商品仍然標著「已修改」。
+ *
+ * @returns {{date: string, text: string}} 'YYYY-MM-DD' 與 'YYYY-MM-DD HH:mm'
+ */
+function inTaipei(iso) {
+  if (!iso) return { date: '', text: '' }
+  const d = new Date(iso)
+  // 解析不出來就原樣顯示，不要因為格式沒見過就變成空白
+  if (Number.isNaN(d.getTime())) {
+    const raw = String(iso)
+    return { date: raw.slice(0, 10), text: raw.slice(0, 16).replace('T', ' ') }
+  }
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Taipei',
+    // h23 而不是 hour12:false —— 後者在某些引擎上午夜會印成 24:00
+    hourCycle: 'h23',
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit',
+  }).formatToParts(d)
+  const g = (t) => (parts.find((x) => x.type === t) || {}).value || ''
+  const date = `${g('year')}-${g('month')}-${g('day')}`
+  return { date, text: `${date} ${g('hour')}:${g('minute')}` }
+}
+
+/** 畫面上那兩處都用這個。空的時候是破折號 */
+const publishedAt = computed(() => inTaipei(lastPublish.value).text || '—')
+
 const toast = ref(null)
 let toastTimer = null
 function say(text, bad = false) {
@@ -74,7 +110,8 @@ function isDirty(p) {
   // 還不知道上次發布時間時一律當成沒改過 —— 寧可少標，不要先亮一片再收回
   if (!statusKnown.value) return false
   if (!lastPublish.value) return true
-  return String(p.updated || '') > String(lastPublish.value).slice(0, 10)
+  // 兩邊都是台北日期才比得準（updated 由 Apps Script 的 today_() 產生）
+  return String(p.updated || '') > inTaipei(lastPublish.value).date
 }
 
 async function doLogin() {
@@ -269,7 +306,7 @@ onMounted(async () => {
       <div class="fill" />
       <div class="foot">
         資料源　Google Sheet<br />
-        最後發布　{{ lastPublish ? lastPublish.slice(0, 16).replace('T', ' ') : '—' }}<br />
+        最後發布　{{ publishedAt }}<br />
         <button class="link quiet" style="font-family: inherit; font-size: 10.5px" @click="signOut">
           登出（票剩 {{ session.remaining() }}）
         </button>
@@ -287,7 +324,7 @@ onMounted(async () => {
           </div>
           <div class="right">
             <p class="stamp">
-              上次發布　{{ lastPublish ? lastPublish.slice(0, 16).replace('T', ' ') : '—' }}
+              上次發布　{{ publishedAt }}
               　·　{{ STATE_TEXT[buildState] || buildState || '—' }}
             </p>
             <button
