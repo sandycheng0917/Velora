@@ -104,6 +104,9 @@ const needThumb = computed(() => {
   return [...seen]
 })
 
+/** 這一頁還在載的縮圖數。0 就不顯示 —— 沒有進度的時候不該有進度條 */
+const loadingCount = computed(() => shown.value.filter((p) => plateState(p) === 'loading').length)
+
 const backfill = ref('')
 async function doBackfill() {
   if (!needThumb.value.length || backfill.value) return
@@ -315,6 +318,8 @@ const priceText = (p) =>
           />
           <template v-else-if="plateState(p) === 'pending'">無圖片</template>
           <template v-else-if="plateState(p) === 'notyet'">未上傳</template>
+          <!-- 只有斜紋沒有字的話，跟「壞掉」長得一樣。實測回報過兩次 -->
+          <template v-else-if="plateState(p) === 'loading'">載入中</template>
         </span>
         <span class="nm">
           <b>{{ p.name_zh }}<em v-if="p.featured === true || String(p.featured).toUpperCase() === 'TRUE'" class="star">◆</em></b>
@@ -356,6 +361,9 @@ const priceText = (p) =>
         筆
       </span>
       <span>顯示 {{ from }}–{{ to }}，共 {{ filtered.length }} 件</span>
+      <span v-if="loadingCount">
+        圖片載入中　{{ shown.length - loadingCount }} / {{ shown.length }}
+      </span>
       <span><em class="star">◆</em> 精選，會出現在首頁</span>
       <!--
         沒有縮圖的圖仍然顯示得出來（退回公開網址或逐張 API），只是慢。

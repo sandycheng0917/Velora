@@ -370,10 +370,26 @@
 }
 /* 縮圖抓回來之前的樣子。用很淡的斜紋而不是轉圈圈 ——
    一頁十幾張各自轉圈會很吵，而且那是「壞掉」的視覺語彙 */
+/*
+ * 載入中。斜紋 + 「載入中」三個字。
+ *
+ * 原本只有斜紋沒有字 —— 使用者兩次回報「以為是空的／壞掉」。
+ * 一格 40 × 52，三個中文字放不下一行，所以字級收到 9px 並允許折行；
+ * 這裡的目標不是讀，是讓人知道「它在動，不是壞了」。
+ */
 .vadmin .plate.loading {
   background: repeating-linear-gradient(
     45deg, var(--surface), var(--surface) 5px, var(--paper-alt) 5px, var(--paper-alt) 10px
   );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 3px;
+  font-size: 9px;
+  line-height: 1.25;
+  letter-spacing: 0.02em;
+  text-align: center;
+  color: var(--ink-faint);
 }
 /* 有影像鍵、但 Sheet 裡沒有位元組。跟「完全沒有圖」要分得出來 ——
    前者是「網站上有圖，只是還沒進 Sheet」，後者是「真的沒有圖」 */
