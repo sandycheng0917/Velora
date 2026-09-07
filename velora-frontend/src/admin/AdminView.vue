@@ -55,6 +55,14 @@ const buildState = ref('')
  */
 const statusKnown = ref(false)
 
+/*
+ * 頁尾的版權年份。
+ *
+ * 寫死的年份到了明年就是錯的，而且沒有人會記得回來改 ——
+ * 前台主視覺那幾個件數數字就是這樣說謊了一整段時間。
+ */
+const year = new Date().getFullYear()
+
 /**
  * 發布時間轉成台北時間。
  *
@@ -275,7 +283,11 @@ onMounted(async () => {
   <!-- 登入 -->
   <div v-if="!signedIn" class="vadmin login">
     <form class="box" @submit.prevent="doLogin">
-      <div class="wm"><b>VELORA</b><span>商品管理</span></div>
+      <div class="wm">
+        <b>VELORA</b>
+        <span class="co">維羅拉國際有限公司</span>
+        <span>商品管理</span>
+      </div>
       <hr />
       <label for="pw">密碼</label>
       <input id="pw" v-model="pw" type="password" autocomplete="current-password" autofocus />
@@ -289,7 +301,11 @@ onMounted(async () => {
   <!-- 後台 -->
   <div v-else class="vadmin">
     <aside class="side">
-      <div class="wm"><b>VELORA</b><span>商品管理</span></div>
+      <div class="wm">
+        <b>VELORA</b>
+        <span class="co">維羅拉國際有限公司</span>
+        <span>商品管理</span>
+      </div>
       <nav class="nav">
         <button
           v-for="p in PANES"
@@ -305,8 +321,9 @@ onMounted(async () => {
       </nav>
       <div class="fill" />
       <div class="foot">
-        資料源　Google Sheet<br />
-        最後發布　{{ publishedAt }}<br />
+        <span class="legal">© {{ year }}　維羅拉國際有限公司</span>
+        資料源　<span class="v">Google Sheet</span><br />
+        最後發布　<span class="v">{{ publishedAt }}</span><br />
         <button class="link quiet" style="font-family: inherit; font-size: 10.5px" @click="signOut">
           登出（票剩 {{ session.remaining() }}）
         </button>
@@ -354,6 +371,7 @@ onMounted(async () => {
         :product="editing"
         :categories="categories"
         :houses="houses"
+        :products="products"
         :img-index="imgIndex"
         @back="pane = 'list'"
         @saved="afterSave"

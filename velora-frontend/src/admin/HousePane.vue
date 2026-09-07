@@ -236,7 +236,7 @@ async function remove(h) {
         <div class="sw" style="padding-top: 4px">
           <span>顯示在前台</span>
           <span class="tog" :class="{ on: form.listed }">
-            <em>{{ form.listed ? '開' : '關' }}</em>
+            <em>{{ form.listed ? 'ON' : 'OFF' }}</em>
             <button type="button" :class="{ on: form.listed }" :aria-pressed="form.listed" @click="form.listed = !form.listed" />
           </span>
         </div>

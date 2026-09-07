@@ -75,6 +75,18 @@
   letter-spacing: 0.28em;
   color: var(--sidebar-ink);
 }
+/*
+ * 公司全名。字級與字距都比「商品管理」再收一級 ——
+ * 它是身分不是標題，說明「這是誰的工具」就夠了，不該跟字標搶。
+ * 側欄只有 232px 寬，0.28em 的字距會讓九個中文字撐破，所以用 0.1em。
+ */
+.vadmin .wm .co {
+  margin-top: 9px;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  /* #8d8271 量出來只有 4.06:1，12px 需要 4.5。這個值是 5.06 */
+  color: #9d9382;
+}
 .vadmin .nav button {
   display: flex;
   align-items: center;
@@ -105,6 +117,33 @@
   font-size: 12.5px;
   line-height: 1.9;
   /* #6E6353 量出來只有 2.61:1，10.5px 需要 4.5。這個值是 4.77 */
+  color: #9a8e7a;
+}
+/* 法定名稱。比上面那幾行再淡一階，是註腳不是資訊 */
+/*
+ * 版權行。
+ *
+ * 用中文而不是「Velora International CO., LTD」：側欄扣掉內距只有
+ * 184px，那串英文在 11px 等寬字下會折成三行（實際踩過）。
+ * 中文全名九個字加年份約 144px，一行放得下。
+ *
+ * 顏色跟上面幾行同色（4.77:1），層級靠字級與間距拉開 ——
+ * 再暗一階就掉到 4.5 以下，深色側欄沒有那個餘裕。
+ */
+/*
+ * 側欄只有 232px，「最後發布　2026-09-08 00:27」放不下一行。
+ * 不處理的話會折在日期中間變成「2026-09- / 08 00:27」——
+ * 讓值整串不折，標籤自己先換行，就變成刻意的兩行。
+ */
+.vadmin .foot .v { white-space: nowrap; }
+
+.vadmin .foot .legal {
+  display: block;
+  padding-bottom: 10px;
+  font-family: var(--f-body);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
   color: #9a8e7a;
 }
 
@@ -615,11 +654,19 @@
   gap: 10px;
   flex: none;
 }
+/*
+ * 狀態字。ON / OFF 而不是「開／關」—— 使用者的原話是「不然我看不懂」。
+ *
+ * min-width 是必要的：OFF 比 ON 寬一個字，不固定寬度的話，
+ * 每按一次開關，右邊那顆圓角膠囊就會左右跳一下。
+ */
 .vadmin .tog em {
   font-family: var(--f-mono);
   font-size: 12px;
   font-style: normal;
   letter-spacing: 0.08em;
+  min-width: 2.6em;
+  text-align: right;
   color: var(--ink-faint);
 }
 .vadmin .tog.on em { color: var(--gold-deep); }

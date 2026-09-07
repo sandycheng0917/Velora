@@ -22,6 +22,8 @@ const props = defineProps({
   categories: { type: Array, required: true },
   houses: { type: Array, required: true },
   imgIndex: { type: Object, default: () => ({}) },
+  // 只為了算「下一個編號是幾號」。清單那邊本來就有這份資料
+  products: { type: Array, default: () => [] },
 })
 const emit = defineEmits(['back', 'saved', 'error'])
 
@@ -81,6 +83,31 @@ const truthy = (v) => v === true || String(v).toUpperCase() === 'TRUE'
  * 上傳會被 opUpload_ 以 bad-key 擋下來，而那個錯誤看起來跟編號無關。
  */
 const ID_RE = /^[A-Za-z0-9_-]{3,40}$/
+
+/**
+ * 新增時的編號提示：VL_<品類前綴>_<下一個序號>。
+ *
+ * 前綴取自 categories 分頁的 ref（FRG / SLK / JWL / BAG），跟前台
+ * 主視覺那一排代號、以及卡片上印的編號是同一套 —— 讀者看到
+ * 「香氛 FRG」再看到「VL_FRG_001」，系統就自己解釋了自己。
+ *
+ * 序號是該品類目前的最大號碼加一，不是「總共幾件」：刪掉一件之後
+ * 那個號碼不會回收（軟刪除的商品仍然佔著它的影像鍵），
+ * 用件數算會撞到已經存在的編號。
+ *
+ * 這只是提示不是預設值 —— 編號建立後不可更改，值得讓人自己打一次。
+ */
+const idHint = computed(() => {
+  const prefix = String(catRow.value.ref || '').trim().toUpperCase().replace(/[^A-Z0-9]/g, '')
+  if (!prefix) return 'VL_XXX_001'
+  const re = new RegExp('^VL[_-]' + prefix + '[_-]([0-9]+)$', 'i')
+  let max = 0
+  for (const p of props.products) {
+    const m = re.exec(String(p.id || '').trim())
+    if (m) max = Math.max(max, Number(m[1]) || 0)
+  }
+  return 'VL_' + prefix + '_' + String(max + 1).padStart(3, '0')
+})
 
 function blank() {
   const o = {
@@ -417,7 +444,7 @@ async function remove() {
         <div class="tri" style="padding-bottom: 24px">
           <div>
             <label>商品編號 <em class="req">*</em></label>
-            <input v-if="creating" v-model.trim="form.id" type="text" placeholder="frg-ylang" :class="{ bad: bad.id }" />
+            <input v-if="creating" v-model.trim="form.id" type="text" :placeholder="idHint" :class="{ bad: bad.id }" />
             <template v-else>
               <div v-if="!renameOpen" class="ro" style="justify-content: space-between">
                 <span style="display: flex; align-items: center; gap: 8px">
@@ -438,7 +465,7 @@ async function remove() {
             </template>
             <p class="hint">
               {{ creating
-                ? '英數、連字號與底線，3–40 字。前台的卡片會直接印它，圖片的影像鍵也是用它組的。'
+                ? `慣例是 ${idHint} 這種寫法 —— VL＋品類前綴＋序號。前台的卡片會直接印它，圖片的影像鍵也是用它組的，所以不能有空格或間隔點。`
                 : renameOpen
                   ? '改完圖片的影像鍵會一起搬，圖不會失聯。之後要按一次「發布」。'
                   : '前台卡片上印的就是它。要改按右邊的「改編號」' }}
@@ -553,7 +580,7 @@ async function remove() {
         <div class="sw" style="padding-top: 6px">
           <span style="font-size: 12px; color: var(--ink-faint)">高畫質（放寬到 100 KB）</span>
           <span class="tog" :class="{ on: hq }">
-            <em>{{ hq ? '開' : '關' }}</em>
+            <em>{{ hq ? 'ON' : 'OFF' }}</em>
             <button type="button" :class="{ on: hq }" :aria-pressed="hq" @click="hq = !hq" />
           </span>
         </div>
@@ -562,14 +589,14 @@ async function remove() {
         <div class="sw">
           <span>顯示在前台</span>
           <span class="tog" :class="{ on: form.listed }">
-            <em>{{ form.listed ? '開' : '關' }}</em>
+            <em>{{ form.listed ? 'ON' : 'OFF' }}</em>
             <button type="button" :class="{ on: form.listed }" :aria-pressed="form.listed" @click="form.listed = !form.listed" />
           </span>
         </div>
         <div class="sw">
           <span>首頁精選</span>
           <span class="tog" :class="{ on: form.featured }">
-            <em>{{ form.featured ? '開' : '關' }}</em>
+            <em>{{ form.featured ? 'ON' : 'OFF' }}</em>
             <button type="button" :class="{ on: form.featured }" :aria-pressed="form.featured" @click="form.featured = !form.featured" />
           </span>
         </div>
@@ -593,7 +620,7 @@ async function remove() {
         <div class="sw" style="padding-top: 12px">
           <span>在前台顯示價格</span>
           <span class="tog" :class="{ on: form.price_public }">
-            <em>{{ form.price_public ? '開' : '關' }}</em>
+            <em>{{ form.price_public ? 'ON' : 'OFF' }}</em>
             <button type="button" :class="{ on: form.price_public }" :aria-pressed="form.price_public" @click="form.price_public = !form.price_public" />
           </span>
         </div>
