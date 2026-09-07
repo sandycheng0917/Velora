@@ -331,7 +331,41 @@ onMounted(async () => {
     </aside>
 
     <main class="main">
-      <div v-if="pane === 'list'">
+      <!--
+        載入骨架。
+        🔴 ready 這個狀態以前被宣告、被維護，但模板裡一次都沒有用到 ——
+           所以取資料那幾秒，標頭寫著「共 0 件商品」、清單寫著「沒有符合
+           的商品」。那不是空白，那是在說謊：使用者會以為東西被清光了。
+           Apps Script 一次呼叫就要一兩秒，這段時間一定看得到。
+      -->
+      <div v-if="!ready" class="boot">
+        <header class="head">
+          <div>
+            <h1>商品清單</h1>
+            <p class="sub">正在向 Google Sheet 取資料…</p>
+          </div>
+        </header>
+        <div class="row hd">
+          <span>序</span><i /><span>圖片</span><span>品名</span>
+          <span class="hideNarrow">品類</span><span class="hideNarrow">商品編號</span>
+          <span class="hideNarrow">價格</span><span>狀態</span><span />
+        </div>
+        <!-- 五列骨架就夠了：目的是撐住版面、讓人知道清單要出現在這裡，
+             不是模擬真實筆數（真實筆數這時候還不知道） -->
+        <div v-for="i in 5" :key="i" class="row" style="cursor: default">
+          <span class="n">{{ String(i).padStart(2, '0') }}</span>
+          <span class="rule" />
+          <span class="plate loading">載入中</span>
+          <span class="nm"><b class="sk sk-a" /><span class="sk sk-b" /></span>
+          <span class="cell hideNarrow"><span class="sk sk-c" /></span>
+          <span class="cell hideNarrow"><span class="sk sk-c" /></span>
+          <span class="cell hideNarrow"><span class="sk sk-c" /></span>
+          <span class="cell"><span class="sk sk-c" /></span>
+          <span />
+        </div>
+      </div>
+
+      <div v-else-if="pane === 'list'">
         <header class="head">
           <div>
             <h1>商品清單</h1>

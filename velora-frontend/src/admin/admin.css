@@ -518,6 +518,25 @@
   .vadmin .hrow .hideNarrow { display: none; }
 }
 
+/*
+ * 載入骨架的灰條。
+ *
+ * 用固定寬度的色塊而不是「載入中…」一行字：字只佔一行，畫面還是空的，
+ * 資料到了之後版面會整個跳一次。骨架先把列高與欄位位置佔住，
+ * 真實資料進來時是「填上」而不是「彈出」。
+ *
+ * 刻意不做閃爍動畫 —— 這個後台的語彙是印刷校樣台，不是儀表板。
+ * 影像板那格的斜紋已經在說「正在來」了。
+ */
+.vadmin .sk {
+  display: block;
+  height: 11px;
+  background: var(--line);
+}
+.vadmin .sk-a { width: 52%; height: 15px; margin-bottom: 9px; }
+.vadmin .sk-b { width: 74%; }
+.vadmin .sk-c { width: 68%; }
+
 .vadmin .sheetfoot {
   display: flex;
   align-items: center;
