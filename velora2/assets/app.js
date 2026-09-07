@@ -42,6 +42,46 @@
    * 展開與否從此是使用者的選擇，不是視窗寬度的函數。
    */
 
+  /*
+   * 商品浮層的兩件加分項。
+   *
+   * 開關本身完全由 CSS 做（見 style.css 的 .card .more[open]）——
+   * 關掉 JS 一樣點得開、點暗幕關得掉。這裡只補兩件沒有 JS 做不到的事：
+   *
+   *   1. ESC 關閉。<details> 沒有原生的 ESC，而浮層看起來就是對話框，
+   *      按 ESC 沒反應會讓人以為卡住了。
+   *   2. 鎖住背景捲動。浮層開著時捲動應該作用在浮層裡，不是後面那一頁。
+   *
+   * 順便保證同時只有一個是開的 —— 暗幕擋著雖然點不到第二張卡，
+   * 但鍵盤（Tab + Enter）繞得過去，那時會有兩層面板疊在一起。
+   */
+  var root = document.documentElement;
+
+  function openPeeks() {
+    return [].slice.call(document.querySelectorAll('.card .more[open]'));
+  }
+  function syncLock() {
+    root.classList.toggle('peek-open', openPeeks().length > 0);
+  }
+
+  document.addEventListener('toggle', function (e) {
+    var el = e.target;
+    if (!el.matches || !el.matches('.card .more')) return;
+    if (el.open) {
+      var all = openPeeks();
+      for (var i = 0; i < all.length; i++) if (all[i] !== el) all[i].open = false;
+    }
+    syncLock();
+  }, true);          // toggle 不冒泡，要用捕獲階段才收得到
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') return;
+    var all = openPeeks();
+    if (!all.length) return;
+    for (var i = 0; i < all.length; i++) all[i].open = false;
+    syncLock();
+  });
+
   var LANGS = ['zh', 'en', 'ko'];
   var HTML_LANG = { zh: 'zh-Hant-TW', en: 'en', ko: 'ko' };
   var STORE = 'velora-lang';

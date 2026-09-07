@@ -604,12 +604,128 @@ html[lang='en'] .wm span { display: none; }
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 10px;
-  padding-top: 14px;
 }
 .gal .plate { aspect-ratio: 1 / 1; }
 .gal .plate:first-child { grid-column: 1 / -1; aspect-ratio: 4 / 5; }
 /* 髮絲框是照主圖尺寸調的，副圖只有一半寬要跟著收 */
 .gal .plate:not(:first-child)::before { inset: 7px; outline-offset: 2px; }
+
+/* 浮層開著時背景不捲動。這個 class 由 app.js 掛上，沒有 JS 就只是不鎖 */
+html.peek-open,
+html.peek-open body { overflow: hidden; }
+
+/* ── 商品浮層 ───────────────────────────────────────────── */
+/*
+ * 點「明細與規格」之後，內容浮到畫面中央。
+ *
+ * ── 為什麼不用 <dialog> + JavaScript ────────────────────────────────
+ *
+ * velora2 承諾「關掉 JS 仍是完整的中文站」。<dialog> 只能用
+ * showModal() 打開，沒有 JS 就永遠打不開，那等於把商品明細藏死。
+ * 這裡沿用原本的 <details>：它原生可點、鍵盤可操作、內容一直在 DOM 裡
+ * （搜尋引擎讀得到），只是展開時的呈現由 CSS 換成浮層。
+ * 沒有 JS 時一樣完整可用，app.js 只多加 ESC 與鎖背景捲動。
+ *
+ * ── 暗幕為什麼是 summary 的 ::before ────────────────────────────────
+ *
+ * 因為那樣「點暗幕」就等於「點 summary」，也就是關閉 —— 不需要任何
+ * JavaScript 就得到「點外面關掉」這個大家都會的操作。
+ */
+
+/* 收合時 .peek 就是普通區塊，什麼都不做 */
+/*
+ * 🔴 這個 40 必須小於面板的 41，而且必須大於 sticky 頁首的 8。
+ *
+ * summary 只要有 z-index 就建立了堆疊脈絡，暗幕（::before）寫再小的
+ * 負值也跳不出這一層。所以 summary 的值就是「暗幕的值」：
+ *   ≥ 41  暗幕蓋在面板上面，面板連照片一起被壓暗（實際踩過）
+ *   ≤ 8   頁首浮在暗幕上面沒被蓋住，而且還點得到
+ * 40 是唯一說得通的位置。改動任何一個數字之前先想清楚這三層的關係。
+ */
+.card .more[open] > summary {
+  position: fixed;
+  z-index: 40;
+  top: 14px;
+  right: 14px;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  /* 文字換成 ✕：留著「明細與規格」會在暗幕角落變成一段看不懂的字 */
+  font-size: 0;
+  background: var(--bg);
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+}
+.card .more[open] > summary::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;                 /* 壓在關閉鈕底下，但仍然屬於 summary，點了就關 */
+  background: rgba(28, 25, 23, 0.62);
+}
+/* 收合時的小三角在展開時要換成 ✕ */
+.card .more[open] > summary::after {
+  content: '✕';
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  border: 0;
+  /* 收合狀態的規則會把箭頭轉 180 度，不歸零的話 ✕ 會跟著轉 */
+  transform: none;
+  font-size: 17px;
+  color: var(--ink-soft);
+}
+
+.card .more[open] > .peek {
+  position: fixed;
+  z-index: 41;
+  /*
+   * 垂直往下偏 26px，讓面板的上緣一定低於右上角的關閉鈕（14 + 42）。
+   * 不偏的話，手機上面板幾乎滿寬，關閉鈕會被壓在面板底下點不到 ——
+   * 而關閉鈕在面板底下這件事，在桌機上測不出來。
+   */
+  top: calc(50% + 26px);
+  left: 50%;
+  transform: translate(-50%, -50%);
+  /* 置中而不是滿版。手機留 32px 的邊，讓人看得出底下還有東西 */
+  width: min(880px, calc(100vw - 32px));
+  max-height: min(84vh, 880px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 26px 22px 30px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  box-shadow: 0 24px 60px rgba(28, 25, 23, 0.28);
+}
+.peek .peek-id .ref { padding-top: 0; }
+.peek .peek-id h3 { margin: 6px 0 14px; }
+.peek .say { margin-bottom: 4px; }
+
+/*
+ * 唯一的轉換點。金色實心底、暗色字 —— #C5A880 不承載文字，這裡是反過來用。
+ *
+ * 🔴 sticky 不是裝飾。手機上面板約 700px 高，而主圖 4/5 就吃掉 430px，
+ *    加上副圖與規格表之後這顆按鈕落在摺線下方兩百多像素 ——
+ *    使用者得先捲過所有照片才看得到「用 LINE 詢問」，而那是做這個
+ *    浮層的唯一理由。釘在面板底部，打開的當下就在眼前。
+ *    底色是不透明的，捲動時內容不會從按鈕後面透出來。
+ */
+.peek .ask {
+  display: block;
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  margin-top: 24px;
+  padding: 15px 0;
+  background: var(--gold);
+  color: var(--ink);
+  text-align: center;
+  font-size: 15.5px;
+  letter-spacing: 0.14em;
+}
 
 /* ── 代理品牌 ───────────────────────────────────────────── */
 .houses { display: grid; gap: 1px; background: var(--line); border: 1px solid var(--line); }
@@ -776,6 +892,30 @@ html[lang='ko'] .card h3 {
 
 /* ════ 平板 ════════════════════════════════════════════════ */
 @media (min-width: 680px) {
+  /*
+   * 浮層在桌機是左圖右文：左欄整個是圖庫，右欄由上而下是
+   * 編號品名 → 說明與規格 → LINE。
+   * 手機沿用基礎樣式的單欄直排（編號品名 → 圖 → 說明規格 → LINE）。
+   */
+  .card .more[open] > .peek {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+    grid-template-areas:
+      'gal id'
+      'gal txt'
+      'gal cta';
+    /* 前兩列貼齊內容，剩下的高度全給最後一列 —— 不指定的話三列會平分
+       圖庫撐出來的高度，品名與標語之間就空一大段 */
+    grid-template-rows: auto auto 1fr;
+    align-content: start;
+    column-gap: 28px;
+    padding: 30px 30px 34px;
+  }
+  .peek .peek-id { grid-area: id; }
+  .peek .gal { grid-area: gal; }
+  .peek .peek-txt { grid-area: txt; }
+  .peek .ask { grid-area: cta; align-self: end; }
+
   /*
    * 🔴 桌機以前會把 <details> 攤平成格線項目（display: contents）並
    *    隱藏 summary，讓說明與規格表逐行對齊。2026-09-07 拿掉了 ——

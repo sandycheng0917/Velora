@@ -39,6 +39,9 @@ const DATA = join(ROOT, 'velora-frontend', 'src', 'data')
  *  加了錨點會把那一區清空，示意版面就消失了。 */
 const SECTIONS = ['fragrance', 'scarf', 'jewelry', 'phonebag']
 
+/** 全站唯一的轉換點。跟 velora2/index.html 頁尾那兩個連結是同一個 */
+const LINE_URL = 'https://lin.ee/uzoQ8dl'
+
 /* ── 跳脫 ─────────────────────────────────────────────────────────── */
 
 /**
@@ -183,28 +186,64 @@ function gallery(p) {
 }
 
 function card(p, houseName, labels) {
+  /*
+   * 展開後的內容整包放在 .peek 裡。
+   *
+   * 需要這層包裝是因為展開時它會浮到畫面中央 —— 一個 position: fixed
+   * 的面板只能有一個盒子，說明、規格表、圖庫三個並排的元素沒辦法
+   * 一起被定位。收合時它就是普通的區塊，不影響任何東西。
+   *
+   * 面板裡要重複一次編號與品名：浮起來之後卡片被壓在暗幕底下，
+   * 沒有標題的面板不知道自己在講哪一件商品。
+   */
+  const peek =
+    `<div class="peek">` +
+      /*
+       * 🔴 編號與品名排在圖前面。
+       *
+       * 手機上面板打開的第一眼只看得到主圖，而 LINE 按鈕釘在底部 ——
+       * 品名夾在中間，等於「看得到照片、看得到按鈕，就是不知道這是什麼」。
+       * 桌機用格線把它移回右欄上方，兩邊各自成立。
+       */
+      `<div class="peek-id">` +
+        `<p class="ref">${esc(one(p.code))}` +
+          (one(houseName) ? `<em>${esc(one(houseName))}</em>` : '') + `</p>` +
+        tri('h3', '', p.name) +
+      `</div>` +
+      gallery(p) +
+      `<div class="peek-txt">` +
+        tri('p', 'say', p.say) +
+        `<dl class="hall">` +
+          tri('dt', '', { zh: '材質', en: 'Material', ko: '소재' }) +
+          tri('dd', '', p.material) +
+          row({ zh: '前調', en: 'Top', ko: '탑' }, notesRow(p.notes.top)) +
+          row({ zh: '中調', en: 'Heart', ko: '미들' }, notesRow(p.notes.mid)) +
+          row({ zh: '後調', en: 'Base', ko: '베이스' }, notesRow(p.notes.base)) +
+          // 規格那一列的標籤逐品類不同：香氛是「容量」、絲巾是「尺寸」
+          row(labels.spec, hasText(p.spec) ? p.spec : null) +
+          // 品類專屬的那一格。標籤留空就整列不輸出 —— 沒有名字的資料沒有意義
+          row(labels.detail, hasText(labels.detail) && hasText(p.detail) ? p.detail : null) +
+          row({ zh: '售價', en: 'Price', ko: '가격' }, priceRow(p.price)) +
+        `</dl>` +
+      `</div>` +
+      /*
+       * 唯一的轉換點，就放在使用者最有興趣的那一刻眼前。這是做成浮層
+       * 而不是就地展開的主要理由 —— 就地展開時 LINE 按鈕在頁尾。
+       *
+       * 🔴 它必須是 .peek 的直接子元素，不能包在 .peek-txt 裡。
+       *    position: sticky 只在父容器的範圍內生效；包在 .peek-txt 裡的話，
+       *    手機上那一塊本身就在摺線以下，按鈕要捲到它才會出現，
+       *    等於白釘。直接掛在捲動容器上，整個面板的高度都是它的舞台。
+       */
+      `<a class="ask" href="${LINE_URL}" target="_blank" rel="noopener noreferrer">` +
+        `<span data-en="Ask about this on LINE" data-ko="이 제품 LINE으로 문의">用 LINE 詢問這一件</span>` +
+      `</a>` +
+    `</div>`
+
   const detail =
     `<details class="more">` +
       `<summary data-en="Details &amp; specs" data-ko="상세 · 사양">明細與規格</summary>` +
-      tri('p', 'say', p.say) +
-      // 順序：說明 → 照片 → 材質／香調／規格／專屬欄／售價。
-      // 先給眼睛看的，再給要查的
-      gallery(p) +
-      `<dl class="hall">` +
-        tri('dt', '', { zh: '材質', en: 'Material', ko: '소재' }) +
-        tri('dd', '', p.material) +
-        // 香調只有香氛填得出來，其餘品類整列不輸出（不是輸出空的）。
-        // <dl> 是一個格線項目，多幾列不影響卡片的子元素數量
-        row({ zh: '前調', en: 'Top', ko: '탑' }, notesRow(p.notes.top)) +
-        row({ zh: '中調', en: 'Heart', ko: '미들' }, notesRow(p.notes.mid)) +
-        row({ zh: '後調', en: 'Base', ko: '베이스' }, notesRow(p.notes.base)) +
-        // 規格那一列的標籤逐品類不同：香氛是「容量」、絲巾是「尺寸」。
-        // 同一格資料，換一個說得通的名字（labels 由 categories 分頁提供）
-        row(labels.spec, hasText(p.spec) ? p.spec : null) +
-        // 品類專屬的那一格。標籤留空就整列不輸出 —— 沒有名字的資料沒有意義
-        row(labels.detail, hasText(labels.detail) && hasText(p.detail) ? p.detail : null) +
-        row({ zh: '售價', en: 'Price', ko: '가격' }, priceRow(p.price)) +
-      `</dl>` +
+      peek +
     `</details>`
 
   const parts = [
