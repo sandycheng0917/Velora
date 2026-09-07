@@ -356,6 +356,22 @@ async function main() {
   }).join('\n\n')
   html = spliceNamed(html, 'HOUSES', houseHtml)
 
+  /*
+   * 把實際家數寫進 data-count，讓 CSS 決定排幾欄。
+   *
+   * 沒有這一步的話，格數是 CSS 寫死的三欄，而 Sheet 上目前只有兩家 ——
+   * 第三格就是一塊空的。空格不是「留位子」，看起來只是漏掉了東西。
+   *
+   * 用整段開標籤比對而不是正規表示式：class 順序或多一個屬性都會讓
+   * 鬆散的 regex 悄悄比不到，而那種失敗是靜默的 —— 產出的 HTML 合法，
+   * 只是永遠停在三欄。這裡比不到就直接拋。
+   */
+  const housesTag = '<div class="houses">'
+  if (html.split(housesTag).length - 1 !== 1) {
+    throw new Error(`找不到唯一的 ${housesTag}，velora2/index.html 被改過了？`)
+  }
+  html = html.replace(housesTag, `<div class="houses" data-count="${shown.length}">`)
+
   // 注入後再全檔驗一次卡片不變式。單張卡片在 card() 裡驗過了，
   // 這裡驗的是「拼接本身沒有把別人的卡片弄壞」
   const cards = [...html.matchAll(/<article class="card">([\s\S]*?)<\/article>/g)]

@@ -105,7 +105,6 @@ export const products = PRODUCTS.map((r) => {
     spec: tri(r, 'spec'),
     notes: notesOf(r),
     origin: origin(r.origin),
-    hs: r.hs,
     // 沒有圖的商品 image 是 undefined，版面會走 .plate.pending 的空版樣式
     image: gallery[0],
     thumb: gallery[0],

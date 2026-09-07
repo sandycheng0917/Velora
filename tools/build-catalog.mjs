@@ -48,7 +48,7 @@ const PUBLIC_FIELDS = [
   'notes_top_zh', 'notes_top_en', 'notes_top_ko',
   'notes_mid_zh', 'notes_mid_en', 'notes_mid_ko',
   'notes_base_zh', 'notes_base_en', 'notes_base_ko',
-  'hs', 'origin',
+  'origin',
   'price', 'price_public',
   'listed', 'featured', 'order',
   'img_main', 'img_2', 'img_3',
@@ -278,7 +278,9 @@ async function main() {
       const house = houseOff.has(str(r.house)) ? '' : str(r.house)
       const o = {
         id: str(r.id), ref: str(r.ref), category: str(r.category), house,
-        hs: str(r.hs), origin: str(r.origin) || 'KR',
+        // hs（報關用的商品分類號）2026-09-07 起不輸出到前台。
+        // 它仍在 Sheet 的 products 分頁上，只是不再進任何前端檔案。
+        origin: str(r.origin) || 'KR',
         listed: bool(r.listed), featured: bool(r.featured),
         order: Number(r.order) || 0,
         updated: str(r.updated),

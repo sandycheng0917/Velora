@@ -123,10 +123,15 @@ function routes_() {
     list: opList_,
     save: opSave_,
     'delete': opDelete_,
-    cost: opCost_,                   // 單筆查詢，每次都寫進 audit，不隨 list 回傳
+    // 2026-09-07 移除 cost 端點：後台不再顯示出口單價，
+    // 所以整條讀取路徑也一起拿掉 —— 令牌外洩時就沒有東西可以拉。
+    // FOB 價仍在 products_private 分頁，要看直接開試算表。
     image: opImage_,
-    imageIndex: opImageIndex_,   // 只回中繼資料，讓後台自己算公開網址
+    imageIndex: opImageIndex_,   // 中繼資料 + 96px 縮圖，後台清單一次畫完
+    saveThumb: opSaveThumb_,     // 回填既有影像的縮圖，不動位元組
     upload: opUpload_,
+    saveHouse: opSaveHouse_,
+    deleteHouse: opDeleteHouse_,
     publish: opPublish_,
     status: opStatus_
   };

@@ -225,44 +225,6 @@ function opDelete_(b) {
 
 /* ══ 成本：單筆查詢，而且會留下紀錄 ═══════════════════════════════ */
 
-/**
- * 查一件商品的成本。
- *
- * 刻意做成單筆而不是隨清單一起回：即使令牌外洩，攻擊者也拿不到整批 FOB 價，
- * 只能一件一件問，而且**每一次都會寫進 audit 分頁**。
- * 那張表是事後唯一的鑑識依據，所以寫入失敗也不能讓查詢成功 ——
- * 這是這個檔案裡唯一一處「記帳失敗就整個失敗」。
- */
-function opCost_(b) {
-  var id = String(b.id || '').trim();
-  if (!id) return { ok: false, err: 'no-id' };
-
-  var ss = openBook_();
-  var sh = ss.getSheetByName('products_private');
-  if (!sh) return { ok: false, err: 'no-sheet' };
-
-  // 先記錄再回傳。順序顛倒的話，查完才記帳，中間掛掉就查得到又沒有紀錄
-  var logged = false;
-  try {
-    var a = ss.getSheetByName('audit');
-    if (a) { a.appendRow([nowIso_(), 'cost', 'TRUE', '查看成本：' + id]); logged = true; }
-  } catch (e) { /* 下面會擋 */ }
-  if (!logged) return { ok: false, err: 'audit-failed', detail: '寫不進操作紀錄，因此不回傳成本' };
-
-  var row = rowOfId_(sh, id);
-  if (!row) return { ok: true, id: id, found: false };
-
-  var idx = headIndex_(sh);
-  var vals = sh.getRange(row, 1, 1, sh.getLastColumn()).getValues()[0];
-  return {
-    ok: true, id: id, found: true,
-    cost: vals[idx.cost],
-    ccy: vals[idx.cost_ccy],
-    at: vals[idx.cost_updated],
-    note: vals[idx.supplier_note]
-  };
-}
-
 /* ══ 影像 ══════════════════════════════════════════════════════════ */
 
 /** 一格的字元上限是 50000，留餘裕。前端照這個數字切 chunk */
@@ -321,6 +283,13 @@ function opUpload_(b) {
       r[idx.sha256] = String(b.sha256 || '');
       r[idx.bytes] = Number(b.bytes || 0);
       r[idx.data] = data.indexOf('w:') === 0 ? data : 'w:' + data;
+      // 縮圖只放第 0 格那一列。放每一列會讓 23 張圖多存幾十份一樣的東西，
+      // 而讀的那一邊（opImageIndex_）本來就只看每個鍵的第一列。
+      // idx.thumb 是 undefined 代表分頁還沒補欄 —— 這時就不寫，
+      // 上傳照樣成功，只是縮圖那條退回原本的公開網址／API 路徑。
+      if (c === 0 && idx.thumb !== undefined && b.thumb) {
+        r[idx.thumb] = 'w:' + String(b.thumb).replace(/^w:/, '');
+      }
       rows.push(r);
     }
 
@@ -412,15 +381,190 @@ function opImageIndex_() {
     var key = String(vals[i][idx.key]).trim();
     if (!key || seen[key]) continue;
     seen[key] = true;
+    var thumb = idx.thumb === undefined ? '' : String(vals[i][idx.thumb] || '');
     out.push({
       key: key,
       sha256: String(vals[i][idx.sha256] || ''),
       mime: String(vals[i][idx.mime] || 'image/webp'),
       alpha: truthyIn_(vals[i][idx.alpha]),
-      bytes: Number(vals[i][idx.bytes]) || 0
+      bytes: Number(vals[i][idx.bytes]) || 0,
+      // 96px 的 WebP，約 1.5KB。後台清單直接拿它畫，不必等公開網址或 API。
+      // 還沒回填的圖這裡是空字串，前端會自動退回原本那兩條路。
+      thumb: thumb.indexOf('w:') === 0 ? thumb.substring(2) : thumb
     });
   }
   return { ok: true, images: out };
+}
+
+/**
+ * 只回填一張圖的縮圖，不動位元組。
+ *
+ * 為什麼不用 opUpload_ 重傳：那支會先刪光這個鍵的所有 chunk 再重寫，
+ * 等於為了一張 1.5KB 的縮圖把 100KB 的原圖搬一次 —— 而且中間掛掉
+ * 就會留下一張只刪不寫的空圖。這支只碰第 0 格那一列的 thumb 欄。
+ */
+function opSaveThumb_(b) {
+  var key = String(b.key || '').trim();
+  if (!key) return { ok: false, err: 'no-key' };
+  var thumb = String(b.thumb || '');
+  if (!thumb) return { ok: false, err: 'no-data' };
+  if (thumb.length > CHUNK_CHARS) {
+    return { ok: false, err: 'chunk-too-big', detail: '縮圖 ' + thumb.length + ' 字元，上限 ' + CHUNK_CHARS };
+  }
+
+  var sh = openImages_().getSheetByName('images');
+  if (!sh) return { ok: false, err: 'no-sheet' };
+  var idx = headIndex_(sh);
+  if (idx.thumb === undefined) {
+    return { ok: false, err: 'no-thumb-col', detail: 'images 分頁還沒有 thumb 欄，請先在 Apps Script 編輯器執行 addThumbColumn()' };
+  }
+
+  var last = lastIdRow_(sh);
+  if (last < 2) return { ok: true, key: key, found: false };
+
+  // 找這個鍵的第 0 格。chunk 不一定照順序排（重傳過的會排在後面），
+  // 所以是比對 chunk 欄的值，不是取第一個遇到的列
+  var vals = sh.getRange(2, 1, last - 1, sh.getLastColumn()).getValues();
+  for (var i = 0; i < vals.length; i++) {
+    if (String(vals[i][idx.key]).trim() !== key) continue;
+    if (Number(vals[i][idx.chunk]) !== 0) continue;
+    sh.getRange(i + 2, idx.thumb + 1).setValue('w:' + thumb.replace(/^w:/, ''));
+    SpreadsheetApp.flush();
+    return { ok: true, key: key, found: true, chars: thumb.length };
+  }
+  return { ok: true, key: key, found: false };
+}
+
+/* ══ 品牌 ══════════════════════════════════════════════════════════ */
+
+/** 前台的品牌區最多排四格。超過就不是「代理幾家」而是另一種版面了 */
+var MAX_HOUSES = 4;
+
+function validateHouse_(h) {
+  var errs = [];
+  var key = String(h.key || '').trim();
+  if (!/^[a-z0-9-]{2,40}$/.test(key)) {
+    errs.push('品牌代碼必須是 2–40 個小寫英數或連字號，收到「' + key + '」');
+  }
+  if (!String(h.name || '').trim()) {
+    errs.push('品牌名稱不能空白');
+  }
+  return errs;
+}
+
+/**
+ * 建立或更新一個品牌。
+ *
+ * key 是主鍵，跟商品的 id 一樣建立後不可改 —— 商品的 house 欄存的就是它，
+ * 改了等於把所有掛著的商品指向一個不存在的品牌，而那個斷鏈要到發布之後
+ * 才會在前台顯現。
+ */
+function opSaveHouse_(b) {
+  var h = b.house;
+  if (!h || typeof h !== 'object') return { ok: false, err: 'bad-house' };
+
+  var errs = validateHouse_(h);
+  if (errs.length) return { ok: false, err: 'invalid', detail: errs };
+
+  var lock = LockService.getScriptLock();
+  try { lock.waitLock(20000); } catch (e) { return { ok: false, err: 'busy' }; }
+
+  try {
+    var ss = openBook_();
+    var sh = ss.getSheetByName('houses');
+    if (!sh) return { ok: false, err: 'no-sheet' };
+
+    var key = String(h.key).trim();
+    var idx = headIndex_(sh);
+    var row = rowOfId_(sh, key);
+    var creating = row === 0;
+
+    // 上限只擋「新增」。既有的四家仍然能編輯，不然改一個錯字都做不到
+    if (creating) {
+      var existing = readKeys_(ss, 'houses').length;
+      if (existing >= MAX_HOUSES) {
+        return { ok: false, err: 'too-many',
+                 detail: '最多 ' + MAX_HOUSES + ' 個品牌，目前已有 ' + existing + ' 個。要新增請先刪掉一個。' };
+      }
+    }
+
+    var width = COLS.houses.length;
+    var values = creating ? new Array(width) : sh.getRange(row, 1, 1, width).getValues()[0];
+    if (creating) for (var z = 0; z < width; z++) values[z] = '';
+
+    for (var i = 0; i < COLS.houses.length; i++) {
+      var col = COLS.houses[i];
+      if (col === 'key') { values[idx.key] = key; continue; }
+      if (!(col in h)) continue;                       // 沒送的欄位保持原值
+      values[idx[col]] = col === 'listed' ? truthyIn_(h[col])
+        : String(h[col] === null || h[col] === undefined ? '' : h[col]);
+    }
+
+    var target = creating ? lastIdRow_(sh) + 1 : row;
+    ensureRows_(sh, target + 1);
+    sh.getRange(target, 1, 1, width).setValues([values]);
+    SpreadsheetApp.flush();
+
+    var back = sh.getRange(target, 1, 1, width).getValues()[0];
+    if (String(back[idx.key]) !== key) {
+      return { ok: false, err: 'write-failed', detail: '寫入第 ' + target + ' 列後讀回的代碼是「' + back[idx.key] + '」' };
+    }
+
+    audit_('saveHouse', true, (creating ? '新增品牌 ' : '更新品牌 ') + key + '（第 ' + target + ' 列）');
+    return { ok: true, key: key, row: target, created: creating };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+/**
+ * 刪除一個品牌。
+ *
+ * 🔴 還有商品掛著就不刪。品牌是硬刪（houses 沒有 deleted 欄），刪掉之後
+ *    那些商品的 house 欄會指向一個不存在的代碼 —— 而 validateProduct_
+ *    會從此擋下每一次儲存，錯誤訊息說「品牌不存在」，但沒有人記得
+ *    是哪一步刪的。要停掉一個品牌應該關掉 listed，那是可逆的。
+ */
+function opDeleteHouse_(b) {
+  var key = String(b.key || '').trim();
+  if (!key) return { ok: false, err: 'no-key' };
+
+  var lock = LockService.getScriptLock();
+  try { lock.waitLock(20000); } catch (e) { return { ok: false, err: 'busy' }; }
+
+  try {
+    var ss = openBook_();
+    var sh = ss.getSheetByName('houses');
+    if (!sh) return { ok: false, err: 'no-sheet' };
+
+    var ph = ss.getSheetByName('products');
+    if (!ph) return { ok: false, err: 'no-sheet' };
+    var pidx = headIndex_(ph);
+    var plast = lastIdRow_(ph);
+    var used = 0;
+    if (plast >= 2) {
+      var prows = ph.getRange(2, 1, plast - 1, ph.getLastColumn()).getValues();
+      for (var i = 0; i < prows.length; i++) {
+        if (truthyIn_(prows[i][pidx.deleted])) continue;
+        if (String(prows[i][pidx.house]).trim() === key) used++;
+      }
+    }
+    if (used) {
+      return { ok: false, err: 'house-in-use',
+               detail: '還有 ' + used + ' 件商品掛著這個品牌。要停掉它請改成不顯示在前台（那是可逆的），' +
+                       '或先把那些商品改成不掛品牌。' };
+    }
+
+    var row = rowOfId_(sh, key);
+    if (!row) return { ok: true, key: key, found: false };
+    sh.deleteRow(row);
+    SpreadsheetApp.flush();
+
+    audit_('deleteHouse', true, '刪除品牌 ' + key + '（原第 ' + row + ' 列）');
+    return { ok: true, key: key, found: true };
+  } finally {
+    lock.releaseLock();
+  }
 }
 
 /* ══ 發布：代打 GitHub API ═════════════════════════════════════════ */

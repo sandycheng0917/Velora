@@ -64,7 +64,12 @@ var COLS = {
    * 以 + - = 開頭的儲存格當公式解析，產生 #ERROR! 或直接改寫內容。
    * 前綴是兩個字元的防呆，產生器 slice(2) 剝掉。
    */
-  images: ['key', 'chunk', 'total', 'mime', 'alpha', 'sha256', 'bytes', 'data'],
+  images: ['key', 'chunk', 'total', 'mime', 'alpha', 'sha256', 'bytes', 'data',
+           // 96px 的縮圖，整張塞在第 0 格那一列（其餘 chunk 列留白）。
+           // 後台清單靠它一次把整頁縮圖畫出來，不必逐張打 op:'image' ——
+           // 本機開發與「剛上傳還沒發布」這兩種情況本來就沒有公開網址可指。
+           // 一張約 1.5KB，23 張連同索引一起回也才 40KB。
+           'thumb'],
 
   /**
    * 品牌。listed 是**整個品牌的開關** —— 取消勾選，這個品牌的所有商品
@@ -136,6 +141,31 @@ var SEED_HOUSES = [
 ];
 
 /* ── 主流程 ────────────────────────────────────────────────────────── */
+
+/**
+ * 只補 images 分頁的 thumb 欄。
+ *
+ * setupSheets() 也會補（writeHeader_ 是冪等的），但那支還會重灌種子、
+ * 重設驗證與保護 —— 資料已經在跑的時候，動作愈小愈好。
+ *
+ * 補完欄位之後，既有的圖還是沒有縮圖：縮圖只能在瀏覽器裡產生
+ * （Apps Script 沒有影像處理），所以要到後台按一次「回填縮圖」。
+ */
+function addThumbColumn() {
+  var sh = openImages_().getSheetByName('images');
+  if (!sh) throw new Error('images 分頁不存在，請先跑 setupSheets()');
+
+  var head = sh.getRange(1, 1, 1, Math.max(sh.getLastColumn(), COLS.images.length)).getValues()[0];
+  for (var i = 0; i < head.length; i++) {
+    if (String(head[i]) === 'thumb') {
+      return say_('images 分頁已經有 thumb 欄（第 ' + (i + 1) + ' 欄），沒有動作。');
+    }
+  }
+  writeHeader_(sh, COLS.images);
+  return say_('images 分頁已補上 thumb 欄（第 ' + COLS.images.length + ' 欄）。'
+            + ' 接著到後台的商品清單按「回填縮圖」，把既有的圖各產一張。');
+}
+
 
 function setupSheets() {
   var ss = openBook_();

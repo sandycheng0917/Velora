@@ -102,6 +102,56 @@ export async function compress(file, { target = TARGET_BYTES, onProgress } = {})
   return { ...best, tries }
 }
 
+/**
+ * 後台清單那格是 40 × 52，高解析螢幕要 2 倍 —— 長邊 96px 就夠了。
+ * 再大只是把 imageIndex 的回應撐胖，畫面上看不出差別。
+ */
+export const THUMB_PX = 96
+
+/**
+ * 產生縮圖，回傳完整的 data URI。
+ *
+ * ── 為什麼要存這一份 ────────────────────────────────────────────────
+ *
+ * 後台清單原本有兩條路：前台烤好的公開網址（快），或逐張 op:'image'（慢）。
+ * 但公開網址在兩種情況下一定不存在 —— 本機開發（沒有 VITE_SITE_URL），
+ * 以及剛上傳還沒發布的圖。而那兩種正好是你最常盯著後台看的時候。
+ *
+ * 縮圖存進 Sheet 之後，imageIndex 一次請求就把整頁的圖帶回來，
+ * 不分本機或線上、不分有沒有發布。23 張連同索引約 40KB。
+ *
+ * 回傳完整的 data URI 而不是裸 base64：縮圖的格式不一定跟原圖一樣
+ * （Safari 舊版沒有 WebP 會退成 JPEG），把 mime 跟資料綁在一起，
+ * 讀的那一邊就不必猜。
+ *
+ * @param {Blob|string} source Blob，或任何 fetch 得到的來源（含 data: URI）
+ * @returns {Promise<{dataUri:string, bytes:number, width:number, height:number}>}
+ */
+export async function thumbnail(source, px = THUMB_PX) {
+  const blob = source instanceof Blob ? source : await (await fetch(source)).blob()
+  const bitmap = await createImageBitmap(blob, { imageOrientation: 'from-image' })
+
+  const scale = Math.min(1, px / Math.max(bitmap.width, bitmap.height))
+  const w = Math.max(1, Math.round(bitmap.width * scale))
+  const h = Math.max(1, Math.round(bitmap.height * scale))
+
+  const canvas = document.createElement('canvas')
+  canvas.width = w
+  canvas.height = h
+  const ctx = canvas.getContext('2d')
+  ctx.drawImage(bitmap, 0, 0, w, h)
+  bitmap.close?.()
+
+  // 跟 compress() 同一個理由：Safari < 16.4 的 toBlob('image/webp')
+  // 會靜默回退 PNG，那比 JPEG 大得多。驗過型別才算數
+  let out = await toBlob(canvas, 'image/webp', 0.72)
+  if (!out || out.type !== 'image/webp') out = await toBlob(canvas, 'image/jpeg', 0.72)
+  if (!out) throw new Error('縮圖產生失敗')
+
+  const b64 = await toBase64(out)
+  return { dataUri: `data:${out.type};base64,${b64}`, bytes: out.size, width: w, height: h }
+}
+
 /** Blob → base64（不含 data: 前綴）。大檔案用 FileReader，不要自己組字串 */
 export function toBase64(blob) {
   return new Promise((resolve, reject) => {

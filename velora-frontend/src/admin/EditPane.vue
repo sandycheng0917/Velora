@@ -5,8 +5,10 @@
  * 三語欄位並排而不是分頁籤 —— 分頁籤會讓「缺哪一格」需要點三次才知道，
  * 而缺譯在前台會自動回退中文，你在前台反而看不出來。並排就一眼看到。
  *
- * 成本欄只在這裡出現，而且要按「顯示」才查，每一次都寫進操作紀錄。
- * 它不隨商品清單一起回傳：即使令牌外洩，也拿不到整批 FOB 價。
+ * 必填只有三項：商品編號、品類、中文品名。標題帶 * 的就是這三個，
+ * 其餘全部可以留空 —— 一個什麼都要填的表單，實際結果是被填進假資料。
+ *
+ * 2026-09-07 移除成本（FOB）與 HS 碼兩個區塊。成本連後端端點一起拿掉了。
  */
 import { computed, onMounted, ref, watch } from 'vue'
 
@@ -44,10 +46,17 @@ const LANGS = [
 
 const truthy = (v) => v === true || String(v).toUpperCase() === 'TRUE'
 
+/**
+ * 商品編號的規則。跟 Api.gs 的 validateProduct_ 與 opUpload_ 是同一條 ——
+ * 影像鍵是用編號組的（`<編號>-main`），所以編號不合法時，
+ * 上傳會被 opUpload_ 以 bad-key 擋下來，而那個錯誤看起來跟編號無關。
+ */
+const ID_RE = /^[a-z0-9-]{3,40}$/
+
 function blank() {
   const o = {
     id: '', ref: '', category: props.categories[0]?.key || '', house: '',
-    hs: '', origin: 'KR', price: '', price_public: false,
+    origin: 'KR', price: '', price_public: false,
     listed: true, featured: false, order: 0,
     img_main: '', img_2: '', img_3: '',
   }
@@ -75,24 +84,6 @@ watch(
 
 const isFragrance = computed(() => form.value.category === 'fragrance')
 
-/* ── 成本 ─────────────────────────────────────────────────────── */
-
-const costShown = ref(false)
-const costData = ref(null)
-const costBusy = ref(false)
-async function showCost() {
-  if (!(await session.keepAlive())) { emit('error', '登入已失效，請重新登入。'); return }
-  costBusy.value = true
-  try {
-    costData.value = await api.cost(session.token.value, form.value.id)
-    costShown.value = true
-  } catch (e) {
-    emit('error', e.message + (e.detail ? '　' + e.detail : ''))
-  } finally {
-    costBusy.value = false
-  }
-}
-
 /* ── 圖片 ─────────────────────────────────────────────────────── */
 
 const SLOTS = [
@@ -100,6 +91,8 @@ const SLOTS = [
   { field: 'img_2', label: '副圖一' },
   { field: 'img_3', label: '副圖二' },
 ]
+/** 哪些欄位沒過檢查。給輸入框標粗底線用，key 是欄名 */
+const bad = ref({})
 const preview = ref({})       // field → objectURL 或 data URI
 const meta = ref({})          // field → 壓縮結果文字
 const upBusy = ref('')
@@ -175,7 +168,22 @@ async function pickFile(field, ev) {
   ev.target.value = ''
   if (!file) return
   if (!(await session.keepAlive())) { emit('error', '登入已失效，請重新登入。'); return }
-  if (!form.value.id) { emit('error', '先填好商品編號再上傳圖片 —— 影像鍵是用它組的。'); return }
+
+  /*
+   * 影像鍵是 `<編號>-main`，所以編號不合法時上傳一定失敗。
+   *
+   * 在這裡先擋，是因為伺服器那邊回的是 bad-key —— 訊息裡沒有「編號」
+   * 兩個字，看到的人不會想到要去改上面那一格。尾端多一個空白就會中，
+   * 而空白在畫面上完全看不出來，所以順手 trim 回去。
+   */
+  const id = String(form.value.id || '').trim()
+  if (!id) { emit('error', '先填好商品編號再上傳圖片 —— 影像鍵是用它組的。'); bad.value = { ...bad.value, id: true }; return }
+  if (!ID_RE.test(id)) {
+    emit('error', `商品編號「${id}」不能拿來組影像鍵：只接受 3–40 個小寫英數與連字號（不能有大寫、空白或底線）。先把編號改好再上傳。`)
+    bad.value = { ...bad.value, id: true }
+    return
+  }
+  form.value.id = id
 
   upBusy.value = field
   meta.value = { ...meta.value, [field]: '壓縮中…' }
@@ -188,13 +196,17 @@ async function pickFile(field, ev) {
       },
     })
     const b64 = await img.toBase64(r.blob)
-    const key = `${form.value.id}-${field.replace('img_', '')}`
+    // 順便產一張 96px 縮圖跟著存進去。清單頁靠它一次把整頁畫完，
+    // 不必等公開網址（剛上傳時本來就還沒有）或逐張打 API
+    const t = await img.thumbnail(r.blob)
+    const key = `${id}-${field.replace('img_', '')}`
     await api.putImage(session.token.value, {
       key,
       mime: r.type,
       alpha: await img.hasAlpha(r.blob),
       sha256: await img.sha256(r.blob),
       bytes: r.blob.size,
+      thumb: t.dataUri,
       chunks: img.chunk(b64),
     })
     form.value[field] = key
@@ -213,8 +225,49 @@ async function pickFile(field, ev) {
 const saving = ref(false)
 const fieldErrs = ref([])
 
+/**
+ * 送出前先在這裡驗一次。
+ *
+ * 伺服器仍然會驗（validateProduct_），這裡不是取代它 —— 前端的驗證
+ * 任何人都繞得過，真正的關卡在後端。這一份的用途只有一個：
+ * 讓「哪一格要修」不必等一趟來回才知道，而且能指到那一格上。
+ *
+ * 規則刻意跟 Api.gs 的 validateProduct_ 一一對應。兩邊不一致的話，
+ * 會出現「前端說可以、伺服器說不行」，那比沒有前端驗證更糟。
+ */
+function validate() {
+  const f = form.value
+  const errs = []
+  const marks = {}
+  const num = (v) => String(v).trim() !== '' && isNaN(Number(v))
+
+  const id = String(f.id || '').trim()
+  if (!ID_RE.test(id)) {
+    errs.push('商品編號要 3–40 個小寫英數或連字號' + (id ? `，收到「${id}」` : '（必填）'))
+    marks.id = true
+  }
+  if (!String(f.name_zh || '').trim()) {
+    errs.push('中文品名不能空白 —— 前台缺其他語言會回退中文，中文缺了就沒有東西可退')
+    marks.name_zh = true
+  }
+  if (!f.category) {
+    errs.push('要選一個品類')
+    marks.category = true
+  }
+  if (num(f.price)) { errs.push(`售價必須是數字，收到「${f.price}」`); marks.price = true }
+  if (f.price_public && String(f.price).trim() === '') {
+    errs.push('開了「在前台顯示價格」就必須填售價')
+    marks.price = true
+  }
+  if (num(f.order)) { errs.push('排序必須是數字'); marks.order = true }
+
+  bad.value = marks
+  return errs
+}
+
 async function save() {
-  fieldErrs.value = []
+  fieldErrs.value = validate()
+  if (fieldErrs.value.length) return
   if (!(await session.keepAlive())) { emit('error', '登入已失效，請重新登入。'); return }
   saving.value = true
   try {
@@ -279,26 +332,31 @@ async function remove() {
     <div class="cols">
       <!-- 左欄 -->
       <div class="colL">
-        <div class="sec"><b>基本</b><hr /></div>
+        <div class="sec"><b>基本　標 <em class="req">*</em> 的是必填，其餘都可以留空</b><hr /></div>
         <div class="tri" style="padding-bottom: 24px">
           <div>
-            <label>商品編號</label>
-            <input v-if="creating" v-model="form.id" type="text" placeholder="frg-ylang" />
+            <label>商品編號 <em class="req">*</em></label>
+            <input v-if="creating" v-model.trim="form.id" type="text" placeholder="frg-ylang" :class="{ bad: bad.id }" />
             <div v-else class="ro">
               <svg width="11" height="11" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
                 <rect x="4" y="9" width="12" height="8" /><path d="M7 9V6a3 3 0 0 1 6 0v3" />
               </svg>
               {{ form.id }}
             </div>
-            <p class="hint">{{ creating ? '小寫英數與連字號，3–40 字。建立後不可更改。' : '建立後不可更改' }}</p>
+            <p class="hint">
+              {{ creating
+                ? '小寫英數與連字號，3–40 字。圖片的影像鍵也是用它組的，所以不能有大寫或空白。建立後不可更改。'
+                : '建立後不可更改' }}
+            </p>
           </div>
           <div>
-            <label>索引碼</label>
+            <label>索引碼（選填）</label>
             <input v-model="form.ref" type="text" placeholder="VL · FRG · 001" />
           </div>
           <div>
-            <label>品類</label>
-            <select v-model="form.category">
+            <label>品類 <em class="req">*</em></label>
+            <select v-model="form.category" :class="{ bad: bad.category }">
+              <option value="">（請選擇）</option>
               <option v-for="c in categories" :key="c.key" :value="c.key">{{ c.name_zh }}</option>
             </select>
           </div>
@@ -312,24 +370,24 @@ async function remove() {
               <option v-for="h in houses" :key="h.key" :value="h.key">{{ h.name }}</option>
             </select>
           </div>
-          <div>
-            <!-- 報關用的商品分類號。不填不影響網站，前台也不顯示 -->
-            <label title="海關的商品分類號碼，報關與計稅用。不填不影響網站。">HS 碼（報關用，選填）</label>
-            <input v-model="form.hs" type="text" placeholder="3307.49.0000" />
-          </div>
-          <div><label>產地</label><input v-model="form.origin" type="text" placeholder="KR" /></div>
+          <div><label>產地（選填）</label><input v-model="form.origin" type="text" placeholder="KR" /></div>
+          <div />
         </div>
 
         <div class="sec" style="padding-top: 16px">
-          <b>文字內容　三語都要填，缺的語言前台會自動回退中文</b><hr />
+          <b>文字內容　只有中文品名必填，缺的語言前台會自動回退中文</b><hr />
         </div>
 
         <div v-for="f in TEXT_FIELDS" :key="f.key" class="fld">
-          <label>{{ f.label }}</label>
+          <label>{{ f.label }}<template v-if="f.key === 'name'"> <em class="req">*</em></template></label>
           <div class="tri">
             <div v-for="l in LANGS" :key="l.k" :class="{ ko: l.k === 'ko' }">
-              <label>{{ l.label }}</label>
-              <textarea v-model="form[`${f.key}_${l.k}`]" :rows="f.rows" />
+              <label>{{ l.label }}<template v-if="f.key === 'name' && l.k === 'zh'"> <em class="req">*</em></template></label>
+              <textarea
+                v-model="form[`${f.key}_${l.k}`]"
+                :rows="f.rows"
+                :class="{ bad: f.key === 'name' && l.k === 'zh' && bad.name_zh }"
+              />
             </div>
           </div>
         </div>
@@ -402,39 +460,53 @@ async function remove() {
         </p>
         <div class="sw" style="padding-top: 6px">
           <span style="font-size: 12px; color: var(--ink-faint)">高畫質（放寬到 100 KB）</span>
-          <button type="button" :class="{ on: hq }" @click="hq = !hq" />
+          <span class="tog" :class="{ on: hq }">
+            <em>{{ hq ? '開' : '關' }}</em>
+            <button type="button" :class="{ on: hq }" :aria-pressed="hq" @click="hq = !hq" />
+          </span>
         </div>
 
         <div class="sec" style="padding-top: 34px"><b>上架設定</b><hr /></div>
-        <div class="sw"><span>顯示在前台</span><button type="button" :class="{ on: form.listed }" @click="form.listed = !form.listed" /></div>
-        <div class="sw"><span>首頁精選</span><button type="button" :class="{ on: form.featured }" @click="form.featured = !form.featured" /></div>
+        <div class="sw">
+          <span>顯示在前台</span>
+          <span class="tog" :class="{ on: form.listed }">
+            <em>{{ form.listed ? '開' : '關' }}</em>
+            <button type="button" :class="{ on: form.listed }" :aria-pressed="form.listed" @click="form.listed = !form.listed" />
+          </span>
+        </div>
+        <div class="sw">
+          <span>首頁精選</span>
+          <span class="tog" :class="{ on: form.featured }">
+            <em>{{ form.featured ? '開' : '關' }}</em>
+            <button type="button" :class="{ on: form.featured }" :aria-pressed="form.featured" @click="form.featured = !form.featured" />
+          </span>
+        </div>
         <p class="hint" style="padding-bottom: 12px">精選會出現在兩個前台的首頁區塊。</p>
-        <div class="sw"><span>排序</span><input v-model="form.order" type="text" style="width: 70px; text-align: right" /></div>
+        <div class="sw">
+          <span>排序（選填）</span>
+          <input v-model="form.order" type="text" style="width: 70px; text-align: right" :class="{ bad: bad.order }" />
+        </div>
 
         <div class="sec" style="padding-top: 34px"><b>價格</b><hr /></div>
-        <div class="sw"><span>售價</span><input v-model="form.price" type="text" style="width: 120px; text-align: right" placeholder="1280" /></div>
+        <div class="sw">
+          <span>售價<template v-if="form.price_public"> <em class="req">*</em></template><template v-else>（選填）</template></span>
+          <input
+            v-model="form.price"
+            type="text"
+            style="width: 120px; text-align: right"
+            placeholder="1280"
+            :class="{ bad: bad.price }"
+          />
+        </div>
         <div class="sw" style="padding-top: 12px">
           <span>在前台顯示價格</span>
-          <button type="button" :class="{ on: form.price_public }" @click="form.price_public = !form.price_public" />
+          <span class="tog" :class="{ on: form.price_public }">
+            <em>{{ form.price_public ? '開' : '關' }}</em>
+            <button type="button" :class="{ on: form.price_public }" :aria-pressed="form.price_public" @click="form.price_public = !form.price_public" />
+          </span>
         </div>
         <p class="hint">關掉時，價格不會被寫進前台檔案 —— 不是藏起來，是根本不輸出。</p>
 
-        <div class="sec" style="padding-top: 34px"><b>成本（FOB）</b><hr /></div>
-        <div class="sw">
-          <span>出口單價</span>
-          <span style="display: flex; align-items: center; gap: 14px">
-            <span class="cell mono">
-              {{ costShown ? (costData?.found ? `${costData.cost} ${costData.ccy || ''}` : '沒有這件的成本資料') : '••••••' }}
-            </span>
-            <button v-if="!costShown" class="ghost" :disabled="costBusy || creating" @click="showCost">
-              {{ costBusy ? '查詢中…' : '顯示' }}
-            </button>
-          </span>
-        </div>
-        <p v-if="costShown && costData?.found && costData.note" class="hint">{{ costData.note }}</p>
-        <div class="warn" style="margin-top: 14px">
-          成本存在另一張分頁，前台的建置流程讀不到它。按「顯示」會寫進操作紀錄。
-        </div>
       </div>
     </div>
   </div>

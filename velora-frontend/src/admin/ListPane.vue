@@ -12,6 +12,7 @@
 import { computed, ref, watch } from 'vue'
 
 import * as api from './api.js'
+import * as img from './image.js'
 import { publicUrl } from './imgurl.js'
 import * as session from './session.js'
 
@@ -84,6 +85,56 @@ const fast = (key) => publicUrl(key, props.imgIndex[key])
 /** 公開網址載不到的鍵。標記之後改走 API */
 const fastFailed = ref({})
 
+/**
+ * 縮圖：存在 Sheet 裡的 96px data URI，跟著 imageIndex 一次全部回來。
+ *
+ * 這是三條路裡最快的一條，而且是唯一一條「不分本機或線上、不分有沒有
+ * 發布」都成立的 —— 公開網址在本機開發與剛上傳時本來就不存在。
+ * 回填過的圖走這裡，沒回填的自動落到公開網址、再落到逐張 API。
+ */
+const thumbOf = (key) => (props.imgIndex[key] || {}).thumb || ''
+
+/** 還沒有縮圖的主圖鍵。有的話才顯示「回填縮圖」那個入口 */
+const needThumb = computed(() => {
+  const seen = new Set()
+  for (const p of props.products) {
+    const k = p.img_main
+    if (k && props.imgIndex[k] && !props.imgIndex[k].thumb) seen.add(k)
+  }
+  return [...seen]
+})
+
+const backfill = ref('')
+async function doBackfill() {
+  if (!needThumb.value.length || backfill.value) return
+  if (!(await session.keepAlive())) { backfill.value = ''; return }
+
+  const keys = needThumb.value
+  let done = 0
+  let failed = 0
+  for (const key of keys) {
+    backfill.value = `回填縮圖 ${done + 1} / ${keys.length}…`
+    try {
+      // 原圖只能從 Sheet 拿。公開網址雖然也有，但那要 CORS 允許
+      // 才能畫進 canvas，而 GitHub Pages 給不給是不保證的
+      const r = await api.getImage(session.token.value, key)
+      if (!r.found) { failed++; continue }
+      const t = await img.thumbnail(`data:${r.mime};base64,${r.data}`)
+      await api.saveThumb(session.token.value, key, t.dataUri)
+      // 立刻畫上去，不必等重新載入索引
+      thumbs.value = { ...thumbs.value, [key]: t.dataUri }
+      done++
+    } catch {
+      failed++
+    }
+  }
+  backfill.value = ''
+  emit('refresh-index')
+  emit('said', failed
+    ? `回填了 ${done} 張縮圖，${failed} 張失敗。失敗的仍走原本的路徑，不影響畫面。`
+    : `回填了 ${done} 張縮圖。之後開清單就不用等圖了。`)
+}
+
 function onFastError(key) {
   fastFailed.value = { ...fastFailed.value, [key]: true }
   if (!thumbs.value[key] && !missingInSheet.value[key] && !queue.includes(key)) {
@@ -91,7 +142,7 @@ function onFastError(key) {
     pump()
   }
 }
-defineEmits(['open'])
+const emit = defineEmits(['open', 'refresh-index', 'said'])
 
 const cat = ref('')
 const q = ref('')
@@ -129,6 +180,7 @@ watch(
     for (const p of rows) {
       const k = p.img_main
       if (!k) continue
+      if (thumbOf(k)) continue                       // Sheet 裡就有縮圖，最快
       // 有公開網址就讓 <img> 自己去載，不必排隊走 API
       if (fast(k) && !fastFailed.value[k]) continue
       if (!thumbs.value[k] && !missingInSheet.value[k] && !queue.includes(k)) queue.push(k)
@@ -144,6 +196,30 @@ const to = computed(() => Math.min((page.value + 1) * per.value, filtered.value.
 function pick(key) {
   cat.value = key
   page.value = 0
+}
+
+/**
+ * 縮圖來源，由快到慢：
+ *   1. Sheet 裡的 96px 縮圖 —— 跟索引一起回來的，本機／線上／未發布都有
+ *   2. 前台烤好的公開網址 —— 已發布的圖，瀏覽器會快取
+ *   3. 逐張 op:'image' 拉回來的 data URI —— 最後的退路
+ */
+function src(p) {
+  const k = p.img_main
+  if (!k) return ''
+  const t = thumbOf(k)
+  if (t) return t
+  if (fast(k) && !fastFailed.value[k]) return fast(k)
+  return thumbs.value[k] || ''
+}
+
+/** 空字串代表有圖。其餘三種要分得出來，見下面的模板註解 */
+function plateState(p) {
+  const k = p.img_main
+  if (!k) return 'pending'
+  if (src(p)) return ''
+  if (missingInSheet.value[k]) return 'notyet'
+  return 'loading'
 }
 
 
@@ -221,18 +297,7 @@ const priceText = (p) =>
         -->
         <span
           class="plate"
-          :class="{
-            pending: !p.img_main,
-            notyet:
-              p.img_main &&
-              missingInSheet[p.img_main] &&
-              !(fast(p.img_main) && !fastFailed[p.img_main]),
-            loading:
-              p.img_main &&
-              !thumbs[p.img_main] &&
-              !missingInSheet[p.img_main] &&
-              !(fast(p.img_main) && !fastFailed[p.img_main]),
-          }"
+          :class="plateState(p)"
           :title="
             !p.img_main
               ? '尚未指定圖片'
@@ -242,15 +307,14 @@ const priceText = (p) =>
           "
         >
           <img
-            v-if="p.img_main && fast(p.img_main) && !fastFailed[p.img_main]"
-            :src="fast(p.img_main)"
+            v-if="src(p)"
+            :src="src(p)"
             alt=""
             loading="lazy"
             @error="onFastError(p.img_main)"
           />
-          <img v-else-if="thumbs[p.img_main]" :src="thumbs[p.img_main]" alt="" />
-          <template v-else-if="!p.img_main">無圖片</template>
-          <template v-else-if="missingInSheet[p.img_main]">未上傳</template>
+          <template v-else-if="plateState(p) === 'pending'">無圖片</template>
+          <template v-else-if="plateState(p) === 'notyet'">未上傳</template>
         </span>
         <span class="nm">
           <b>{{ p.name_zh }}<em v-if="p.featured === true || String(p.featured).toUpperCase() === 'TRUE'" class="star">◆</em></b>
@@ -293,6 +357,15 @@ const priceText = (p) =>
       </span>
       <span>顯示 {{ from }}–{{ to }}，共 {{ filtered.length }} 件</span>
       <span><em class="star">◆</em> 精選，會出現在首頁</span>
+      <!--
+        沒有縮圖的圖仍然顯示得出來（退回公開網址或逐張 API），只是慢。
+        所以這是一個「可以不按」的入口，不是錯誤提示。
+      -->
+      <span v-if="needThumb.length || backfill">
+        <button class="link" :disabled="!!backfill" @click="doBackfill">
+          {{ backfill || `回填縮圖（${needThumb.length} 張）` }}
+        </button>
+      </span>
       <span class="grow" />
       <button class="link" :disabled="page === 0" :style="{ color: page === 0 ? 'var(--line-strong)' : '' }" @click="page--">
         上一頁

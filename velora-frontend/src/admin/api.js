@@ -54,10 +54,22 @@ const MESSAGES = {
   invalid: '有欄位沒有通過檢查。',
   'not-found': '找不到這件商品。',
   'write-failed': '寫入後讀回來對不上，資料可能沒存進去。請再試一次。',
-  'audit-failed': '寫不進操作紀錄，因此不顯示成本。',
   'not-configured': 'GitHub 設定不完整，無法發布。',
   github: 'GitHub 拒絕了這個請求。',
   incomplete: '影像資料不完整，可能上傳到一半中斷了。',
+  // 這幾個以前沒有對應的中文，畫面上只會顯示「未預期的錯誤：bad-key」。
+  // 一個看不懂的錯誤碼等於沒有錯誤訊息 —— 使用者不知道要去改哪裡
+  'bad-key': '影像鍵不合法。它是用商品編號組的，編號只能是小寫英數與連字號。',
+  'bad-product': '送出的商品資料格式不對。',
+  'no-key': '沒有指定影像鍵。',
+  'no-id': '沒有指定商品編號。',
+  'no-data': '沒有收到影像資料。',
+  'no-sheet': '找不到對應的試算表分頁，後端可能還沒初始化。',
+  'chunk-too-big': '單一區塊超過 Sheet 一格的字元上限。',
+  'no-thumb-col': 'images 分頁還沒有 thumb 欄。請在 Apps Script 編輯器執行 addThumbColumn()。',
+  'bad-house': '品牌資料的格式不對。',
+  'too-many': '品牌數量已達上限。',
+  'house-in-use': '還有商品掛著這個品牌，不能刪。',
   server: '伺服器發生未預期的錯誤。',
 }
 
@@ -117,10 +129,18 @@ export const renew = (token) => call('renew', { token })
 export const list = (token) => call('list', { token })
 export const save = (token, product) => call('save', { token, product })
 export const remove = (token, id, restore = false) => call('delete', { token, id, restore })
-export const cost = (token, id) => call('cost', { token, id })
 export const getImage = (token, key) => call('image', { token, key }, { timeout: 90000 })
-/** 只回中繼資料（鍵、sha、mime、alpha、bytes），不回位元組。23 張約 2KB */
+/**
+ * 中繼資料（鍵、sha、mime、alpha、bytes）加 96px 縮圖，不回原圖位元組。
+ * 23 張連同縮圖約 40KB —— 後台清單靠這一次請求就把整頁的圖畫完。
+ */
 export const imageIndex = (token) => call('imageIndex', { token })
+/** 回填既有影像的縮圖。只寫 thumb 欄，不動位元組 */
+export const saveThumb = (token, key, thumb) => call('saveThumb', { token, key, thumb })
 export const putImage = (token, payload) => call('upload', { token, ...payload }, { timeout: 120000 })
 export const publish = (token) => call('publish', { token })
 export const status = (token) => call('status', { token })
+
+/* 品牌。上限四家由伺服器擋，前端只是先攔一次讓錯誤來得早一點 */
+export const saveHouse = (token, house) => call('saveHouse', { token, house })
+export const deleteHouse = (token, key) => call('deleteHouse', { token, key })

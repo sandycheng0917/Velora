@@ -796,13 +796,33 @@ html[lang='ko'] .card h3 {
 
   .grid { column-gap: 36px; }   /* 欄數從基礎樣式繼承，這裡只放寬欄距 */
   .rules { grid-template-columns: repeat(3, 1fr); gap: 36px 32px; }
+
+  /*
+   * 品牌區的欄數跟著實際家數走。家數由 tools/inject-velora2.mjs 寫進
+   * .houses 的 data-count。
+   *
+   * 沒有這幾條的話欄數是寫死的三欄 —— 而 Sheet 上目前只有兩家，
+   * 第三格就是一塊空的。空格看起來不是「留位子給第三家」，
+   * 是漏掉了東西。
+   *
+   * 四家在這個寬度排 2×2：一列四格的字太窄，要到 1040 以上才讀得完。
+   * 沒有 data-count（例如還沒跑過注入器的原始檔）就沿用三欄。
+   */
   .houses { grid-template-columns: repeat(3, 1fr); }
+  /* 只剩一家時不要撐滿整列 —— 內文本來就有 38ch 的上限，
+     滿版的框加上靠左的字看起來像是右半邊掉了東西 */
+  .houses[data-count='1'] { grid-template-columns: 1fr; max-width: 560px; }
+  .houses[data-count='2'],
+  .houses[data-count='4'] { grid-template-columns: repeat(2, 1fr); }
 
   .cta { padding-top: 96px; padding-bottom: 104px; }
 }
 
 /* ════ 桌機：書脊變成真正的書口，位置牌立起來 ═══════════════ */
 @media (min-width: 1040px) {
+  /* 四家到這個寬度才排得下一列四格 */
+  .houses[data-count='4'] { grid-template-columns: repeat(4, 1fr); }
+
   /* 桌機導覽在同一列，頁首回到固定高度，錨點的補償也跟著縮回來 */
   .hdr { flex-wrap: nowrap; height: var(--hdr-h); }
   html { scroll-padding-top: calc(var(--hdr-h) + 16px); }

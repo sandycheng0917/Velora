@@ -4,7 +4,7 @@
  * 由 tools/build-catalog.mjs 從 Google Sheet 產生，請勿手動編輯 ——
  * 下次建置就會被覆蓋。要改內容請改 Sheet。
  *
- * 產生時間：2026-09-06T17:23:10.911Z
+ * 產生時間：2026-09-07T06:28:16.509Z
  */
 
 export default [
@@ -13,7 +13,6 @@ export default [
     "ref": "VL · FRG · 001",
     "category": "fragrance",
     "house": "vuca",
-    "hs": "3307.49.0000",
     "origin": "KR",
     "listed": true,
     "featured": true,
@@ -54,7 +53,6 @@ export default [
     "ref": "VL · FRG · 002",
     "category": "fragrance",
     "house": "vuca",
-    "hs": "3307.49.0000",
     "origin": "KR",
     "listed": true,
     "featured": false,
@@ -95,7 +93,6 @@ export default [
     "ref": "VL · FRG · 003",
     "category": "fragrance",
     "house": "vuca",
-    "hs": "3307.49.0000",
     "origin": "KR",
     "listed": true,
     "featured": false,
@@ -136,7 +133,6 @@ export default [
     "ref": "VL · FRG · 004",
     "category": "fragrance",
     "house": "vuca",
-    "hs": "3307.49.0000",
     "origin": "KR",
     "listed": true,
     "featured": false,
@@ -177,7 +173,6 @@ export default [
     "ref": "VL · FRG · 005",
     "category": "fragrance",
     "house": "vuca",
-    "hs": "3307.49.0000",
     "origin": "KR",
     "listed": true,
     "featured": false,
@@ -218,7 +213,6 @@ export default [
     "ref": "VL · SLK · 001",
     "category": "scarf",
     "house": "saintmari",
-    "hs": "6214.10.0000",
     "origin": "KR",
     "listed": true,
     "featured": true,
@@ -257,7 +251,6 @@ export default [
     "ref": "VL · SLK · 002",
     "category": "scarf",
     "house": "saintmari",
-    "hs": "6214.10.0000",
     "origin": "KR",
     "listed": true,
     "featured": false,
@@ -296,7 +289,6 @@ export default [
     "ref": "VL · SLK · 003",
     "category": "scarf",
     "house": "saintmari",
-    "hs": "6214.10.0000",
     "origin": "KR",
     "listed": true,
     "featured": false,
@@ -335,7 +327,6 @@ export default [
     "ref": "VL · SCR · 001",
     "category": "jewelry",
     "house": "saintmari",
-    "hs": "7118.90.9000",
     "origin": "KR",
     "listed": true,
     "featured": true,
@@ -374,7 +365,6 @@ export default [
     "ref": "VL · EAR · 001",
     "category": "jewelry",
     "house": "saintmari",
-    "hs": "7113.11.0000",
     "origin": "KR",
     "listed": true,
     "featured": false,
@@ -413,7 +403,6 @@ export default [
     "ref": "VL · NEC · 001",
     "category": "jewelry",
     "house": "saintmari",
-    "hs": "7113.11.0000",
     "origin": "KR",
     "listed": true,
     "featured": false,
@@ -452,7 +441,6 @@ export default [
     "ref": "VL · RNG · 001",
     "category": "jewelry",
     "house": "saintmari",
-    "hs": "7113.11.0000",
     "origin": "KR",
     "listed": true,
     "featured": false,
@@ -491,7 +479,6 @@ export default [
     "ref": "VL · BRC · 001",
     "category": "jewelry",
     "house": "saintmari",
-    "hs": "7113.11.0000",
     "origin": "KR",
     "listed": true,
     "featured": false,

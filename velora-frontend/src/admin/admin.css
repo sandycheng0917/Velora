@@ -115,6 +115,16 @@
   overflow-y: auto;
   padding: 40px 44px 40px;
 }
+/*
+ * 內容上限。
+ *
+ * 沒有這條的話，版單的 1fr 品名欄在 1920 上會撐出約 900px 空白，
+ * 品名與右邊的品類／索引碼／價格／狀態變成兩座島，眼睛要橫跨整頁
+ * 才對得起同一列。超寬螢幕右側留白是刻意換來的。
+ */
+.vadmin .main > * {
+  max-width: 1180px;
+}
 .vadmin h1 {
   margin: 0;
   font-family: var(--f-cjk);
@@ -196,10 +206,13 @@
 
 /* ── 篩選列 ───────────────────────────────────────────────────── */
 
+/* 🔴 flex-wrap 不能拿掉：沒有它，1100px 以下「絲巾扣」會被壓成直排三行，
+   而 .filter 是 space-between、搜尋框又固定 250px，擠的永遠是頁籤這邊 */
 .vadmin .tabs {
   display: flex;
   align-items: center;
-  gap: 26px;
+  flex-wrap: wrap;
+  gap: 12px 26px;
   padding: 26px 0 14px;
 }
 .vadmin .tabs button {
@@ -214,6 +227,7 @@
   font-family: var(--f-cjk);
   font-size: 15px;
   letter-spacing: 0.13em;
+  white-space: nowrap;
   cursor: pointer;
 }
 .vadmin .tabs button.on {
@@ -230,12 +244,16 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 0 24px;
 }
+/* 可縮的 250px，不是寫死的 250px —— 讓搜尋框先讓步，頁籤才不會被壓爛 */
 .vadmin .search {
   display: flex;
   align-items: center;
   gap: 9px;
-  width: 250px;
+  flex: 0 1 250px;
+  min-width: 150px;
   padding-bottom: 8px;
   border-bottom: 1px solid var(--line-strong);
 }
@@ -340,6 +358,8 @@
   letter-spacing: 0.05em;
   color: var(--gold-deep);
 }
+/* grid item 的 min-width 預設是 auto，不歸零的話底下的截斷全部無效 */
+.vadmin .nm { min-width: 0; }
 .vadmin .nm b {
   display: block;
   font-family: var(--f-cjk);
@@ -347,18 +367,34 @@
   font-weight: 200;
   letter-spacing: 0.06em;
   color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .vadmin .nm .alt {
   display: flex;
   align-items: center;
   gap: 9px;
   margin-top: 5px;
+  min-width: 0;
   font-size: 13px;
   color: var(--ink-faint);
 }
+/*
+ * 英名與韓名各自截斷。
+ *
+ * 不截的話 flex item 的 min-width: auto 會讓它們硬撐到 min-content，
+ * 1280 左右副行就折成兩行 —— 13 列裡有 8 列高度不一樣，那就是跑版。
+ * 分隔線與「缺英文」不參與收縮，它們是必須看得見的訊號。
+ */
+.vadmin .nm .alt > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .vadmin .nm .alt .en { font-family: var(--f-disp); letter-spacing: 0.12em; }
-.vadmin .nm .alt i { width: 1px; height: 10px; background: var(--line-strong); }
-.vadmin .nm .alt .miss { color: var(--gold-deep); }
+.vadmin .nm .alt i { flex: none; width: 1px; height: 10px; background: var(--line-strong); }
+.vadmin .nm .alt .miss { flex: none; color: var(--gold-deep); }
 .vadmin .star { font-size: 11px; color: var(--gold-deep); margin-left: 8px; }
 .vadmin .cell { font-size: 14px; color: var(--ink-soft); }
 .vadmin .cell.mono {
@@ -377,6 +413,55 @@
 .vadmin .st.off i { background: var(--line-strong); }
 .vadmin .st.off { color: var(--ink-faint); }
 .vadmin .chev { color: var(--line-strong); }
+
+/*
+ * 品牌列。
+ *
+ * 不沿用商品版單的 .row —— 那是九欄，最後一欄只有 16px（放 chevron 的），
+ * 塞不下「編輯／刪除」兩個按鈕；而且品牌沒有縮圖、沒有索引碼、沒有價格，
+ * 硬套會變成一排永遠空著的格子。欄位不同就該有自己的格線。
+ */
+.vadmin .hrow {
+  display: grid;
+  grid-template-columns: 104px 1px minmax(0, 1fr) 80px 96px 116px;
+  align-items: center;
+  gap: 0 20px;
+  border-bottom: 1px solid var(--line);
+  min-height: 76px;
+  padding-right: 12px;
+  text-align: left;
+}
+.vadmin .hrow.hd {
+  min-height: 34px;
+  border-bottom-color: var(--line-strong);
+}
+.vadmin .hrow.hd span {
+  font-family: var(--f-mono);
+  font-size: 12px;
+  letter-spacing: 0.2em;
+  color: var(--ink-faint);
+}
+.vadmin .hrow .n {
+  font-family: var(--f-mono);
+  font-size: 13.5px;
+  letter-spacing: 0.06em;
+  color: var(--ink-faint);
+  padding-left: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.vadmin .hrow .rule { width: 1px; height: 100%; background: var(--gold); }
+/* 韓文名與國別是短標籤，不參與收縮 —— 讓長度不定的簡介去讓步。
+   不加這條的話 flex 會按比例縮，結果是「부…｜韓…｜簡介…」三個都被截 */
+.vadmin .hrow .alt > span:not(:last-child) { flex: none; }
+.vadmin .hrow .acts { display: flex; gap: 16px; justify-content: flex-end; }
+.vadmin .hrow .acts button:disabled { color: var(--line-strong); cursor: default; }
+
+@media (max-width: 1100px) {
+  .vadmin .hrow { grid-template-columns: 88px 1px minmax(0, 1fr) 96px 100px; }
+  .vadmin .hrow .hideNarrow { display: none; }
+}
 
 .vadmin .sheetfoot {
   display: flex;
@@ -457,6 +542,25 @@
 .vadmin input:focus,
 .vadmin textarea:focus,
 .vadmin select:focus { border-bottom-color: var(--gold-deep); }
+
+/*
+ * 必填記號與沒過檢查的欄位。
+ *
+ * 星號用 gold-deep（4.6:1）而不是 --gold —— 一個看不清楚的必填記號
+ * 等於沒有標。沒過的欄位加粗底線而不是換成紅色：整份後台沒有第二個
+ * 紅色，臨時引進一個只為了報錯，會跟金色的語彙打架。
+ */
+.vadmin .req {
+  font-family: var(--f-mono);
+  font-style: normal;
+  color: var(--gold-deep);
+}
+.vadmin input.bad,
+.vadmin textarea.bad,
+.vadmin select.bad {
+  border-bottom-width: 2px;
+  border-bottom-color: var(--gold-deep);
+}
 .vadmin .ko input,
 .vadmin .ko textarea { font-family: 'Noto Sans KR', var(--f-body); word-break: keep-all; }
 .vadmin .stack > div { padding-bottom: 16px; }
@@ -484,25 +588,56 @@
   color: var(--ink-soft);
 }
 
+/*
+ * 開關。
+ *
+ * 🔴 原本是「關 #cdc2ae／開 #c5a880」，兩者對比只有 1.28:1 ——
+ * 同亮度的兩個米金色，在米色底上根本分不出哪個是開。實際回報過。
+ *
+ * 現在靠三件事分辨，不是只靠顏色：
+ *   · 形狀   關＝空心（透明軌＋髮絲描邊），開＝實心金
+ *   · 圓鈕   關＝灰鈕靠左，開＝白鈕靠右
+ *   · 文字   旁邊直接寫「開／關」，對比 6.0:1 與 6.2:1
+ * 軌道本身的空心／實心差只有 1.94:1，所以文字那條不能省。
+ */
 .vadmin .sw {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 16px;
   padding-bottom: 8px;
   font-size: 14.5px;
 }
-.vadmin .sw button {
-  width: 34px;
-  height: 18px;
+/* 開關本體與狀態字綁在一起，才不會被 space-between 拆到兩端 */
+.vadmin .tog {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   flex: none;
-  border: 0;
-  border-radius: 9px;
-  background: var(--line-strong);
+}
+.vadmin .tog em {
+  font-family: var(--f-mono);
+  font-size: 12px;
+  font-style: normal;
+  letter-spacing: 0.08em;
+  color: var(--ink-faint);
+}
+.vadmin .tog.on em { color: var(--gold-deep); }
+.vadmin .sw button {
+  width: 38px;
+  height: 20px;
+  flex: none;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  background: none;
   position: relative;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background 0.15s, border-color 0.15s;
 }
-.vadmin .sw button.on { background: var(--gold); }
+.vadmin .sw button.on {
+  background: var(--gold);
+  border-color: var(--gold-deep);
+}
 .vadmin .sw button::after {
   content: '';
   position: absolute;
@@ -511,10 +646,13 @@
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background: #fff;
-  transition: transform 0.15s;
+  background: var(--line-strong);
+  transition: transform 0.15s, background 0.15s;
 }
-.vadmin .sw button.on::after { transform: translateX(16px); }
+.vadmin .sw button.on::after {
+  transform: translateX(18px);
+  background: #fff;
+}
 
 .vadmin .big {
   width: 100%;

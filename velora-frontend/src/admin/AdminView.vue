@@ -14,6 +14,7 @@ import { computed, onMounted, ref } from 'vue'
 import * as api from './api.js'
 import './admin.css'
 import EditPane from './EditPane.vue'
+import HousePane from './HousePane.vue'
 import ListPane from './ListPane.vue'
 import * as session from './session.js'
 
@@ -79,6 +80,27 @@ async function doLogin() {
   } finally {
     busy.value = false
   }
+}
+
+/**
+ * 只重載影像索引。
+ *
+ * 回填縮圖之後要用 —— 整包 load() 會連商品、品類、發布狀態一起重抓，
+ * 而那時畫面上可能正開著清單的某一頁，全部換掉會跳位。
+ */
+async function reloadIndex() {
+  try {
+    const ix = await api.imageIndex(session.token.value)
+    imgIndex.value = Object.fromEntries((ix.images || []).map((m) => [m.key, m]))
+  } catch {
+    // 抓不到就維持舊的。縮圖那條會退回公開網址或逐張 API，不會破圖
+  }
+}
+
+/** 品牌存完或刪完都要重讀 houses —— 上限與「掛著幾件」都靠那份清單算 */
+async function afterHouseSave(msg) {
+  say(msg)
+  await load()
 }
 
 async function load() {
@@ -264,6 +286,8 @@ onMounted(async () => {
           :img-index="imgIndex"
           :is-dirty="isDirty"
           @open="openEdit"
+          @refresh-index="reloadIndex"
+          @said="(m) => say(m)"
         />
       </div>
 
@@ -283,7 +307,10 @@ onMounted(async () => {
         <header class="head">
           <div>
             <h1>品類與品牌</h1>
-            <p class="sub">品類決定前台的分區與索引碼前綴。要新增或改名請直接編輯 Google Sheet 的 categories 分頁。</p>
+            <p class="sub">
+              品類決定前台的分區與索引碼前綴，要新增或改名請直接編輯 Google Sheet 的 categories 分頁。
+              品牌可以在這一頁直接維護。
+            </p>
           </div>
         </header>
         <div style="padding-top: 30px">
@@ -307,32 +334,13 @@ onMounted(async () => {
           <p class="hint" style="padding-top: 14px">
             沒有商品的品類前台不會顯示 —— 導覽列點進去是空的，比沒有那一項更糟。
           </p>
-          <p class="hint">
-            要暫停一個代理品牌：到 Google Sheet 的 <b>houses</b> 分頁，
-            把那一列的 <b>listed</b> 取消勾選，然後回這裡按發布。
-            該品牌的所有商品、品類分區與品牌介紹都會從前台消失，資料完全保留。
-          </p>
 
-          <div class="sec" style="padding-top: 42px"><b>品牌</b><hr /></div>
-          <div style="display: flex; gap: 36px; align-items: flex-start">
-            <div
-              v-for="h in houses"
-              :key="h.key"
-              style="flex: 1; padding-left: 18px"
-              :style="{ borderLeft: '1px solid ' + (truthy(h.listed) ? 'var(--gold)' : 'var(--line-strong)') }"
-            >
-              <p style="display: flex; align-items: center; gap: 12px; margin: 0">
-                <span style="font-family: var(--f-disp); font-size: 21px; letter-spacing: 0.19em">{{ h.name }}</span>
-                <span class="st" :class="truthy(h.listed) ? 'live' : 'off'"><i />{{ truthy(h.listed) ? '代理中' : '已暫停' }}</span>
-              </p>
-              <p class="hint" style="padding-top: 8px">
-                {{ h.name_ko }}　·　{{ h.country_zh }}　{{ h.tagline }}
-              </p>
-              <p class="hint" :style="{ color: h.intro_zh ? 'var(--ink-soft)' : 'var(--gold-deep)' }">
-                {{ h.intro_zh || '簡介尚未填寫' }}
-              </p>
-            </div>
-          </div>
+          <HousePane
+            :houses="houses"
+            :products="products"
+            @saved="afterHouseSave"
+            @error="(m) => say(m, true)"
+          />
         </div>
       </div>
 
